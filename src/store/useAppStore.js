@@ -35,8 +35,8 @@ const useAppStore = create((set, get) => ({
   fetchSystemConfig: async () => {
     try {
       const [
-        { data: resPl },
-        { data: resDm },
+        { data: resTrangThai },
+        { data: resPtThanhToan },
         { data: resNm },
         { data: resM },
         { data: resCol },
@@ -45,33 +45,41 @@ const useAppStore = create((set, get) => ({
         { data: resHd },
         { data: resLdv }
       ] = await Promise.all([
-        supabase.from('phan_loai').select('*'),
-        supabase.from('dm_danh_muc').select('*'),
-        supabase.from('nhom_menu').select('*').order('index'),
-        supabase.from('menu').select('*').order('index'),
-        supabase.from('ql_cot_du_lieu').select('*'),
-        supabase.from('quan_ly_chu_ky').select('*').limit(1),
-        supabase.from('danh_muc_dich_vu').select('*'),
+        supabase.from('dm_trang_thai_giao_dich').select('*'),
+        supabase.from('dm_phuong_thuc_thanh_toan').select('*'),
+        supabase.from('sys_nhom_menu').select('*').order('index'),
+        supabase.from('sys_menu').select('*').order('index'),
+        supabase.from('sys_ql_cot_du_lieu').select('*'),
+        supabase.from('sys_quan_ly_chu_ky').select('*').limit(1),
+        supabase.from('sys_danh_muc_dich_vu').select('*'),
         supabase.from('ma_hop_dong').select('*'),
-        supabase.from('loai_dich_vu').select('*').order('index')
+        supabase.from('sys_loai_dich_vu').select('*').order('index')
       ]);
 
-      const payClass = resPl?.find(c =>
-        c.ten_phan_loai?.toLowerCase().includes('phương thức') || c.id_phan_loai === 'pl-2'
-      );
-      const paymethodsList = payClass
-        ? resDm?.filter(c => c.id_phan_loai === payClass.id_phan_loai)
-        : resDm?.filter(c => c.id_phan_loai === 'pl-2');
+      const mappedCategories = [
+        ...(resTrangThai || []).map(s => ({
+          ...s,
+          id_danh_muc: s.id_trang_thai,
+          ten_danh_muc: s.ten_trang_thai,
+          id_phan_loai: 'pl-1'
+        })),
+        ...(resPtThanhToan || []).map(p => ({
+          ...p,
+          id_danh_muc: p.id_pttt,
+          ten_danh_muc: p.ten_pttt,
+          id_phan_loai: 'pl-2'
+        }))
+      ];
 
       set({
-        classifications: resPl || [],
-        categories: resDm || [],
+        classifications: [],
+        categories: mappedCategories,
         menuGroups: resNm || [],
         menus: resM || [],
         columnsConfig: resCol || [],
         signature: resSig?.[0] || {},
         banks: resBanks || [],
-        paymethods: paymethodsList || [],
+        paymethods: resPtThanhToan || [],
         ma_hop_dong: resHd || [],
         services: resLdv || [],
         dbOnline: true
