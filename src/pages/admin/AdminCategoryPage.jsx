@@ -19,18 +19,23 @@ export default function AdminCategoryPage() {
   const [editingRecord, setEditingRecord] = useState(null);
   const [form] = Form.useForm();
   const formValues = Form.useWatch([], form);
+  
+  const currentTableRef = React.useRef(tableName);
 
   // Load data for active table
-  const loadData = async () => {
+  const loadData = async (targetTableName = tableName) => {
     setLoading(true);
     try {
       const { data: tableData, error } = await supabase
-        .from(activeConfig.tableName)
+        .from(targetTableName)
         .select('*')
         .order('ngay_tao', { ascending: false });
 
       if (error) throw error;
-      setData(tableData || []);
+      
+      if (currentTableRef.current === targetTableName) {
+        setData(tableData || []);
+      }
 
       // Fetch lookup data if table has lookup columns
       const lookupCols = activeConfig.columns.filter(c => c.type === 'lookup');
@@ -42,24 +47,32 @@ export default function AdminCategoryPage() {
               ? `${col.lookup.valueField}, ${col.lookup.labelField}, ${col.lookup.extraSelect}`
               : `${col.lookup.valueField}, ${col.lookup.labelField}`;
             const { data: lData } = await supabase.from(col.lookup.table).select(selectFields);
-            if (lData) {
+            if (lData && currentTableRef.current === targetTableName) {
               newLookupData[col.lookup.table] = lData;
             }
           }
         }));
-        setLookupData(newLookupData);
+        if (currentTableRef.current === targetTableName) {
+          setLookupData(newLookupData);
+        }
       }
     } catch (err) {
       console.error(err);
-      message.error(`Lỗi tải dữ liệu bảng ${activeConfig.title}`);
+      if (currentTableRef.current === targetTableName) {
+        message.error(`Lỗi tải dữ liệu bảng`);
+      }
     } finally {
-      setLoading(false);
+      if (currentTableRef.current === targetTableName) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
+    currentTableRef.current = tableName;
     if (activeConfig) {
-      loadData();
+      setData([]); // Xoá dữ liệu cũ ngay khi đổi tab để tránh render sai column
+      loadData(tableName);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableName]);
