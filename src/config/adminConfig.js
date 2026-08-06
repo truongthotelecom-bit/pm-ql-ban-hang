@@ -136,7 +136,13 @@ export const adminCategoriesConfig = [
           labelField: 'ma_hop_dong', 
           valueField: 'id_ma_hop_dong', 
           extraSelect: 'id_loai_dich_vu, chu_hop_dong, sys_danh_muc_dich_vu(ten_viet_tat)',
-          formatLabel: (l) => `${l.sys_danh_muc_dich_vu?.ten_viet_tat || 'Khác'} - ${l.ma_hop_dong} - ${l.chu_hop_dong || 'Khách lẻ'}`
+          formatLabel: (l) => {
+            const parts = [];
+            if (l.sys_danh_muc_dich_vu?.ten_viet_tat) parts.push(l.sys_danh_muc_dich_vu.ten_viet_tat);
+            parts.push(l.ma_hop_dong);
+            if (l.chu_hop_dong) parts.push(l.chu_hop_dong);
+            return parts.join(' - ');
+          }
         } 
       },
       { key: 'ghi_chu', label: 'Ghi chú', type: 'text' }
