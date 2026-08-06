@@ -633,7 +633,7 @@ export default function Transactions() {
                 onClick={() => setDrawerOpen(true)} 
                 className="bg-violet-600 border-none font-bold rounded"
               >
-                Lập phiếu POS
+                Tạo giao dịch
               </Button>
             )}
           </div>

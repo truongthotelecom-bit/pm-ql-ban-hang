@@ -134,9 +134,7 @@ export default function IndexPage() {
             <p className="text-xs text-gray-400 mt-0.5">Hệ thống chuyển khoản chi tiết & định dạng in hóa đơn nhanh</p>
           </div>
           <div className="flex items-center gap-4">
-            <Button type="primary" onClick={() => setDrawerOpen(true)} className="bg-violet-600 hover:bg-violet-700 font-semibold px-4 rounded-lg hidden sm:inline-flex border-none">
-              + Tạo giao dịch
-            </Button>
+
             
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
               <div className="w-10 h-10 rounded-full border border-violet-500/20 p-0.5 cursor-pointer hover:border-violet-500/60 transition-all group relative">
