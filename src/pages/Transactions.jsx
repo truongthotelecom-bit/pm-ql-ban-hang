@@ -1087,6 +1087,7 @@ export default function Transactions() {
         onCancel={() => setShowEditFileModal(false)}
         footer={null}
         className="glass-modal"
+      >
         <div className="p-4 border border-white/5 rounded-xl bg-white/[0.01] space-y-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-gray-400">Nội dung hồ sơ</label>
