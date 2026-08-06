@@ -852,6 +852,8 @@ export default function Transactions() {
                 <Select
                   placeholder="Chọn danh mục dịch vụ..."
                   className="w-full"
+                  showSearch
+                  optionFilterProp="children"
                   value={newContractPayload.id_danh_muc_dich_vu}
                   onChange={v => setNewContractPayload({ ...newContractPayload, id_danh_muc_dich_vu: v })}
                 >
@@ -859,7 +861,7 @@ export default function Transactions() {
                     .filter(b => store.selectedService ? b.id_loai_dich_vu === store.selectedService.id_loai_dich_vu : true)
                     .map(b => (
                       <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>
-                        {b.ten_viet_tat || b.ten_dich_vu}
+                        {b.ten_viet_tat ? `${b.ten_viet_tat} - ${b.ten_dich_vu}` : b.ten_dich_vu}
                       </Option>
                     ))
                   }
@@ -1317,7 +1319,9 @@ export default function Transactions() {
               placeholder="Chọn ngân hàng / nhà mạng"
             >
               {store.banks?.map(b => (
-                <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>{b.ten_viet_tat || b.ten_dich_vu}</Option>
+                <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>
+                  {b.ten_viet_tat ? `${b.ten_viet_tat} - ${b.ten_dich_vu}` : b.ten_dich_vu}
+                </Option>
               ))}
             </Select>
           </div>
