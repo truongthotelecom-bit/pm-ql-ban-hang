@@ -80,7 +80,7 @@ export default function TransactionHistory() {
       const customer = store.customers?.find(c => c.id_khach_hang === file.id_khach_hang);
       const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === contract?.id_danh_muc_dich_vu);
       const service = store.services?.find(s => s.id_loai_dich_vu === file.id_loai_dich_vu);
-      const menuGroup = store.menuGroups?.find(m => m.id_nhom_menu === service?.id_nhom_menu);
+      const menuGroup = store.menuGroups?.find(m => m.id_nhom_menu === service?.id_nhom);
 
       // --- ÁP DỤNG BỘ LỌC ---
       if (filters.nhomMenuId && menuGroup?.id_nhom_menu !== filters.nhomMenuId) return false;
@@ -191,10 +191,10 @@ export default function TransactionHistory() {
               className="w-full"
               value={filters.loaiDichVuId}
               onChange={v => setFilters({...filters, loaiDichVuId: v, danhMucId: null})}
-              disabled={!!filters.nhomMenuId && store.services.filter(s => s.id_nhom_menu === filters.nhomMenuId).length === 0}
+              disabled={!!filters.nhomMenuId && store.services.filter(s => s.id_nhom === filters.nhomMenuId).length === 0}
             >
               {store.services
-                .filter(s => !filters.nhomMenuId || s.id_nhom_menu === filters.nhomMenuId)
+                .filter(s => !filters.nhomMenuId || s.id_nhom === filters.nhomMenuId)
                 .map(s => <Option key={s.id_loai_dich_vu} value={s.id_loai_dich_vu}>{s.ten_danh_muc}</Option>)}
             </Select>
           </div>
