@@ -117,13 +117,21 @@ const useAppStore = create((set, get) => ({
 
   addCustomer: async (customer) => {
     try {
-      const { data, error } = await supabase.from('khach_hang').insert([customer]).select().single();
-      if (!error && data) {
+      // Loại bỏ các trường rỗng để tránh lỗi DB
+      const clean = Object.fromEntries(
+        Object.entries(customer).filter(([, v]) => v !== '' && v !== undefined && v !== null)
+      );
+      const { data, error } = await supabase.from('khach_hang').insert([clean]).select().single();
+      if (error) {
+        console.error('Lỗi thêm khách hàng:', error);
+        return null;
+      }
+      if (data) {
         set(state => ({ customers: [data, ...state.customers] }));
         return data;
       }
     } catch (err) {
-      console.error(err);
+      console.error('Lỗi thêm khách hàng (exception):', err);
     }
   },
 

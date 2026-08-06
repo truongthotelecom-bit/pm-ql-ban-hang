@@ -170,6 +170,8 @@ export default function Transactions() {
       setNewFilePayload({ ...newFilePayload, id_khach_hang: data.id_khach_hang });
       setAddNewCustInline(false);
       setNewCustPayload({ ho_va_ten: '', so_dien_thoai: '', dia_chi: '', cccd: '', email: '', id_gioi_tinh: 'b0000004-0000-0000-0000-000000000001', id_level: 'b0000003-0000-0000-0000-000000000002' });
+    } else {
+      message.error('Không thể lưu khách! Kiểm tra Console (F12) để xem lỗi chi tiết.');
     }
   };
 
