@@ -18,6 +18,7 @@ export default function AdminCategoryPage() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [form] = Form.useForm();
+  const formValues = Form.useWatch([], form);
 
   // Load data for active table
   const loadData = async () => {
@@ -37,7 +38,10 @@ export default function AdminCategoryPage() {
         const newLookupData = { ...lookupData };
         await Promise.all(lookupCols.map(async (col) => {
           if (!newLookupData[col.lookup.table]) {
-            const { data: lData } = await supabase.from(col.lookup.table).select(`${col.lookup.valueField}, ${col.lookup.labelField}`);
+            const selectFields = col.lookup.extraSelect 
+              ? `${col.lookup.valueField}, ${col.lookup.labelField}, ${col.lookup.extraSelect}`
+              : `${col.lookup.valueField}, ${col.lookup.labelField}`;
+            const { data: lData } = await supabase.from(col.lookup.table).select(selectFields);
             if (lData) {
               newLookupData[col.lookup.table] = lData;
             }
@@ -67,11 +71,18 @@ export default function AdminCategoryPage() {
   // Handle Add/Edit
   const handleSave = async (values) => {
     try {
+      const dataToSave = { ...values };
+      activeConfig.columns.forEach(col => {
+        if (col.isVirtual) {
+          delete dataToSave[col.key];
+        }
+      });
+
       if (editingRecord) {
         // Update
         const { error } = await supabase
           .from(activeConfig.tableName)
-          .update({ ...values, ngay_sua: new Date().toISOString() })
+          .update({ ...dataToSave, ngay_sua: new Date().toISOString() })
           .eq(activeConfig.primaryKey, editingRecord[activeConfig.primaryKey]);
         
         if (error) throw error;
@@ -80,7 +91,7 @@ export default function AdminCategoryPage() {
         // Insert
         const { error } = await supabase
           .from(activeConfig.tableName)
-          .insert([{ ...values }]);
+          .insert([{ ...dataToSave }]);
         
         if (error) throw error;
         message.success('Thêm mới thành công');
@@ -122,7 +133,7 @@ export default function AdminCategoryPage() {
   };
 
   // Build Antd Table Columns
-  const tableColumns = activeConfig.columns.map(col => ({
+  const tableColumns = activeConfig.columns.filter(col => !col.isVirtual).map(col => ({
     title: col.label,
     dataIndex: col.key,
     key: col.key,
@@ -230,31 +241,50 @@ export default function AdminCategoryPage() {
           onFinish={handleSave}
           className="mt-4"
         >
-          {activeConfig.columns.map(col => (
-            <Form.Item
-              key={col.key}
-              name={col.key}
-              label={<span className="text-slate-300">{col.label}</span>}
-              rules={[{ required: col.required, message: `Vui lòng nhập ${col.label.toLowerCase()}` }]}
-            >
-              {col.type === 'number' ? (
-                <Input type="number" className="bg-slate-900 border-slate-700 text-white" />
-              ) : col.type === 'lookup' ? (
-                <Select 
-                  className="w-full admin-select" 
-                  placeholder={`Chọn ${col.label.toLowerCase()}...`}
-                  allowClear
-                  options={(lookupData[col.lookup.table] || []).map(l => ({
-                    value: l[col.lookup.valueField],
-                    label: l[col.lookup.labelField]
-                  }))}
-                  popupClassName="dark-select-dropdown"
-                />
-              ) : (
-                <Input className="bg-slate-900 border-slate-700 text-white" placeholder={`Nhập ${col.label.toLowerCase()}...`} />
-              )}
-            </Form.Item>
-          ))}
+          {activeConfig.columns.map(col => {
+            let options = [];
+            if (col.type === 'lookup') {
+              let rawOptions = lookupData[col.lookup.table] || [];
+              if (col.dependsOn && formValues && formValues[col.dependsOn]) {
+                const filterVal = formValues[col.dependsOn];
+                rawOptions = rawOptions.filter(opt => opt[col.filterField] === filterVal);
+              }
+              options = rawOptions.map(l => ({
+                value: l[col.lookup.valueField],
+                label: l[col.lookup.labelField]
+              }));
+            }
+
+            return (
+              <Form.Item
+                key={col.key}
+                name={col.key}
+                label={<span className="text-slate-300">{col.label}</span>}
+                rules={[{ required: col.required && !col.isVirtual, message: `Vui lòng nhập ${col.label.toLowerCase()}` }]}
+              >
+                {col.type === 'number' ? (
+                  <Input type="number" className="bg-slate-900 border-slate-700 text-white" />
+                ) : col.type === 'lookup' ? (
+                  <Select 
+                    className="w-full admin-select" 
+                    placeholder={`Chọn ${col.label.toLowerCase()}...`}
+                    allowClear
+                    options={options}
+                    popupClassName="dark-select-dropdown"
+                    onChange={(val) => {
+                      // Nếu thay đổi trường filter, reset trường phụ thuộc
+                      const dependentCol = activeConfig.columns.find(c => c.dependsOn === col.key);
+                      if (dependentCol) {
+                        form.setFieldsValue({ [dependentCol.key]: undefined });
+                      }
+                    }}
+                  />
+                ) : (
+                  <Input className="bg-slate-900 border-slate-700 text-white" placeholder={`Nhập ${col.label.toLowerCase()}...`} />
+                )}
+              </Form.Item>
+            );
+          })}
         </Form>
       </Modal>
 
