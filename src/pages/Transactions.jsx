@@ -252,7 +252,10 @@ export default function Transactions() {
       <div className="w-full xl:w-[32%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md">
         <div className="flex justify-between items-center border-b border-white/5 pb-3">
           <div className="flex items-center gap-2">
-            <span className="text-lg">{store.selectedService?.icon || '📁'}</span>
+            {store.selectedService?.icon?.startsWith('http') 
+              ? <img src={store.selectedService.icon} alt="icon" className="h-6 w-6 object-contain" />
+              : <span className="text-lg">{store.selectedService?.icon || '📁'}</span>
+            }
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">{store.selectedService?.ten_danh_muc || 'TẤT CẢ DỊCH VỤ'} - HỒ SƠ</span>
           </div>
           <div className="flex gap-1.5">
