@@ -157,7 +157,7 @@ export default function AdminCategoryPage() {
       if (col.type === 'lookup') {
         const tableLookups = lookupData[col.lookup.table] || [];
         const item = tableLookups.find(l => l[col.lookup.valueField] === text);
-        return <span className="text-gray-200">{item ? item[col.lookup.labelField] : text}</span>;
+        return <span className="text-gray-200">{item ? (col.lookup.formatLabel ? col.lookup.formatLabel(item) : item[col.lookup.labelField]) : text}</span>;
       }
       return <span className="text-gray-200">{text}</span>;
     }
@@ -264,7 +264,7 @@ export default function AdminCategoryPage() {
               }
               options = rawOptions.map(l => ({
                 value: l[col.lookup.valueField],
-                label: l[col.lookup.labelField]
+                label: col.lookup.formatLabel ? col.lookup.formatLabel(l) : l[col.lookup.labelField]
               }));
             }
 

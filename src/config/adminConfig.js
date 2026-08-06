@@ -112,9 +112,33 @@ export const adminCategoriesConfig = [
     primaryKey: 'id_ho_so_dich_vu',
     columns: [
       { key: 'noi_dung', label: 'Nội dung hồ sơ', type: 'text', required: true },
-      { key: 'id_khach_hang', label: 'Khách Hàng', type: 'lookup', lookup: { table: 'khach_hang', labelField: 'ho_va_ten', valueField: 'id_khach_hang' } },
+      { 
+        key: 'id_khach_hang', 
+        label: 'Khách Hàng', 
+        type: 'lookup', 
+        lookup: { 
+          table: 'khach_hang', 
+          labelField: 'ho_va_ten', 
+          valueField: 'id_khach_hang',
+          extraSelect: 'so_dien_thoai',
+          formatLabel: (l) => l.so_dien_thoai ? `${l.ho_va_ten} - ${l.so_dien_thoai}` : l.ho_va_ten
+        } 
+      },
       { key: '_filter_loai_dich_vu', label: 'Lọc Mã HĐ theo Loại Dịch Vụ', type: 'lookup', isVirtual: true, lookup: { table: 'sys_loai_dich_vu', labelField: 'ten_danh_muc', valueField: 'id_loai_dich_vu' } },
-      { key: 'id_ma_hop_dong', label: 'Mã Hợp Đồng', type: 'lookup', dependsOn: '_filter_loai_dich_vu', filterField: 'id_loai_dich_vu', lookup: { table: 'ma_hop_dong', labelField: 'ma_hop_dong', valueField: 'id_ma_hop_dong', extraSelect: 'id_loai_dich_vu' } },
+      { 
+        key: 'id_ma_hop_dong', 
+        label: 'Mã Hợp Đồng', 
+        type: 'lookup', 
+        dependsOn: '_filter_loai_dich_vu', 
+        filterField: 'id_loai_dich_vu', 
+        lookup: { 
+          table: 'ma_hop_dong', 
+          labelField: 'ma_hop_dong', 
+          valueField: 'id_ma_hop_dong', 
+          extraSelect: 'id_loai_dich_vu, chu_hop_dong, sys_danh_muc_dich_vu(ten_viet_tat)',
+          formatLabel: (l) => `${l.sys_danh_muc_dich_vu?.ten_viet_tat || 'Khác'} - ${l.ma_hop_dong} - ${l.chu_hop_dong || 'Khách lẻ'}`
+        } 
+      },
       { key: 'ghi_chu', label: 'Ghi chú', type: 'text' }
     ]
   }
