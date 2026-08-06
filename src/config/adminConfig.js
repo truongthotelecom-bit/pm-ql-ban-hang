@@ -2,6 +2,7 @@ export const adminCategoriesConfig = [
   {
     title: 'Trạng thái giao dịch',
     tableName: 'dm_trang_thai_giao_dich',
+    group: 'Giao dịch & Thanh toán',
     primaryKey: 'id_trang_thai',
     columns: [
       { key: 'ten_trang_thai', label: 'Tên trạng thái', type: 'text', required: true },
@@ -12,6 +13,7 @@ export const adminCategoriesConfig = [
   {
     title: 'Phương thức thanh toán',
     tableName: 'dm_phuong_thuc_thanh_toan',
+    group: 'Giao dịch & Thanh toán',
     primaryKey: 'id_pttt',
     columns: [
       { key: 'ten_pttt', label: 'Tên phương thức', type: 'text', required: true },
@@ -22,6 +24,7 @@ export const adminCategoriesConfig = [
   {
     title: 'Hạng khách hàng',
     tableName: 'dm_hang_khach_hang',
+    group: 'Khách hàng',
     primaryKey: 'id_hang',
     columns: [
       { key: 'ten_hang', label: 'Tên hạng', type: 'text', required: true },
@@ -32,6 +35,7 @@ export const adminCategoriesConfig = [
   {
     title: 'Loại GD Thu Chi',
     tableName: 'dm_loai_gd_thu_chi',
+    group: 'Giao dịch & Thanh toán',
     primaryKey: 'id_loai_gd',
     columns: [
       { key: 'ten_loai', label: 'Tên loại GD', type: 'text', required: true },
@@ -42,6 +46,7 @@ export const adminCategoriesConfig = [
   {
     title: 'Nhóm Menu',
     tableName: 'sys_nhom_menu',
+    group: 'Hệ thống Dịch vụ',
     primaryKey: 'id_nhom',
     columns: [
       { key: 'ten_nhom', label: 'Tên nhóm', type: 'text', required: true },
@@ -52,6 +57,7 @@ export const adminCategoriesConfig = [
   {
     title: 'Loại dịch vụ',
     tableName: 'sys_loai_dich_vu',
+    group: 'Hệ thống Dịch vụ',
     primaryKey: 'id_loai_dich_vu',
     columns: [
       { key: 'ten_danh_muc', label: 'Tên loại dịch vụ', type: 'text', required: true },
@@ -64,6 +70,7 @@ export const adminCategoriesConfig = [
   {
     title: 'Ngân hàng / Máy POS',
     tableName: 'sys_danh_muc_dich_vu',
+    group: 'Hệ thống Dịch vụ',
     primaryKey: 'id_danh_muc_dich_vu',
     columns: [
       { key: 'ten_dich_vu', label: 'Tên dịch vụ/Ngân hàng', type: 'text', required: true },
@@ -77,6 +84,7 @@ export const adminCategoriesConfig = [
   {
     title: 'Hồ sơ dịch vụ (Giao dịch)',
     tableName: 'ho_so_dich_vu',
+    group: 'Hồ sơ',
     primaryKey: 'id_ho_so_dich_vu',
     columns: [
       { key: 'noi_dung', label: 'Nội dung hồ sơ', type: 'text', required: true },
