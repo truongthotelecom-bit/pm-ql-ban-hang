@@ -42,6 +42,7 @@ export default function Transactions() {
   // Mobile: bottom sheet action picker
   const [mobileActionFile, setMobileActionFile] = useState(null); // file được tap trên mobile
   const [showMobileAction, setShowMobileAction] = useState(false);
+  const [showMobileDetail, setShowMobileDetail] = useState(false); // Hien thi modal chi tiet tren mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1280;
 
   // New Case File Form State
@@ -426,7 +427,19 @@ export default function Transactions() {
       {/* ============================================================
          CỘT 2 + 3: Chi TIET - an tren mobile, hien tren desktop
          ============================================================ */}
-      <div className="hidden xl:contents">
+      <div className={`${showMobileDetail ? 'fixed inset-0 z-[100] bg-[#0d1426] flex flex-col gap-4 p-4 overflow-y-auto animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
+        
+        {/* Nút đóng trên Mobile */}
+        <div className="xl:hidden flex justify-between items-center mb-2">
+          <span className="font-extrabold text-white text-lg">CHI TIẾT HỒ SƠ</span>
+          <button 
+            onClick={() => setShowMobileDetail(false)}
+            className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white font-bold active:scale-95"
+          >
+            ✕
+          </button>
+        </div>
+
       <div className="w-full xl:w-[40%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between">
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
@@ -708,10 +721,7 @@ export default function Transactions() {
                   onClick={() => {
                     store.selectServiceFile(mFile);
                     setShowMobileAction(false);
-                    // Scroll xuong de xem chi tiet
-                    setTimeout(() => {
-                      document.getElementById('mobile-detail-section')?.scrollIntoView({ behavior: 'smooth' });
-                    }, 100);
+                    setShowMobileDetail(true);
                   }}
                   className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all"
                 >
@@ -732,22 +742,7 @@ export default function Transactions() {
         );
       })()}
 
-      {/* Mobile: Chi tiet hien phia duoi danh sach */}
-      {store.selectedServiceFile && (
-        <div id="mobile-detail-section" className="xl:hidden space-y-4">
-          <div className="p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 shadow-xl">
-            <div className="flex justify-between items-center pb-3 border-b border-white/5 mb-3">
-              <span className="font-extrabold text-white text-xs tracking-wider uppercase">Chi tiet ho so</span>
-              <Button
-                type="primary" size="small" icon={<PlusOutlined />}
-                onClick={() => setDrawerOpen(true)}
-                className="bg-violet-600 border-none font-bold rounded"
-              >Lap phieu POS</Button>
-            </div>
-            <p className="text-xs text-gray-400">Chon "Them giao dich" hoac "Xem chi tiet" tu menu khi bam vao hop dong.</p>
-          </div>
-        </div>
-      )}
+      {/* Mobile detail section removed because it's now a full screen modal */}
 
       <Modal
         title={<span className="font-extrabold text-white text-base">✨ LẬP HỒ SƠ QUẢN LÝ DỊCH VỤ MỚI</span>}
