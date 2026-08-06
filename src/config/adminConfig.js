@@ -124,12 +124,12 @@ export const adminCategoriesConfig = [
           formatLabel: (l) => l.so_dien_thoai ? `${l.ho_va_ten} - ${l.so_dien_thoai}` : l.ho_va_ten
         } 
       },
-      { key: '_filter_loai_dich_vu', label: 'Lọc Mã HĐ theo Loại Dịch Vụ', type: 'lookup', isVirtual: true, lookup: { table: 'sys_loai_dich_vu', labelField: 'ten_danh_muc', valueField: 'id_loai_dich_vu' } },
+      { key: 'id_loai_dich_vu', label: 'Lọc Mã HĐ theo Loại Dịch Vụ', type: 'lookup', lookup: { table: 'sys_loai_dich_vu', labelField: 'ten_danh_muc', valueField: 'id_loai_dich_vu' } },
       { 
         key: 'id_ma_hop_dong', 
         label: 'Mã Hợp Đồng', 
         type: 'lookup', 
-        dependsOn: '_filter_loai_dich_vu', 
+        dependsOn: 'id_loai_dich_vu', 
         filterField: 'id_loai_dich_vu', 
         lookup: { 
           table: 'ma_hop_dong', 
