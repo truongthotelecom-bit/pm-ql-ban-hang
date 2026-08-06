@@ -53,7 +53,7 @@ const useAppStore = create((set, get) => ({
         supabase.from('sys_quan_ly_chu_ky').select('*').limit(1),
         supabase.from('sys_danh_muc_dich_vu').select('*'),
         supabase.from('ma_hop_dong').select('*'),
-        supabase.from('sys_loai_dich_vu').select('*').order('index')
+        supabase.from('sys_loai_dich_vu').select('*').order('ngay_tao')
       ]);
 
       const mappedCategories = [
