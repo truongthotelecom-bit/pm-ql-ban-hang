@@ -74,8 +74,8 @@ export default function Transactions() {
     dia_chi: '',
     cccd: '',
     email: '',
-    id_gioi_tinh: 'dm-gender-male',
-    id_level: 'dm-lvl-member'
+    id_gioi_tinh: 'b0000004-0000-0000-0000-000000000001',
+    id_level: 'b0000003-0000-0000-0000-000000000002'
   });
 
   // Edit Customer Form State
@@ -169,7 +169,7 @@ export default function Transactions() {
       message.success('🎉 Đã khởi tạo hồ sơ khách hàng mới!');
       setNewFilePayload({ ...newFilePayload, id_khach_hang: data.id_khach_hang });
       setAddNewCustInline(false);
-      setNewCustPayload({ ho_va_ten: '', so_dien_thoai: '', dia_chi: '', cccd: '', email: '', id_gioi_tinh: 'dm-gender-male', id_level: 'dm-lvl-member' });
+      setNewCustPayload({ ho_va_ten: '', so_dien_thoai: '', dia_chi: '', cccd: '', email: '', id_gioi_tinh: 'b0000004-0000-0000-0000-000000000001', id_level: 'b0000003-0000-0000-0000-000000000002' });
     }
   };
 
@@ -883,9 +883,13 @@ export default function Transactions() {
                 value={newFilePayload.id_ma_hop_dong || undefined}
                 onChange={v => setNewFilePayload({ ...newFilePayload, id_ma_hop_dong: v })}
               >
-                {store.ma_hop_dong.filter(h => !store.selectedService || h.id_loai_dich_vu === store.selectedService.id_loai_dich_vu || !h.id_loai_dich_vu).map(h => (
-                  <Option key={h.id_ma_hop_dong} value={h.id_ma_hop_dong}>{h.ma_hop_dong} - {h.chu_hop_dong}</Option>
-                ))}
+                {store.ma_hop_dong.filter(h => !store.selectedService || h.id_loai_dich_vu === store.selectedService.id_loai_dich_vu || !h.id_loai_dich_vu).map(h => {
+                  const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === h.id_danh_muc_dich_vu);
+                  const prefix = bank?.ten_viet_tat ? `${bank.ten_viet_tat} - ` : '';
+                  return (
+                    <Option key={h.id_ma_hop_dong} value={h.id_ma_hop_dong}>{prefix}{h.ma_hop_dong} - {h.chu_hop_dong}</Option>
+                  );
+                })}
               </Select>
             )}
           </div>
