@@ -359,7 +359,19 @@ export default function Transactions() {
                           }}
                           className={`h-full px-3.5 py-3 rounded-xl border transition-all cursor-pointer hover:scale-[1.01] overflow-hidden ${isSelected ? 'bg-violet-600/10 border-violet-500/50 shadow-lg shadow-violet-600/5' : 'bg-[#131c33]/40 border-white/5 hover:border-white/10'}`}
                         >
-                          {/* Dòng trên: Logo + Thông tin chia 2 bên */}
+                          {/* Dòng trên cùng: Ngày GD cuối (trái) & Ngày tạo (phải) */}
+                          <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-white/5 text-[9px] font-medium">
+                            <span className="text-violet-400/80">
+                              {file._lastTxDate 
+                                ? `GD cuối: ${file._lastTxDate.toLocaleDateString('vi-VN')} ${file._lastTxDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
+                                : `Tạo: ${file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}`}
+                            </span>
+                            <span className="text-gray-500">
+                              Tạo: {file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}
+                            </span>
+                          </div>
+
+                          {/* Dòng giữa: Logo + Thông tin chia 2 bên */}
                           <div className="flex items-center gap-3">
                             {/* Logo dịch vụ */}
                             <div className="flex-shrink-0 w-10 h-10 bg-white/5 rounded-xl border border-white/10 p-1 flex items-center justify-center overflow-hidden">
@@ -407,18 +419,7 @@ export default function Transactions() {
                             </div>
                           )}
 
-                          {/* Dòng dưới: Ngày tạo hoặc GD cuối (canh phải) */}
-                          <div className="flex justify-end items-center mt-2 pt-2 border-t border-white/5 text-[9px] font-medium">
-                            {file._lastTxDate ? (
-                              <span className="text-violet-400/70">
-                                GD cuối: {file._lastTxDate.toLocaleDateString('vi-VN')} {file._lastTxDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                            ) : (
-                              <span className="text-gray-500">
-                                Tạo: {file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}
-                              </span>
-                            )}
-                          </div>
+                          {/* Dòng dưới đã được chuyển lên trên cùng */}
                         </div>
                       </div>
                     );
