@@ -138,8 +138,14 @@ export default function TransactionHistory() {
             <div className="flex gap-2">
               <Select 
                 value={filters.dateRangeType} 
-                onChange={v => setFilters({...filters, dateRangeType: v})}
-                className="w-full !bg-white/5"
+                onChange={v => {
+                  if (v !== DATE_RANGES.CUSTOM) {
+                    setFilters({...filters, dateRangeType: v, customDateRange: null});
+                  } else {
+                    setFilters({...filters, dateRangeType: v});
+                  }
+                }}
+                className="w-[140px] shrink-0 !bg-white/5"
               >
                 <Option value={DATE_RANGES.TODAY}>Hôm nay</Option>
                 <Option value={DATE_RANGES.YESTERDAY}>Hôm qua</Option>
@@ -149,16 +155,16 @@ export default function TransactionHistory() {
                 <Option value={DATE_RANGES.LAST_MONTH}>Tháng trước</Option>
                 <Option value={DATE_RANGES.THIS_YEAR}>Năm nay</Option>
                 <Option value={DATE_RANGES.LAST_YEAR}>Năm trước</Option>
-                <Option value={DATE_RANGES.CUSTOM}>Từ ngày - Đến ngày</Option>
+                <Option value={DATE_RANGES.CUSTOM}>Tùy chỉnh...</Option>
               </Select>
-              {filters.dateRangeType === DATE_RANGES.CUSTOM && (
-                <RangePicker 
-                  className="!bg-white/5 !border-white/10 !text-white" 
-                  placeholder={['Từ ngày', 'Đến ngày']}
-                  format="DD/MM/YYYY"
-                  onChange={dates => setFilters({...filters, customDateRange: dates})}
-                />
-              )}
+              
+              <RangePicker 
+                className="w-full !bg-white/5 !border-white/10 !text-white" 
+                placeholder={['Từ ngày', 'Đến ngày']}
+                format="DD/MM/YYYY"
+                value={filters.customDateRange}
+                onChange={dates => setFilters({...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates})}
+              />
             </div>
           </div>
 
