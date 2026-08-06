@@ -206,6 +206,36 @@ const useAppStore = create((set, get) => ({
     }
   },
 
+  // Cập nhật hồ sơ dịch vụ
+  updateServiceFile: async (fileId, payload) => {
+    try {
+      const fullPayload = { ...payload };
+      Object.keys(fullPayload).forEach(key => {
+        if (fullPayload[key] === '') fullPayload[key] = null;
+      });
+
+      const { data, error } = await supabase
+        .from('ho_so_dich_vu')
+        .update(fullPayload)
+        .eq('id_ho_so_dich_vu', fileId)
+        .select()
+        .single();
+
+      if (!error && data) {
+        const activeSvc = get().selectedService;
+        if (activeSvc) await get().fetchServiceFiles(activeSvc.id_loai_dich_vu);
+        
+        // Cập nhật lại file đang select nếu đang mở
+        if (get().selectedServiceFile?.id_ho_so_dich_vu === fileId) {
+          set({ selectedServiceFile: data });
+        }
+        return data;
+      }
+    } catch (err) {
+      console.error('Lỗi cập nhật hồ sơ dịch vụ:', err);
+    }
+  },
+
   // Lấy chi tiết giao dịch của hồ sơ
   fetchTransactionDetails: async (fileId) => {
     try {

@@ -20,6 +20,8 @@ import {
   PhoneOutlined
 } from '@ant-design/icons';
 import TransactionDrawer from '../components/TransactionDrawer';
+import DynamicForm from '../components/DynamicForm';
+import { adminConfig } from '../config/adminConfig';
 import { FixedSizeList as List } from 'react-window';
 
 const { Option } = Select;
@@ -37,6 +39,7 @@ export default function Transactions() {
   const [showCustHistoryModal, setShowCustHistoryModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
   const [showBillModal, setShowBillModal] = useState(false);
+  const [showEditFileModal, setShowEditFileModal] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Mobile: bottom sheet action picker
@@ -54,6 +57,7 @@ export default function Transactions() {
     ghi_chu: ''
   });
   
+  const [editFilePayload, setEditFilePayload] = useState({});
   // Inline Creation Toggle inside Modal
   const [addNewContractInline, setAddNewContractInline] = useState(false);
   const [newContractPayload, setNewContractPayload] = useState({
@@ -166,6 +170,26 @@ export default function Transactions() {
       setNewFilePayload({ ...newFilePayload, id_khach_hang: data.id_khach_hang });
       setAddNewCustInline(false);
       setNewCustPayload({ ho_va_ten: '', so_dien_thoai: '', dia_chi: '', cccd: '', email: '', id_gioi_tinh: 'dm-gender-male', id_level: 'dm-lvl-member' });
+    }
+  };
+
+  // Sửa hồ sơ dịch vụ
+  const handleEditFileSubmit = async () => {
+    const activeFile = store.selectedServiceFile;
+    if (!activeFile) return;
+    
+    const data = await store.updateServiceFile(activeFile.id_ho_so_dich_vu, editFilePayload);
+    if (data) {
+      message.success('Đã cập nhật chi tiết hồ sơ dịch vụ thành công!');
+      setShowEditFileModal(false);
+    }
+  };
+
+  const openEditFileModal = () => {
+    const activeFile = store.selectedServiceFile;
+    if (activeFile) {
+      setEditFilePayload(activeFile);
+      setShowEditFileModal(true);
     }
   };
 
@@ -516,6 +540,14 @@ export default function Transactions() {
                 </div>
 
                 <div className="border-t border-white/5 pt-3 flex gap-2 justify-end mt-1">
+                  <Button 
+                    size="small" 
+                    icon={<EditOutlined />} 
+                    onClick={openEditFileModal}
+                    className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400"
+                  >
+                    Sửa hồ sơ
+                  </Button>
                   <Button 
                     size="small" 
                     icon={<EditOutlined />} 
@@ -1045,6 +1077,27 @@ export default function Transactions() {
             </div>
           );
         })()}
+      </Modal>
+
+      {/* ============================================================
+         MODAL 6: CHỈNH SỬA CHI TIẾT HỒ SƠ
+         ============================================================ */}
+      <Modal
+        title={<span className="font-extrabold text-white text-base">✏️ CHỈNH SỬA CHI TIẾT HỒ SƠ</span>}
+        open={showEditFileModal}
+        onCancel={() => setShowEditFileModal(false)}
+        footer={null}
+        className="glass-modal"
+      >
+        <div className="p-4 border border-white/5 rounded-xl bg-white/[0.01]">
+          <DynamicForm
+            config={adminConfig.find(c => c.tableName === 'ho_so_dich_vu')}
+            value={editFilePayload}
+            onChange={setEditFilePayload}
+            onSubmit={handleEditFileSubmit}
+            onCancel={() => setShowEditFileModal(false)}
+          />
+        </div>
       </Modal>
 
       {/* ============================================================
