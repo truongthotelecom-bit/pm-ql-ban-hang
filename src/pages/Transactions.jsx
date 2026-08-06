@@ -20,8 +20,7 @@ import {
   PhoneOutlined
 } from '@ant-design/icons';
 import TransactionDrawer from '../components/TransactionDrawer';
-import DynamicForm from '../components/DynamicForm';
-import { adminConfig } from '../config/adminConfig';
+import { adminCategoriesConfig } from '../config/adminConfig';
 import { FixedSizeList as List } from 'react-window';
 
 const { Option } = Select;
@@ -1088,15 +1087,44 @@ export default function Transactions() {
         onCancel={() => setShowEditFileModal(false)}
         footer={null}
         className="glass-modal"
-      >
-        <div className="p-4 border border-white/5 rounded-xl bg-white/[0.01]">
-          <DynamicForm
-            config={adminConfig.find(c => c.tableName === 'ho_so_dich_vu')}
-            value={editFilePayload}
-            onChange={setEditFilePayload}
-            onSubmit={handleEditFileSubmit}
-            onCancel={() => setShowEditFileModal(false)}
-          />
+        <div className="p-4 border border-white/5 rounded-xl bg-white/[0.01] space-y-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-400">Nội dung hồ sơ</label>
+            <Input 
+              value={editFilePayload.noi_dung || ''} 
+              onChange={e => setEditFilePayload({...editFilePayload, noi_dung: e.target.value})}
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-400">Loại Hợp Đồng</label>
+            <Select
+              className="w-full"
+              value={editFilePayload.id_loai_hop_dong || undefined}
+              onChange={v => setEditFilePayload({...editFilePayload, id_loai_hop_dong: v})}
+              placeholder="Chọn phân loại hợp đồng"
+            >
+              {store.loaiHopDongs?.map(l => (
+                <Option key={l.id_loai_hop_dong} value={l.id_loai_hop_dong}>{l.ten_loai}</Option>
+              ))}
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-400">Ghi chú</label>
+            <Input.TextArea 
+              value={editFilePayload.ghi_chu || ''} 
+              onChange={e => setEditFilePayload({...editFilePayload, ghi_chu: e.target.value})}
+              className="bg-white/5 border-white/10 text-white"
+              rows={3}
+            />
+          </div>
+          <Button 
+            type="primary" 
+            onClick={handleEditFileSubmit} 
+            className="w-full bg-violet-600 border-none font-bold mt-2"
+          >
+            Lưu thay đổi
+          </Button>
         </div>
       </Modal>
 
