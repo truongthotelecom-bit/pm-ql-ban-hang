@@ -6,6 +6,7 @@ import IndexPage from './pages/IndexPage';
 import LoginPage from './pages/LoginPage';
 import AdminLayout from './layouts/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminCategoryPage from './pages/admin/AdminCategoryPage';
 // Import các trang Admin khác sau này...
 
 export default function App() {
@@ -42,7 +43,7 @@ export default function App() {
         >
           {/* Outlet của AdminLayout */}
           <Route index element={<AdminDashboard />} />
-          <Route path="danh-muc" element={<div className="p-4 text-white">Quản lý Danh mục (Đang xây dựng)</div>} />
+          <Route path="danh-muc" element={<AdminCategoryPage />} />
           <Route path="tai-khoan" element={<div className="p-4 text-white">Quản lý Tài khoản (Đang xây dựng)</div>} />
           <Route path="cai-dat" element={<div className="p-4 text-white">Cài đặt hệ thống (Đang xây dựng)</div>} />
         </Route>
