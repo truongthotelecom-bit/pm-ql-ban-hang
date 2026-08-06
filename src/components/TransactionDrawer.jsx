@@ -155,7 +155,7 @@ export default function TransactionDrawer({ open, onClose }) {
               <label className="text-xs font-bold text-gray-400">Phương thức thanh toán nguồn *</label>
               <Select value={paymethod} onChange={setPaymethod} className="w-full">
                 {store.paymethods.map(p => (
-                  <Option key={p.id_danh_muc} value={p.id_danh_muc}>{p.ten_danh_muc}</Option>
+                  <Option key={p.id_pttt} value={p.id_pttt}>{p.ten_pttt}</Option>
                 ))}
               </Select>
             </div>
