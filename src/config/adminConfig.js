@@ -73,5 +73,16 @@ export const adminCategoriesConfig = [
       { key: 'id_loai_dich_vu', label: 'ID Loại dịch vụ (Tùy chọn)', type: 'text' },
       { key: 'ghi_chu', label: 'Ghi chú', type: 'text' }
     ]
+  },
+  {
+    title: 'Hồ sơ dịch vụ (Giao dịch)',
+    tableName: 'ho_so_dich_vu',
+    primaryKey: 'id_ho_so_dich_vu',
+    columns: [
+      { key: 'noi_dung', label: 'Nội dung hồ sơ', type: 'text', required: true },
+      { key: 'id_khach_hang', label: 'ID Khách Hàng (Tùy chọn)', type: 'text' },
+      { key: 'id_ma_hop_dong', label: 'ID Mã Hợp Đồng (Tùy chọn)', type: 'text' },
+      { key: 'ghi_chu', label: 'Ghi chú', type: 'text' }
+    ]
   }
 ];
