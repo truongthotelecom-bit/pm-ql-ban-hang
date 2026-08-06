@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import useAuthStore from './store/useAuthStore';
 import AuthGuard from './components/AuthGuard';
 import IndexPage from './pages/IndexPage';
@@ -43,7 +43,8 @@ export default function App() {
         >
           {/* Outlet của AdminLayout */}
           <Route index element={<AdminDashboard />} />
-          <Route path="danh-muc" element={<AdminCategoryPage />} />
+          <Route path="danh-muc" element={<Navigate to="/admin/danh-muc/dm_trang_thai_giao_dich" replace />} />
+          <Route path="danh-muc/:tableName" element={<AdminCategoryPage />} />
           <Route path="tai-khoan" element={<div className="p-4 text-white">Quản lý Tài khoản (Đang xây dựng)</div>} />
           <Route path="cai-dat" element={<div className="p-4 text-white">Cài đặt hệ thống (Đang xây dựng)</div>} />
         </Route>

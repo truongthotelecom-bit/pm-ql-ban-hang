@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, message, Popconfirm, Tag, Spin } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, DownOutlined, RightOutlined } from '@ant-design/icons';
+import { useParams, Navigate } from 'react-router-dom';
+import { Table, Button, Modal, Form, Input, message, Popconfirm } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
 import { supabase } from '../../lib/supabaseClient';
 import { adminCategoriesConfig } from '../../config/adminConfig';
 
 export default function AdminCategoryPage() {
-  const [activeConfigIndex, setActiveConfigIndex] = useState(0);
-  const activeConfig = adminCategoriesConfig[activeConfigIndex];
+  const { tableName } = useParams();
+  
+  const activeConfig = adminCategoriesConfig.find(c => c.tableName === tableName);
 
-  // Trạng thái đóng/mở của các nhóm menu
-  const [expandedGroups, setExpandedGroups] = useState({ 
-    'Hệ thống Dịch vụ': true, 
-    'Giao dịch & Thanh toán': true, 
-    'Khách hàng': false, 
-    'Hồ sơ': false 
-  });
-
-  const toggleGroup = (groupName) => {
-    setExpandedGroups(prev => ({ ...prev, [groupName]: !prev[groupName] }));
-  };
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   
@@ -47,9 +38,15 @@ export default function AdminCategoryPage() {
   };
 
   useEffect(() => {
-    loadData();
+    if (activeConfig) {
+      loadData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeConfigIndex]);
+  }, [tableName]);
+
+  if (!activeConfig) {
+    return <Navigate to="/admin/danh-muc/dm_trang_thai_giao_dich" replace />;
+  }
 
   // Handle Add/Edit
   const handleSave = async (values) => {
@@ -156,55 +153,6 @@ export default function AdminCategoryPage() {
 
   return (
     <div className="h-full flex gap-6">
-      {/* Sidebar chọn bảng */}
-      <div className="w-64 bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-slate-800 bg-slate-800/30">
-          <h3 className="font-bold text-slate-200">Các Danh Mục</h3>
-        </div>
-        <div className="flex-1 overflow-y-auto space-y-2 p-3">
-          {Object.entries(
-            adminCategoriesConfig.reduce((acc, config, idx) => {
-              const group = config.group || 'Khác';
-              if (!acc[group]) acc[group] = [];
-              acc[group].push({ config, idx });
-              return acc;
-            }, {})
-          ).map(([groupName, items]) => {
-            const isExpanded = expandedGroups[groupName];
-            return (
-              <div key={groupName} className="border border-slate-800 rounded-lg overflow-hidden bg-slate-900/30">
-                <button
-                  onClick={() => toggleGroup(groupName)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 text-xs font-bold text-slate-300 uppercase tracking-wider hover:bg-slate-800/50 transition-colors"
-                >
-                  <span>{groupName}</span>
-                  {isExpanded ? <DownOutlined className="text-[10px]" /> : <RightOutlined className="text-[10px]" />}
-                </button>
-                
-                {isExpanded && (
-                  <div className="p-1 space-y-0.5 bg-slate-900/50 border-t border-slate-800/50">
-                    {items.map(({ config, idx }) => (
-                      <button
-                        key={config.tableName}
-                        onClick={() => setActiveConfigIndex(idx)}
-                        className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center gap-2 ${
-                          activeConfigIndex === idx 
-                            ? 'bg-blue-600/20 text-blue-400 font-medium' 
-                            : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                        }`}
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-current opacity-50"></span>
-                        {config.title}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Main Content (Table) */}
       <div className="flex-1 bg-slate-900/50 border border-slate-800 rounded-xl flex flex-col overflow-hidden relative">
         <div className="p-4 border-b border-slate-800 bg-slate-800/30 flex justify-between items-center">
