@@ -123,7 +123,7 @@ const useAppStore = create((set, get) => ({
       const yyyy = now.getFullYear();
       const mm = String(now.getMonth() + 1).padStart(2, '0');
       const dd = String(now.getDate()).padStart(2, '0');
-      const rand8 = String(Math.floor(Math.random() * 100000000)).padStart(8, '0');
+      const rand8 = Math.random().toString(36).substring(2, 10).toUpperCase().padEnd(8, '0');
       const generatedId = `${yyyy}-${mm}-${dd}-${rand8}`;
 
       // Loại bỏ các trường rỗng để tránh lỗi DB
