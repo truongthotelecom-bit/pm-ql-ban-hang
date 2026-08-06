@@ -290,18 +290,26 @@ export default function MoneyTransferForm({ value, onChange }) {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-gray-400 text-xs font-bold block">Trạng thái giao dịch</label>
-          <Select
-            className="w-full !bg-white/5 !text-white"
-            value={form.id_trang_thai || '11111111-1111-1111-1111-111111111111'}
-            onChange={(v) => handleValueChange('id_trang_thai', v)}
-          >
-            {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
-              <Option key={s.id_trang_thai} value={s.id_trang_thai}>
-                {s.icon} {s.ten_trang_thai}
-              </Option>
-            ))}
-          </Select>
+          <label className="text-gray-400 text-xs font-bold block mb-2">Trạng thái giao dịch</label>
+          <div className="grid grid-cols-3 gap-2">
+            {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => {
+              const isActive = (form.id_trang_thai || '11111111-1111-1111-1111-111111111111') === s.id_trang_thai;
+              return (
+                <button
+                  key={s.id_trang_thai}
+                  onClick={() => handleValueChange('id_trang_thai', s.id_trang_thai)}
+                  className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl text-[10px] font-bold border transition-all active:scale-95 ${
+                    isActive
+                      ? 'bg-violet-600/20 border-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.3)] text-violet-300'
+                      : 'bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <span className="text-sm mb-1">{s.icon}</span>
+                  <span className="truncate w-full text-center">{s.ten_trang_thai}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
