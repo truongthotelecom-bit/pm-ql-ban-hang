@@ -306,8 +306,16 @@ const useAppStore = create((set, get) => ({
       const activeSvc = get().selectedService;
       if (!activeFile || !activeSvc) return;
 
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const rand8 = Math.random().toString(36).substring(2, 10).toUpperCase().padEnd(8, '0');
+      const generatedId = `${yyyy}-${mm}-${dd}-${rand8}`;
+
       const fullPayload = {
         ...detailPayload,
+        id_chi_tiet_giao_dich: generatedId,
         id_ho_so_dich_vu: activeFile.id_ho_so_dich_vu,
         id_loai_dich_vu: activeSvc.id_loai_dich_vu,
         thoi_gian_giao_dich: new Date().toISOString()
