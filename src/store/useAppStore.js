@@ -118,10 +118,21 @@ const useAppStore = create((set, get) => ({
 
   addCustomer: async (customer) => {
     try {
+      // Sinh mã khách hàng theo format YYYY-MM-DD-XXXXXXXX
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const rand8 = String(Math.floor(Math.random() * 100000000)).padStart(8, '0');
+      const generatedId = `${yyyy}-${mm}-${dd}-${rand8}`;
+
       // Loại bỏ các trường rỗng để tránh lỗi DB
       const clean = Object.fromEntries(
         Object.entries(customer).filter(([, v]) => v !== '' && v !== undefined && v !== null)
       );
+      // Gán ID đã tạo vào payload
+      clean.id_khach_hang = generatedId;
+
       const { data, error } = await supabase.from('khach_hang').insert([clean]).select().single();
       if (error) {
         console.error('Lỗi thêm khách hàng:', error);
