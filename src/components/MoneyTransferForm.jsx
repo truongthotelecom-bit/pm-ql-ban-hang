@@ -19,7 +19,8 @@ export default function MoneyTransferForm({ value, onChange }) {
     phi_dich_vu: 0,
     chiet_khau: 0,
     so_tien_giam: 0,
-    noi_dung: ''
+    noi_dung: '',
+    id_trang_thai: '11111111-1111-1111-1111-111111111111'
   };
 
   const setForm = (newFormOrCallback) => {
@@ -276,16 +277,32 @@ export default function MoneyTransferForm({ value, onChange }) {
 
       <Divider className="border-white/10 my-4" />
 
-      {/* CỤM 3: NỘI DUNG */}
-      <div className="mb-6 space-y-1">
-        <label className="text-gray-400 text-xs font-bold block">Nội dung chuyển khoản / Ghi chú</label>
-        <TextArea 
-          rows={2} 
-          className="!bg-white/5 !border-white/10 !text-white rounded-lg"
-          placeholder="Nhập nội dung chuyển khoản..."
-          value={form.noi_dung}
-          onChange={(e) => handleValueChange('noi_dung', e.target.value)}
-        />
+      {/* CỤM 3: NỘI DUNG & TRẠNG THÁI */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <label className="text-gray-400 text-xs font-bold block">Nội dung chuyển khoản / Ghi chú</label>
+          <TextArea 
+            rows={2} 
+            className="!bg-white/5 !border-white/10 !text-white rounded-lg"
+            placeholder="Nhập nội dung chuyển khoản..."
+            value={form.noi_dung}
+            onChange={(e) => handleValueChange('noi_dung', e.target.value)}
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-gray-400 text-xs font-bold block">Trạng thái giao dịch</label>
+          <Select
+            className="w-full !bg-white/5 !text-white"
+            value={form.id_trang_thai || '11111111-1111-1111-1111-111111111111'}
+            onChange={(v) => handleValueChange('id_trang_thai', v)}
+          >
+            {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
+              <Option key={s.id_trang_thai} value={s.id_trang_thai}>
+                {s.icon} {s.ten_trang_thai}
+              </Option>
+            ))}
+          </Select>
+        </div>
       </div>
 
       {/* CỤM 4: TỔNG KẾT BILL */}
