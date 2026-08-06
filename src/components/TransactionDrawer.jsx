@@ -13,12 +13,33 @@ export default function TransactionDrawer({ open, onClose }) {
   const store = useAppStore();
   const [activeKey, setActiveKey] = useState('1');
 
-  // Form State
-  const [gdPayload, setGdPayload] = useState({
-    id_pttt_nguon: 'dm-pay-transfer',
-    id_pttt_di: 'dm-pay-transfer'
-  });
+  const [gdPayload, setGdPayload] = useState({});
   const [netAmount, setNetAmount] = useState(0);
+
+  const activeFile = store.selectedServiceFile;
+  const activeCust = activeFile ? store.customers.find(c => c.id_khach_hang === activeFile.id_khach_hang) : null;
+  const activeHd = activeFile ? store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile.id_ma_hop_dong) : null;
+
+  // Tự động gán thông minh (Nội dung) khi mở drawer
+  useEffect(() => {
+    if (open) {
+      let defaultNoiDung = '';
+      if (activeFile?.noi_dung && activeFile.noi_dung.trim() !== '') {
+        defaultNoiDung = activeFile.noi_dung;
+      } else {
+        const isChuyenKhoan = store.selectedService?.ten_danh_muc?.toLowerCase().includes('chuyển khoản') || store.selectedService?.ma_viet_tat === 'CK';
+        if (isChuyenKhoan) {
+          defaultNoiDung = 'Chuyển tiền';
+        } else {
+          const lastSameCategoryTx = store.allTransactions?.find(t => t.id_loai_dich_vu === store.selectedService?.id_loai_dich_vu && t.noi_dung);
+          if (lastSameCategoryTx) {
+            defaultNoiDung = lastSameCategoryTx.noi_dung;
+          }
+        }
+      }
+      setGdPayload({ noi_dung: defaultNoiDung });
+    }
+  }, [open]);
 
   // QR State (Kế thừa từ danh mục ngân hàng & hợp đồng)
   const [qrBankBin, setQrBankBin] = useState('970422');
@@ -30,11 +51,14 @@ export default function TransactionDrawer({ open, onClose }) {
   const [receiptUrl, setReceiptUrl] = useState('https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?auto=format&fit=crop&w=600&q=80');
 
   // Signature
-  const [selectedSignature, setSelectedSignature] = useState('sig-1');
+  const [selectedSignature, setSelectedSignature] = useState(store.signature?.id_chu_ky || undefined);
 
-  const activeFile = store.selectedServiceFile;
-  const activeCust = activeFile ? store.customers.find(c => c.id_khach_hang === activeFile.id_khach_hang) : null;
-  const activeHd = activeFile ? store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile.id_ma_hop_dong) : null;
+  useEffect(() => {
+    if (store.signature?.id_chu_ky && !selectedSignature) {
+      setSelectedSignature(store.signature.id_chu_ky);
+    }
+  }, [store.signature]);
+
 
   // Tự động gán thông tin tài khoản nhận từ Hợp đồng khi mở Drawer
   useEffect(() => {
@@ -75,18 +99,22 @@ export default function TransactionDrawer({ open, onClose }) {
       so_tien_nhap_tay: gdPayload.so_tien || 0,
       so_tien_di: netAmount,
       noi_dung: gdPayload.noi_dung || `Thanh toán hợp đồng ${activeHd?.ma_hop_dong || ''}`,
-      id_trang_thai: gdPayload.id_trang_thai || 'dm-1',
+      id_trang_thai: gdPayload.id_trang_thai || '11111111-1111-1111-1111-111111111111',
       hinh_anh_kiem_duyet: receiptUrl,
       id_chu_ky: selectedSignature
     };
 
-    const data = await store.addTransactionDetail(transactionPayload);
+    try {
+      const data = await store.addTransactionDetail(transactionPayload);
 
-    if (data) {
-      message.success('🎉 Đã lập phiếu giao dịch dòng tiền chi tiết thành công!');
-      onClose();
-      setActiveKey('1');
-      setGdPayload({});
+      if (data) {
+        message.success('🎉 Đã lập phiếu giao dịch dòng tiền chi tiết thành công!');
+        onClose();
+        setActiveKey('1');
+        setGdPayload({});
+      }
+    } catch (error) {
+      message.error(`Thêm giao dịch thất bại: ${error.message || 'Lỗi không xác định'}`);
     }
   };
 
@@ -209,7 +237,7 @@ export default function TransactionDrawer({ open, onClose }) {
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-gray-400">Chọn mẫu chữ ký hiển thị ở chân trang</label>
               <Select value={selectedSignature} onChange={setSelectedSignature} className="w-full">
-                <Option value="sig-1">{store.signature.ten_chu_ky || 'Quản lý quầy'} - {store.signature.ten_cua_hang}</Option>
+                <Option value={store.signature?.id_chu_ky}>{store.signature?.ten_chu_ky || 'Quản lý quầy'} - {store.signature?.ten_cua_hang}</Option>
               </Select>
             </div>
 

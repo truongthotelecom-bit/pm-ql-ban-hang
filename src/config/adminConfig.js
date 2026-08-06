@@ -143,7 +143,6 @@ export const adminCategoriesConfig = [
             if (l.chu_hop_dong) parts.push(l.chu_hop_dong);
             return parts.join(' - ');
           }
-          }
         } 
       },
       { key: 'id_loai_hop_dong', label: 'Loại Hợp Đồng', type: 'lookup', lookup: { table: 'dm_loai_hop_dong', labelField: 'ten_loai', valueField: 'id_loai_hop_dong' } },

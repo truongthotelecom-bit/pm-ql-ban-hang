@@ -250,6 +250,9 @@ const useAppStore = create((set, get) => ({
         await get().fetchTransactionDetails(activeFile.id_ho_so_dich_vu);
         await get().fetchCustomers();
         return data;
+      } else {
+        console.error('Lỗi Supabase khi thêm giao dịch:', error);
+        throw error;
       }
     } catch (err) {
       console.error('Lỗi thêm giao dịch chi tiết:', err);

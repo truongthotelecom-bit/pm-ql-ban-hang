@@ -169,7 +169,7 @@ export default function MoneyTransferForm({ value, onChange }) {
             onChange={(v) => handleValueChange('so_tien', v)}
             formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
             parser={(value) => value?.replace(/\$\s?|(,*)/g, '')}
-            addonAfter="VNĐ"
+            suffix="VNĐ"
             min={0}
           />
         </div>
@@ -204,7 +204,7 @@ export default function MoneyTransferForm({ value, onChange }) {
               value={form.phi_dich_vu}
               onChange={(v) => handleValueChange('phi_dich_vu', v)}
               formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              addonAfter="VNĐ"
+              suffix="VNĐ"
               min={0}
             />
           </div>
@@ -215,7 +215,7 @@ export default function MoneyTransferForm({ value, onChange }) {
               value={form.so_tien_giam}
               onChange={(v) => handleValueChange('so_tien_giam', v)}
               formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              addonAfter="VNĐ"
+              suffix="VNĐ"
               min={0}
             />
           </div>
@@ -228,7 +228,7 @@ export default function MoneyTransferForm({ value, onChange }) {
             value={form.chiet_khau}
             onChange={(v) => handleValueChange('chiet_khau', v)}
             formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-            addonAfter="VNĐ"
+            suffix="VNĐ"
             min={0}
           />
         </div>
