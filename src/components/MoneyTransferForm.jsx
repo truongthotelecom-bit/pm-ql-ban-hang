@@ -29,6 +29,10 @@ export default function MoneyTransferForm({ value, onChange }) {
     const amt = newForm.so_tien || 0;
     const fee = newForm.phi_dich_vu || 0;
     const isTrong = newForm.is_cuoc_trong;
+    // Chiết khấu lưu theo % nhưng tính ra tiền giảm
+    const ckPercent = newForm.chiet_khau || 0;
+    const tienGiamCK = Math.round((amt * ckPercent) / 100);
+    newForm.so_tien_giam_ck = tienGiamCK; // lưu để hiển thị, không ảnh hưởng so_tien_giam của khách
     newForm.so_tien_di = isTrong ? (amt - fee) : amt;
     newForm.toggle_so_tien_giam = newForm.so_tien_giam > 0;
     
@@ -40,6 +44,22 @@ export default function MoneyTransferForm({ value, onChange }) {
       resolveFeeSchedule(form.so_tien);
     }
   }, [activeFile?.id_loai_hop_dong, activeContract?.id_danh_muc_dich_vu]);
+
+  // Tự động điền hình thức thanh toán từ giao dịch gần nhất cùng danh mục
+  useEffect(() => {
+    if (!activeFile) return;
+    const idLoaiDV = activeFile.id_loai_dich_vu;
+    const lastTx = store.allTransactions?.find(
+      t => t.id_loai_dich_vu === idLoaiDV && (t.id_pttt_nguon || t.id_pttt_di)
+    );
+    if (lastTx) {
+      onChange(prev => ({
+        ...(prev || {}),
+        id_pttt_nguon: (prev || {}).id_pttt_nguon || lastTx.id_pttt_nguon || undefined,
+        id_pttt_di:    (prev || {}).id_pttt_di    || lastTx.id_pttt_di    || undefined,
+      }));
+    }
+  }, [activeFile?.id_ho_so_dich_vu]);
 
   const resolveFeeSchedule = (amount) => {
     // 1. Tìm biểu phí phù hợp nhất
@@ -137,7 +157,7 @@ export default function MoneyTransferForm({ value, onChange }) {
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-gray-400 text-xs font-bold block">Hình thức KHÁCH ĐƯA TIỀN</label>
+            <label className="text-gray-400 text-xs font-bold block">Hình thức KHÁCH ĐƯĂ TIỀN</label>
             <Select
               className="w-full"
               placeholder="Chọn hình thức (Nguồn)"
@@ -146,6 +166,10 @@ export default function MoneyTransferForm({ value, onChange }) {
             >
               {store.paymethods.map(p => <Option key={p.id_pttt} value={p.id_pttt}>{p.ten_pttt}</Option>)}
             </Select>
+            {/* Hiển thị gợi ý nếu đang là auto-fill */}
+            {form.id_pttt_nguon && (
+              <span className="text-[9px] text-violet-400 italic">⚡ Tự điền từ giao dịch trước</span>
+            )}
           </div>
           <div className="space-y-1">
             <label className="text-gray-400 text-xs font-bold block">Hình thức CHUYỂN TIỀN ĐI</label>
@@ -157,6 +181,9 @@ export default function MoneyTransferForm({ value, onChange }) {
             >
               {store.paymethods.map(p => <Option key={p.id_pttt} value={p.id_pttt}>{p.ten_pttt}</Option>)}
             </Select>
+            {form.id_pttt_di && (
+              <span className="text-[9px] text-violet-400 italic">⚡ Tự điền từ giao dịch trước</span>
+            )}
           </div>
         </div>
         
@@ -222,15 +249,28 @@ export default function MoneyTransferForm({ value, onChange }) {
         </div>
 
         <div className="space-y-1 mt-3">
-          <label className="text-gray-500 text-[10px] font-bold block uppercase tracking-wider">Chiết khấu Kế toán Nội bộ (Không trừ vào tiền khách)</label>
-          <InputNumber
-            className="w-full !bg-black/20 !border-white/5 !text-gray-400"
-            value={form.chiet_khau}
-            onChange={(v) => handleValueChange('chiet_khau', v)}
-            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-            suffix="VNĐ"
-            min={0}
-          />
+          <label className="text-gray-500 text-[10px] font-bold block uppercase tracking-wider">
+            Chiết khấu Kế toán Nội bộ (%)
+          </label>
+          <div className="flex items-center gap-2">
+            <InputNumber
+              className="w-32 !bg-black/20 !border-white/5 !text-gray-400"
+              value={form.chiet_khau}
+              onChange={(v) => handleValueChange('chiet_khau', v)}
+              suffix="%"
+              min={0}
+              max={100}
+              precision={2}
+            />
+            {/* Hiển thị tiền cụ thể ra */}
+            <div className="flex-1 px-3 py-2 rounded-lg bg-black/20 border border-white/5">
+              <div className="text-[10px] text-gray-500 uppercase tracking-wider">Tương đương</div>
+              <div className="text-sm font-bold text-yellow-400">
+                -{formatCurrency(form.so_tien_giam_ck || Math.round(((form.so_tien || 0) * (form.chiet_khau || 0)) / 100))}
+              </div>
+              <div className="text-[9px] text-gray-600 mt-0.5">({form.chiet_khau || 0}% × {formatCurrency(form.so_tien || 0)})</div>
+            </div>
+          </div>
         </div>
       </div>
 
