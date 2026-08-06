@@ -149,11 +149,13 @@ export default function TransactionHistory() {
                 <Option value={DATE_RANGES.LAST_MONTH}>Tháng trước</Option>
                 <Option value={DATE_RANGES.THIS_YEAR}>Năm nay</Option>
                 <Option value={DATE_RANGES.LAST_YEAR}>Năm trước</Option>
-                <Option value={DATE_RANGES.CUSTOM}>Tùy chọn...</Option>
+                <Option value={DATE_RANGES.CUSTOM}>Từ ngày - Đến ngày</Option>
               </Select>
               {filters.dateRangeType === DATE_RANGES.CUSTOM && (
                 <RangePicker 
                   className="!bg-white/5 !border-white/10 !text-white" 
+                  placeholder={['Từ ngày', 'Đến ngày']}
+                  format="DD/MM/YYYY"
                   onChange={dates => setFilters({...filters, customDateRange: dates})}
                 />
               )}
@@ -168,7 +170,7 @@ export default function TransactionHistory() {
               placeholder="Tất cả" 
               className="w-full"
               value={filters.nhomMenuId}
-              onChange={v => setFilters({...filters, nhomMenuId: v, loaiDichVuId: null})}
+              onChange={v => setFilters({...filters, nhomMenuId: v, loaiDichVuId: null, danhMucId: null})}
             >
               {store.menuGroups.map(m => <Option key={m.id_nhom_menu} value={m.id_nhom_menu}>{m.ten_nhom}</Option>)}
             </Select>
@@ -182,8 +184,8 @@ export default function TransactionHistory() {
               placeholder="Tất cả" 
               className="w-full"
               value={filters.loaiDichVuId}
-              onChange={v => setFilters({...filters, loaiDichVuId: v})}
-              disabled={!filters.nhomMenuId && store.services.length === 0}
+              onChange={v => setFilters({...filters, loaiDichVuId: v, danhMucId: null})}
+              disabled={!!filters.nhomMenuId && store.services.filter(s => s.id_nhom_menu === filters.nhomMenuId).length === 0}
             >
               {store.services
                 .filter(s => !filters.nhomMenuId || s.id_nhom_menu === filters.nhomMenuId)
@@ -202,8 +204,11 @@ export default function TransactionHistory() {
               value={filters.danhMucId}
               onChange={v => setFilters({...filters, danhMucId: v})}
               filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
+              disabled={!!filters.loaiDichVuId && store.banks.filter(b => b.id_loai_dich_vu === filters.loaiDichVuId).length === 0}
             >
-              {store.banks.map(b => <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>{b.ten_viet_tat} - {b.ten_dich_vu}</Option>)}
+              {store.banks
+                .filter(b => !filters.loaiDichVuId || b.id_loai_dich_vu === filters.loaiDichVuId)
+                .map(b => <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>{b.ten_viet_tat} - {b.ten_dich_vu}</Option>)}
             </Select>
           </div>
 
