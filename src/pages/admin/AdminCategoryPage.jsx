@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { Table, Button, Modal, Form, Input, message, Popconfirm } from 'antd';
+import { Table, Button, Modal, Form, Input, message, Popconfirm, Select } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
 import { supabase } from '../../lib/supabaseClient';
 import { adminCategoriesConfig } from '../../config/adminConfig';
@@ -12,6 +12,7 @@ export default function AdminCategoryPage() {
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [lookupData, setLookupData] = useState({});
   
   // Modal state
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -29,6 +30,21 @@ export default function AdminCategoryPage() {
 
       if (error) throw error;
       setData(tableData || []);
+
+      // Fetch lookup data if table has lookup columns
+      const lookupCols = activeConfig.columns.filter(c => c.type === 'lookup');
+      if (lookupCols.length > 0) {
+        const newLookupData = { ...lookupData };
+        await Promise.all(lookupCols.map(async (col) => {
+          if (!newLookupData[col.lookup.table]) {
+            const { data: lData } = await supabase.from(col.lookup.table).select(`${col.lookup.valueField}, ${col.lookup.labelField}`);
+            if (lData) {
+              newLookupData[col.lookup.table] = lData;
+            }
+          }
+        }));
+        setLookupData(newLookupData);
+      }
     } catch (err) {
       console.error(err);
       message.error(`Lỗi tải dữ liệu bảng ${activeConfig.title}`);
@@ -114,6 +130,11 @@ export default function AdminCategoryPage() {
       if (!text) return <span className="text-gray-500">-</span>;
       if (col.key === 'icon') return <span className="text-xl">{text}</span>;
       if (col.key === 'logo') return <img src={text} alt="logo" className="h-8 object-contain bg-white rounded p-1" />;
+      if (col.type === 'lookup') {
+        const tableLookups = lookupData[col.lookup.table] || [];
+        const item = tableLookups.find(l => l[col.lookup.valueField] === text);
+        return <span className="text-gray-200">{item ? item[col.lookup.labelField] : text}</span>;
+      }
       return <span className="text-gray-200">{text}</span>;
     }
   }));
@@ -218,6 +239,17 @@ export default function AdminCategoryPage() {
             >
               {col.type === 'number' ? (
                 <Input type="number" className="bg-slate-900 border-slate-700 text-white" />
+              ) : col.type === 'lookup' ? (
+                <Select 
+                  className="w-full admin-select" 
+                  placeholder={`Chọn ${col.label.toLowerCase()}...`}
+                  allowClear
+                  options={(lookupData[col.lookup.table] || []).map(l => ({
+                    value: l[col.lookup.valueField],
+                    label: l[col.lookup.labelField]
+                  }))}
+                  popupClassName="dark-select-dropdown"
+                />
               ) : (
                 <Input className="bg-slate-900 border-slate-700 text-white" placeholder={`Nhập ${col.label.toLowerCase()}...`} />
               )}
@@ -252,6 +284,15 @@ export default function AdminCategoryPage() {
         .dark-modal .ant-modal-title { color: white; }
         .dark-modal .ant-modal-close { color: #94a3b8; }
         .dark-modal .ant-modal-footer { border-top: 1px solid #334155; padding-top: 16px;}
+        
+        /* Select Dark Mode */
+        .admin-select .ant-select-selector { background-color: #0f172a !important; border-color: #334155 !important; color: white !important; }
+        .admin-select .ant-select-arrow { color: #94a3b8; }
+        .admin-select .ant-select-clear { background-color: transparent; color: #94a3b8; }
+        .dark-select-dropdown { background-color: #1e293b; border: 1px solid #334155; }
+        .dark-select-dropdown .ant-select-item { color: #cbd5e1; }
+        .dark-select-dropdown .ant-select-item-option-active:not(.ant-select-item-option-disabled) { background-color: #334155; color: white; }
+        .dark-select-dropdown .ant-select-item-option-selected:not(.ant-select-item-option-disabled) { background-color: #2563eb; color: white; }
       `}</style>
     </div>
   );

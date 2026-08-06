@@ -63,7 +63,7 @@ export const adminCategoriesConfig = [
       { key: 'ten_danh_muc', label: 'Tên loại dịch vụ', type: 'text', required: true },
       { key: 'ma_viet_tat', label: 'Mã viết tắt', type: 'text' },
       { key: 'icon', label: 'Biểu tượng/Emoji', type: 'text' },
-      { key: 'id_nhom', label: 'ID Nhóm Menu (Tùy chọn)', type: 'text' },
+      { key: 'id_nhom', label: 'Nhóm Menu', type: 'lookup', lookup: { table: 'sys_nhom_menu', labelField: 'ten_nhom', valueField: 'id_nhom' } },
       { key: 'ghi_chu', label: 'Ghi chú', type: 'text' }
     ]
   },
@@ -77,7 +77,7 @@ export const adminCategoriesConfig = [
       { key: 'ten_viet_tat', label: 'Viết tắt', type: 'text' },
       { key: 'ma_bin', label: 'Mã BIN', type: 'text' },
       { key: 'logo', label: 'Link Logo', type: 'text' },
-      { key: 'id_loai_dich_vu', label: 'ID Loại dịch vụ (Tùy chọn)', type: 'text' },
+      { key: 'id_loai_dich_vu', label: 'Loại dịch vụ', type: 'lookup', lookup: { table: 'sys_loai_dich_vu', labelField: 'ten_danh_muc', valueField: 'id_loai_dich_vu' } },
       { key: 'ghi_chu', label: 'Ghi chú', type: 'text' }
     ]
   },
