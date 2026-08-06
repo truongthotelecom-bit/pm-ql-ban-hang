@@ -784,7 +784,7 @@ export default function Transactions() {
       <div className="w-full xl:w-[28%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between">
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
-            <span className="font-extrabold text-white text-xs tracking-wider uppercase">Tác vụ Biên lai POS</span>
+            <span className="font-extrabold text-white text-xs tracking-wider uppercase">CHI TIẾT GIAO DỊCH</span>
           </div>
 
           {activeDetail ? (
