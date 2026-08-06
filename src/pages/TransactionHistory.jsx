@@ -178,7 +178,7 @@ export default function TransactionHistory() {
               value={filters.nhomMenuId}
               onChange={v => setFilters({...filters, nhomMenuId: v, loaiDichVuId: null, danhMucId: null})}
             >
-              {store.menuGroups.map(m => <Option key={m.id_nhom_menu} value={m.id_nhom_menu}>{m.ten_nhom}</Option>)}
+              {store.menuGroups.map(m => <Option key={m.id_nhom} value={m.id_nhom}>{m.ten_nhom}</Option>)}
             </Select>
           </div>
 
