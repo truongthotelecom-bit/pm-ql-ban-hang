@@ -16,6 +16,10 @@ const useAppStore = create((set, get) => ({
   paymethods: [],
   ma_hop_dong: [],
   dbOnline: false,
+  
+  // Danh mục mới
+  loaiHopDongs: [],
+  bieuPhis: [],
 
   // --- SCHEMA V2 STATES ---
   services: [],
@@ -43,7 +47,9 @@ const useAppStore = create((set, get) => ({
         { data: resSig },
         { data: resBanks },
         { data: resHd },
-        { data: resLdv }
+        { data: resLdv },
+        { data: resLhd },
+        { data: resBp }
       ] = await Promise.all([
         supabase.from('dm_trang_thai_giao_dich').select('*'),
         supabase.from('dm_phuong_thuc_thanh_toan').select('*'),
@@ -53,7 +59,9 @@ const useAppStore = create((set, get) => ({
         supabase.from('sys_quan_ly_chu_ky').select('*').limit(1),
         supabase.from('sys_danh_muc_dich_vu').select('*'),
         supabase.from('ma_hop_dong').select('*'),
-        supabase.from('sys_loai_dich_vu').select('*').order('ngay_tao')
+        supabase.from('sys_loai_dich_vu').select('*').order('ngay_tao'),
+        supabase.from('dm_loai_hop_dong').select('*'),
+        supabase.from('dm_bieu_phi').select('*')
       ]);
 
       const mappedCategories = [
@@ -82,6 +90,8 @@ const useAppStore = create((set, get) => ({
         paymethods: resPtThanhToan || [],
         ma_hop_dong: resHd || [],
         services: resLdv || [],
+        loaiHopDongs: resLhd || [],
+        bieuPhis: resBp || [],
         dbOnline: true
       });
 
@@ -180,6 +190,9 @@ const useAppStore = create((set, get) => ({
       if (!activeSvc) return;
 
       const fullPayload = { ...payload, id_loai_dich_vu: activeSvc.id_loai_dich_vu };
+      Object.keys(fullPayload).forEach(key => {
+        if (fullPayload[key] === '') fullPayload[key] = null;
+      });
       const { data, error } = await supabase.from('ho_so_dich_vu').insert([fullPayload]).select().single();
 
       if (!error && data) {

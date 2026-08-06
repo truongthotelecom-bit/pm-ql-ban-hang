@@ -5,7 +5,7 @@ import {
   QrcodeOutlined, SafetyCertificateOutlined, PrinterOutlined 
 } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
-import DynamicForm from './DynamicForm';
+import MoneyTransferForm from './MoneyTransferForm';
 
 const { Option } = Select;
 
@@ -14,8 +14,10 @@ export default function TransactionDrawer({ open, onClose }) {
   const [activeKey, setActiveKey] = useState('1');
 
   // Form State
-  const [gdPayload, setGdPayload] = useState({});
-  const [paymethod, setPaymethod] = useState('dm-pay-transfer');
+  const [gdPayload, setGdPayload] = useState({
+    id_pttt_nguon: 'dm-pay-transfer',
+    id_pttt_di: 'dm-pay-transfer'
+  });
   const [netAmount, setNetAmount] = useState(0);
 
   // QR State (Kế thừa từ danh mục ngân hàng & hợp đồng)
@@ -44,11 +46,7 @@ export default function TransactionDrawer({ open, onClose }) {
 
   // Cập nhật tính số tiền thực thu/di
   useEffect(() => {
-    const amt = parseFloat(gdPayload.so_tien || 0);
-    const disc = parseFloat(gdPayload.chiet_khau || 0);
-    const feeAmt = parseFloat(gdPayload.phi_dich_vu || 0);
-    const discAmt = amt * (disc / 100);
-    setNetAmount(amt - discAmt + feeAmt);
+    setNetAmount(parseFloat(gdPayload.so_tien_di || 0));
   }, [gdPayload]);
 
   // Cập nhật sinh VietQR thời gian thực
@@ -73,13 +71,8 @@ export default function TransactionDrawer({ open, onClose }) {
     }
 
     const transactionPayload = {
-      id_pttt_nguon: paymethod,
-      so_tien: gdPayload.so_tien || 0,
+      ...gdPayload,
       so_tien_nhap_tay: gdPayload.so_tien || 0,
-      phi_dich_vu: gdPayload.phi_dich_vu || 0,
-      chiet_khau: gdPayload.chiet_khau || 0,
-      so_tien_giam: (gdPayload.so_tien || 0) * ((gdPayload.chiet_khau || 0) / 100),
-      id_pttt_di: paymethod,
       so_tien_di: netAmount,
       noi_dung: gdPayload.noi_dung || `Thanh toán hợp đồng ${activeHd?.ma_hop_dong || ''}`,
       id_trang_thai: gdPayload.id_trang_thai || 'dm-1',
@@ -151,30 +144,10 @@ export default function TransactionDrawer({ open, onClose }) {
         {/* TAB 2: NGHIỆP VỤ TÀI CHÍNH */}
         <Tabs.TabPane tab={<span><DollarOutlined /> Dòng tiền</span>} key="2">
           <div className="pt-3 space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-gray-400">Phương thức thanh toán nguồn *</label>
-              <Select value={paymethod} onChange={setPaymethod} className="w-full">
-                {store.paymethods.map(p => (
-                  <Option key={p.id_pttt} value={p.id_pttt}>{p.ten_pttt}</Option>
-                ))}
-              </Select>
-            </div>
-
-            <DynamicForm
-              config={store.columnsConfig}
+            <MoneyTransferForm
               value={gdPayload}
               onChange={setGdPayload}
-              categories={store.categories}
-              customers={store.customers}
-              contracts={store.ma_hop_dong}
             />
-
-            <div className="p-4 rounded-xl bg-gray-950 border border-white/5 flex justify-between items-center mt-4 shadow-inner">
-              <span className="font-bold text-gray-400 text-xs uppercase tracking-wider">Thực đi (Tạm tính):</span>
-              <h2 className="text-2xl font-black text-violet-400 tracking-wide">
-                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(netAmount)}
-              </h2>
-            </div>
           </div>
         </Tabs.TabPane>
 

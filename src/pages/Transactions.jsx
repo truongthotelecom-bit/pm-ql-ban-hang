@@ -49,6 +49,7 @@ export default function Transactions() {
   const [newFilePayload, setNewFilePayload] = useState({
     id_khach_hang: '',
     id_ma_hop_dong: '',
+    id_loai_hop_dong: '',
     noi_dung: '',
     ghi_chu: ''
   });
@@ -178,7 +179,7 @@ export default function Transactions() {
     if (data) {
       message.success('🎉 Lập hồ sơ quản lý dịch vụ mới thành công!');
       setShowNewFileModal(false);
-      setNewFilePayload({ id_khach_hang: '', id_ma_hop_dong: '', noi_dung: '', ghi_chu: '' });
+      setNewFilePayload({ id_khach_hang: '', id_ma_hop_dong: '', id_loai_hop_dong: '', noi_dung: '', ghi_chu: '' });
     }
   };
 
@@ -876,6 +877,21 @@ export default function Transactions() {
                 ))}
               </Select>
             )}
+          </div>
+
+          {/* PHẦN 2.5: LOẠI HỢP ĐỒNG */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-400">CHỌN LOẠI HỢP ĐỒNG *</label>
+            <Select
+              placeholder="Chọn phân loại hợp đồng (VIP, Tiêu chuẩn...)"
+              className="w-full"
+              value={newFilePayload.id_loai_hop_dong || undefined}
+              onChange={v => setNewFilePayload({ ...newFilePayload, id_loai_hop_dong: v })}
+            >
+              {store.loaiHopDongs?.map(l => (
+                <Option key={l.id_loai_hop_dong} value={l.id_loai_hop_dong}>{l.ten_loai}</Option>
+              ))}
+            </Select>
           </div>
 
           {/* PHAN 3: NOI DUNG MO TA */}

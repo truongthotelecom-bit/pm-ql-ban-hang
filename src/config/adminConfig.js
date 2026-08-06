@@ -143,9 +143,39 @@ export const adminCategoriesConfig = [
             if (l.chu_hop_dong) parts.push(l.chu_hop_dong);
             return parts.join(' - ');
           }
+          }
         } 
       },
+      { key: 'id_loai_hop_dong', label: 'Loại Hợp Đồng', type: 'lookup', lookup: { table: 'dm_loai_hop_dong', labelField: 'ten_loai', valueField: 'id_loai_hop_dong' } },
       { key: 'ghi_chu', label: 'Ghi chú', type: 'text' }
+    ]
+  },
+  {
+    title: 'Danh mục Loại hợp đồng',
+    tableName: 'dm_loai_hop_dong',
+    group: 'Hệ thống',
+    primaryKey: 'id_loai_hop_dong',
+    columns: [
+      { key: 'ten_loai', label: 'Tên loại hợp đồng', type: 'text', required: true },
+      { key: 'index', label: 'Thứ tự', type: 'number' },
+      { key: 'trang_thai', label: 'Trạng thái', type: 'boolean' }
+    ]
+  },
+  {
+    title: 'Quản lý Biểu phí & Chiết khấu',
+    tableName: 'dm_bieu_phi',
+    group: 'Hệ thống',
+    primaryKey: 'id_bieu_phi',
+    columns: [
+      { key: 'ten_bieu_phi', label: 'Tên quy tắc', type: 'text', required: true },
+      { key: 'id_loai_dich_vu', label: 'Phân hệ DV', type: 'lookup', lookup: { table: 'sys_loai_dich_vu', labelField: 'ten_danh_muc', valueField: 'id_loai_dich_vu' } },
+      { key: 'id_danh_muc_dich_vu', label: 'Ngân hàng/POS', type: 'lookup', lookup: { table: 'sys_danh_muc_dich_vu', labelField: 'ten_dich_vu', valueField: 'id_danh_muc_dich_vu' } },
+      { key: 'id_loai_hop_dong', label: 'Loại hợp đồng', type: 'lookup', lookup: { table: 'dm_loai_hop_dong', labelField: 'ten_loai', valueField: 'id_loai_hop_dong' } },
+      { key: 'phi_dich_vu_mac_dinh', label: 'Mức Phí DV', type: 'number' },
+      { key: 'id_cach_tinh_phi', label: 'Cách tính phí', type: 'lookup', lookup: { table: 'dm_cach_tinh_phi', labelField: 'ten_cach_tinh', valueField: 'id_cach_tinh' } },
+      { key: 'chiet_khau_mac_dinh', label: 'Mức Chiết khấu', type: 'number' },
+      { key: 'id_cach_tinh_chiet_khau', label: 'Cách tính CK', type: 'lookup', lookup: { table: 'dm_cach_tinh_phi', labelField: 'ten_cach_tinh', valueField: 'id_cach_tinh' } },
+      { key: 'trang_thai', label: 'Trạng thái', type: 'boolean' }
     ]
   }
 ];
