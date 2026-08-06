@@ -37,6 +37,7 @@ export default function Transactions() {
   const [showEditCustModal, setShowEditCustModal] = useState(false);
   const [showCustHistoryModal, setShowCustHistoryModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [showBillModal, setShowBillModal] = useState(false);
   const [showEditFileModal, setShowEditFileModal] = useState(false);
   const [showEditContractModal, setShowEditContractModal] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
