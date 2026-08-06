@@ -219,6 +219,131 @@ export default function Transactions() {
     }
   };
 
+  // ============================================================
+  // HÀM IN HÓA ĐƠN 2 LIÊN NỬa A4
+  // ============================================================
+  const handlePrintInvoice = () => {
+    if (!activeDetail) return;
+
+    const fmtVND = (val) => {
+      const num = parseFloat(val || 0);
+      return isNaN(num) ? '0 ₫' : num.toLocaleString('vi-VN') + ' ₫';
+    };
+
+    // Lấy thông tin ngân hàng từ hợp đồng
+    const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === activeHd?.id_danh_muc_dich_vu);
+    const tenDonVi = bank?.ten_dich_vu || store.selectedService?.ten_danh_muc || '';
+    const maTaiKhoan = activeHd?.ma_hop_dong || '';
+    const chuTaiKhoan = activeHd?.chu_hop_dong || '';
+    const ngayGD = new Date(activeDetail.thoi_gian_giao_dich || activeDetail.ngay_tao).toLocaleString('vi-VN');
+
+    // Xây dựng chuỷ ký
+    const sig = store.signature || {};
+    const chuKyText = [
+      sig.ten_cua_hang || '',
+      sig.dia_chi ? 'DC: ' + sig.dia_chi : '',
+      sig.sdt1 ? 'SĐT: ' + sig.sdt1 : '',
+      sig.zalo ? 'Zalo: ' + sig.zalo : '',
+    ].filter(Boolean).join('\n');
+
+    const createPane = (lienName) => `
+    <div class="invoice-pane">
+      <div class="lien-badge">${lienName}</div>
+      <div class="title">BIÊN LAI GIAO DỊCH</div>
+      <div class="dynamic-title">DV: ${store.selectedService?.ten_danh_muc || ''}</div>
+
+      <div class="section-title">⌨ THÔNG TIN THANH TOÁN</div>
+      <div class="data-row"><div class="data-label">- Đơn vị DV</div><div class="data-value">: ${tenDonVi}</div></div>
+      <div class="data-row"><div class="data-label">- Mã TT</div><div class="data-value">: ${maTaiKhoan}</div></div>
+      <div class="data-row"><div class="data-label">- Chủ HĐ</div><div class="data-value">: ${chuTaiKhoan}</div></div>
+
+      <div class="section-title">⌨ THÔNG TIN NGƯỜI GỎI</div>
+      <div class="data-row"><div class="data-label">- Họ và tên</div><div class="data-value">: ${activeCust?.ho_va_ten || 'Khách lẻ'}</div></div>
+      <div class="data-row"><div class="data-label">- Sđt</div><div class="data-value">: ${activeCust?.so_dien_thoai || ''}</div></div>
+
+      <div class="section-title">⌨ THÔNG TIN CHI TIỬT</div>
+      <div class="data-row"><div class="data-label">- Nội dung</div><div class="data-value">: ${activeDetail.noi_dung || ''}</div></div>
+      <div class="data-row"><div class="data-label">- Số tiền</div><div class="data-value">: ${fmtVND(activeDetail.so_tien)}</div></div>
+      <div class="data-row"><div class="data-label">- Phí DV</div><div class="data-value">: ${fmtVND(activeDetail.phi_dich_vu)}</div></div>
+      ${parseFloat(activeDetail.chiet_khau) > 0 ? `<div class="data-row"><div class="data-label">- Giảm</div><div class="data-value">: -${fmtVND(activeDetail.so_tien_giam)}</div></div>` : ''}
+      <div class="data-row total-row"><div class="data-label">- Tổng</div><div class="data-value">: ${fmtVND(activeDetail.so_tien_di)}</div></div>
+      <div class="data-row"><div class="data-label">- Ngày GD</div><div class="data-value">: ${ngayGD}</div></div>
+
+      <div style="flex-grow:1"></div>
+
+      <div class="sign-block">
+        <div class="sign-row">
+          <div class="sign-col"><b>Khách hàng</b><i>(İKý, ghi rõ)</i></div>
+          <div class="sign-col"><b>Nhân viên</b><i>(İKý, ghi rõ)</i></div>
+        </div>
+      </div>
+
+      <div class="contact-box">${chuKyText}</div>
+
+      <div class="service-box">
+        <b>CUNG CẤP DỊCH VỤ</b>
+        <div class="srv-table">
+          <div class="srv-row">
+            <div class="srv-cell">- Thu hộ trả góp, điện, nước</div>
+            <div class="srv-cell">- Trả trước – trả sau</div>
+          </div>
+          <div class="srv-row">
+            <div class="srv-cell">- Chuyển tiền, nhận tiền mặt</div>
+            <div class="srv-cell">- Internet, camera, định vị</div>
+          </div>
+          <div class="srv-row">
+            <div class="srv-cell">- Cấp lại sim Viettel</div>
+            <div class="srv-cell">- Sim số đẹp, 4G–5G</div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-ad">BẢO HIỂM XE MÁY 2 NĂM 100K</div>
+    </div>`;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;width:0;height:0;border:0';
+    document.body.appendChild(iframe);
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Biên lai 2 liên Nửa A4</title>
+    <style>
+      @page { size: A4 portrait; margin: 0; }
+      body { margin:0; font-family: Arial, Helvetica, sans-serif; color:#000; box-sizing:border-box; }
+      .page-container { width:210mm; height:148.5mm; display:flex; flex-direction:row; border-bottom:1px dashed #bbb; }
+      .invoice-pane { width:50%; height:100%; box-sizing:border-box; padding:5mm 8mm; position:relative; display:flex; flex-direction:column; }
+      .invoice-pane:first-child { border-right:1px dashed #666; }
+      .lien-badge { text-align:center; font-size:11px; font-weight:bold; text-transform:uppercase; margin-bottom:4px; color:#555; }
+      .title { text-align:center; font-size:16px; font-weight:bold; text-transform:uppercase; margin-bottom:6px; }
+      .dynamic-title { font-size:13px; font-weight:bold; margin-bottom:6px; text-transform:uppercase; color:#222; border-bottom:1px solid #000; padding-bottom:3px; }
+      .section-title { font-weight:bold; font-size:12px; margin-top:5px; margin-bottom:2px; }
+      .data-row { display:flex; font-size:11px; line-height:1.4; }
+      .data-label { width:65px; flex-shrink:0; }
+      .data-value { font-weight:bold; flex-grow:1; }
+      .total-row .data-value { font-size:12px; }
+      .sign-block { width:100%; margin-bottom:6px; }
+      .sign-row { display:flex; justify-content:space-around; }
+      .sign-col { text-align:center; }
+      .sign-col b { display:block; font-size:11.5px; margin-bottom:1px; }
+      .sign-col i { font-size:10px; color:#555; font-weight:normal; }
+      .contact-box { font-size:10.5px; line-height:1.35; margin-bottom:6px; border-top:1px dashed #ccc; padding-top:4px; white-space:pre-wrap; }
+      .service-box { border:1px solid #000; padding:4px; margin-bottom:6px; border-radius:3px; }
+      .service-box b { display:block; text-align:center; font-size:11px; margin-bottom:3px; }
+      .srv-table { display:table; width:100%; font-size:10px; line-height:1.3; }
+      .srv-row { display:table-row; }
+      .srv-cell { display:table-cell; width:50%; }
+      .footer-ad { text-align:center; font-weight:bold; font-size:12px; }
+    </style></head><body>
+      <div class="page-container">
+        ${createPane('Liên 1: Giao khách hàng')}
+        ${createPane('Liên 2: Cửa hàng lưu')}
+      </div>
+    </body></html>`);
+    doc.close();
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+    setTimeout(() => iframe.remove(), 1500);
+  };
+
   // Tạo hồ sơ dịch vụ chính thức
   const handleCreateServiceFile = async () => {
     if (!newFilePayload.id_khach_hang || !newFilePayload.id_ma_hop_dong) {
@@ -674,7 +799,7 @@ export default function Transactions() {
                   <span className="text-[9px] text-gray-400 font-extrabold leading-tight uppercase">TẠO QR THANH TOÁN</span>
                 </button>
                 <button 
-                  onClick={() => setShowBillModal(true)}
+                  onClick={handlePrintInvoice}
                   className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-violet-500/40 hover:bg-[#131b33]/40 transition-all group"
                 >
                   <div className="w-8 h-8 rounded-full bg-violet-600/10 text-violet-400 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-all"><PrinterOutlined /></div>
@@ -1228,63 +1353,7 @@ export default function Transactions() {
         )}
       </Modal>
 
-      {/* ============================================================
-         MODAL 5: XEM TRƯỚC BẢN IN HÓA ĐƠN POS BÁN LẺ
-         ============================================================ */}
-      <Modal
-        title={<span className="font-extrabold text-white text-base">🖨️ XEM TRƯỚC BẢN IN HÓA ĐƠN POS BÁN LẺ</span>}
-        open={showBillModal}
-        onCancel={() => setShowBillModal(false)}
-        footer={[
-          <Button key="close" onClick={() => setShowBillModal(false)}>Đóng</Button>,
-          <Button key="print" type="primary" onClick={() => window.print()} className="bg-violet-600 border-none font-bold rounded">Thực hiện In</Button>
-        ]}
-        className="glass-modal"
-      >
-        {activeDetail && (
-          <div className="print-area text-black font-mono p-4 text-xs leading-relaxed bg-white rounded-lg shadow">
-            <div className="text-center border-b border-dashed border-gray-400 pb-4 mb-4">
-              <h2 className="text-base font-bold uppercase">{store.signature.ten_cua_hang || 'AURA FINTECH'}</h2>
-              <p>Địa chỉ: {store.signature.dia_chi}</p>
-              <p>Hotline: {store.signature.sdt1}</p>
-            </div>
-            
-            <h3 className="text-center font-bold text-sm mb-4 tracking-wider uppercase">BIÊN NHẬN GIAO DỊCH POS</h3>
-            <p><strong>Khách hàng:</strong> {activeCust?.ho_va_ten || 'Khách lẻ'}</p>
-            <p><strong>Điện thoại:</strong> {activeCust?.so_dien_thoai || '-'}</p>
-            <p><strong>Mã hợp đồng:</strong> {activeHd?.ma_hop_dong || '-'}</p>
-            <p><strong>Nội dung:</strong> {activeDetail.noi_dung}</p>
-            <p><strong>Thời gian lập:</strong> {new Date(activeDetail.thoi_gian_giao_dich || activeDetail.ngay_tao).toLocaleString('vi-VN')}</p>
-            <p>------------------------------------------</p>
-            
-            <div className="flex justify-between font-bold text-sm mt-3">
-              <span>SỐ TIỀN GD:</span>
-              <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien)}</span>
-            </div>
-            <div className="flex justify-between text-xs mt-1">
-              <span>PHÍ DỊCH VỤ:</span>
-              <span>+{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.phi_dich_vu)}</span>
-            </div>
-            {parseFloat(activeDetail.chiet_khau) > 0 && (
-              <div className="flex justify-between text-xs mt-1">
-                <span>GIẢM CHIẾT KHẤU:</span>
-                <span>-{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien_giam)}</span>
-              </div>
-            )}
-            
-            <div className="flex justify-between font-black text-sm border-t border-gray-400 mt-2 pt-2 text-red-600">
-              <span>TỔNG CỘNG THU:</span>
-              <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien_di)}</span>
-            </div>
-            
-            <p className="mt-4">------------------------------------------</p>
-            <div className="text-center mt-6">
-              <p className="font-bold">{store.signature.ten_chu_ky || 'Người thực hiện giao dịch'}</p>
-              <p className="text-[9px] text-gray-500 mt-8 italic">(Đã ký điện tử bảo mật hệ thống AURA)</p>
-            </div>
-          </div>
-        )}
-      </Modal>
+      {/* MODAL 5: Đã thay thế bằng in trực tiếp - không còn modal xem trước */}
 
       {/* POS TRANSACTION DRAWER */}
       {/* ============================================================
