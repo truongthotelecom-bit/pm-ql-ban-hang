@@ -37,8 +37,8 @@ export default function Transactions() {
   const [showEditCustModal, setShowEditCustModal] = useState(false);
   const [showCustHistoryModal, setShowCustHistoryModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
-  const [showBillModal, setShowBillModal] = useState(false);
   const [showEditFileModal, setShowEditFileModal] = useState(false);
+  const [showEditContractModal, setShowEditContractModal] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Mobile: bottom sheet action picker
@@ -55,8 +55,8 @@ export default function Transactions() {
     noi_dung: '',
     ghi_chu: ''
   });
-  
   const [editFilePayload, setEditFilePayload] = useState({});
+  const [editContractPayload, setEditContractPayload] = useState({});
   // Inline Creation Toggle inside Modal
   const [addNewContractInline, setAddNewContractInline] = useState(false);
   const [newContractPayload, setNewContractPayload] = useState({
@@ -189,6 +189,30 @@ export default function Transactions() {
     if (activeFile) {
       setEditFilePayload(activeFile);
       setShowEditFileModal(true);
+    }
+  };
+
+  // Sửa mã hợp đồng
+  const handleEditContractSubmit = async () => {
+    const activeFile = store.selectedServiceFile;
+    const activeHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong);
+    if (!activeHd) return;
+    
+    const data = await store.updateContract(activeHd.id_ma_hop_dong, editContractPayload);
+    if (data) {
+      message.success('Đã cập nhật mã hợp đồng thành công!');
+      setShowEditContractModal(false);
+    }
+  };
+
+  const openEditContractModal = () => {
+    const activeFile = store.selectedServiceFile;
+    const activeHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong);
+    if (activeHd) {
+      setEditContractPayload(activeHd);
+      setShowEditContractModal(true);
+    } else {
+      message.error('Hồ sơ này chưa gắn với mã hợp đồng nào!');
     }
   };
 
@@ -554,6 +578,14 @@ export default function Transactions() {
                     className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400"
                   >
                     Sửa thông tin khách
+                  </Button>
+                  <Button 
+                    size="small" 
+                    icon={<EditOutlined />} 
+                    onClick={openEditContractModal}
+                    className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400"
+                  >
+                    Sửa hợp đồng
                   </Button>
                   <Button 
                     size="small" 
@@ -1246,6 +1278,67 @@ export default function Transactions() {
       </Modal>
 
       {/* POS TRANSACTION DRAWER */}
+      {/* ============================================================
+         MODAL 7: CHỈNH SỬA MÃ HỢP ĐỒNG
+         ============================================================ */}
+      <Modal
+        title={<span className="font-extrabold text-white text-base">✏️ CHỈNH SỬA MÃ HỢP ĐỒNG</span>}
+        open={showEditContractModal}
+        onCancel={() => setShowEditContractModal(false)}
+        footer={null}
+        className="glass-modal"
+      >
+        <div className="p-4 border border-white/5 rounded-xl bg-white/[0.01] space-y-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-400">Mã hợp đồng</label>
+            <Input 
+              value={editContractPayload.ma_hop_dong || ''} 
+              onChange={e => setEditContractPayload({...editContractPayload, ma_hop_dong: e.target.value})}
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-400">Chủ hợp đồng</label>
+            <Input 
+              value={editContractPayload.chu_hop_dong || ''} 
+              onChange={e => setEditContractPayload({...editContractPayload, chu_hop_dong: e.target.value})}
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-400">Phân hệ dịch vụ / Ngân hàng</label>
+            <Select
+              className="w-full"
+              showSearch
+              optionFilterProp="children"
+              value={editContractPayload.id_danh_muc_dich_vu || undefined}
+              onChange={v => setEditContractPayload({...editContractPayload, id_danh_muc_dich_vu: v})}
+              placeholder="Chọn ngân hàng / nhà mạng"
+            >
+              {store.banks?.map(b => (
+                <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>{b.ten_viet_tat || b.ten_dich_vu}</Option>
+              ))}
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-400">Ghi chú thêm</label>
+            <Input.TextArea 
+              value={editContractPayload.ghi_chu || ''} 
+              onChange={e => setEditContractPayload({...editContractPayload, ghi_chu: e.target.value})}
+              className="bg-white/5 border-white/10 text-white"
+              rows={2}
+            />
+          </div>
+          <Button 
+            type="primary" 
+            onClick={handleEditContractSubmit} 
+            className="w-full bg-violet-600 border-none font-bold mt-2"
+          >
+            Lưu thay đổi
+          </Button>
+        </div>
+      </Modal>
+
       <TransactionDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </div>
   );

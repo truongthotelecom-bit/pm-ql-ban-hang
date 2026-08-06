@@ -146,6 +146,25 @@ const useAppStore = create((set, get) => ({
     }
   },
 
+  updateContract: async (contractId, contract) => {
+    try {
+      const { data, error } = await supabase
+        .from('ma_hop_dong')
+        .update(contract)
+        .eq('id_ma_hop_dong', contractId)
+        .select()
+        .single();
+      if (!error && data) {
+        set(state => ({
+          ma_hop_dong: state.ma_hop_dong.map(c => c.id_ma_hop_dong === contractId ? data : c)
+        }));
+        return data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  },
+
   // Chọn dịch vụ
   selectService: async (service) => {
     set({ selectedService: service, activeTab: 'transactions' });
