@@ -1090,6 +1090,36 @@ export default function Transactions() {
       >
         <div className="p-4 border border-white/5 rounded-xl bg-white/[0.01] space-y-4">
           <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-400">Khách Hàng</label>
+            <Select
+              className="w-full"
+              showSearch
+              optionFilterProp="children"
+              value={editFilePayload.id_khach_hang || undefined}
+              onChange={v => setEditFilePayload({...editFilePayload, id_khach_hang: v})}
+              placeholder="Chọn khách hàng"
+            >
+              {store.customers?.map(c => (
+                <Option key={c.id_khach_hang} value={c.id_khach_hang}>{c.ho_va_ten} ({c.so_dien_thoai})</Option>
+              ))}
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-400">Mã Số Hợp Đồng</label>
+            <Select
+              className="w-full"
+              showSearch
+              optionFilterProp="children"
+              value={editFilePayload.id_ma_hop_dong || undefined}
+              onChange={v => setEditFilePayload({...editFilePayload, id_ma_hop_dong: v})}
+              placeholder="Chọn mã số hợp đồng"
+            >
+              {store.ma_hop_dong?.map(h => (
+                <Option key={h.id_ma_hop_dong} value={h.id_ma_hop_dong}>{h.ma_hop_dong} - {h.chu_hop_dong}</Option>
+              ))}
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-gray-400">Nội dung hồ sơ</label>
             <Input 
               value={editFilePayload.noi_dung || ''} 
