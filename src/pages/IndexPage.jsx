@@ -5,8 +5,9 @@ import useAuthStore from '../store/useAuthStore';
 import Dashboard from './Dashboard';
 import ServiceMenu from './ServiceMenu';
 import Transactions from './Transactions';
+import TransactionHistory from './TransactionHistory';
 import { Button, Input, message, Dropdown } from 'antd';
-import { HomeOutlined, ShoppingCartOutlined, SettingOutlined, UserOutlined, LogoutOutlined, ControlOutlined, AppstoreOutlined } from '@ant-design/icons';
+import { HomeOutlined, ShoppingCartOutlined, SettingOutlined, UserOutlined, LogoutOutlined, ControlOutlined, AppstoreOutlined, CalendarOutlined } from '@ant-design/icons';
 import { Sparkles } from 'lucide-react';
 import TransactionDrawer from '../components/TransactionDrawer';
 
@@ -102,6 +103,12 @@ export default function IndexPage() {
             <ShoppingCartOutlined style={{ fontSize: '16px' }} /> Live Feed Giao dịch
           </button>
           <button
+            onClick={() => store.setActiveTab('history')}
+            className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${store.activeTab === 'history' ? 'bg-violet-600/10 border border-violet-500/25 text-violet-400 shadow-md shadow-violet-600/5' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'}`}
+          >
+            <CalendarOutlined style={{ fontSize: '16px' }} /> Lịch sử Giao dịch
+          </button>
+          <button
             onClick={() => store.setActiveTab('customers')}
             className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${store.activeTab === 'customers' ? 'bg-violet-600/10 border border-violet-500/25 text-violet-400 shadow-md shadow-violet-600/5' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'}`}
           >
@@ -150,6 +157,7 @@ export default function IndexPage() {
           {store.activeTab === 'dashboard' && <Dashboard onNewTransaction={() => setDrawerOpen(true)} />}
           {store.activeTab === 'services' && <ServiceMenu />}
           {store.activeTab === 'transactions' && <Transactions />}
+          {store.activeTab === 'history' && <TransactionHistory />}
           
           {store.activeTab === 'customers' && (
             <div className="p-6 rounded-2xl glass-panel border border-white/10 space-y-4">

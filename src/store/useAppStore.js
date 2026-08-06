@@ -29,6 +29,7 @@ const useAppStore = create((set, get) => ({
   transactionDetails: [],
   selectedDetail: null,
   allTransactions: [],
+  allServiceFiles: [],
 
   // Setters
   setActiveTab: (tab) => set({ activeTab: tab }),
@@ -191,7 +192,7 @@ const useAppStore = create((set, get) => ({
         ? (filesData || []).filter(f => f.id_loai_dich_vu === serviceId)
         : (filesData || []);
 
-      set({ serviceFiles: filtered, allTransactions: allTxData || [] });
+      set({ serviceFiles: filtered, allServiceFiles: filesData || [], allTransactions: allTxData || [] });
 
       if (filtered.length > 0) {
         const firstFile = filtered[0];
