@@ -134,7 +134,7 @@ export default function TransactionDrawer({ open, onClose }) {
 
   return (
     <Drawer
-      title={<div className="text-gray-100 font-extrabold text-lg">✨ LẬP PHIẾU DÒNG TIỀN POS CHI TIẾT</div>}
+      title={<div className="text-gray-100 font-extrabold text-lg uppercase">✨ DỊCH VỤ {store.selectedService?.ten_danh_muc || 'CHUYỂN TIỀN'}</div>}
       width={600}
       onClose={onClose}
       open={open}
@@ -186,7 +186,7 @@ export default function TransactionDrawer({ open, onClose }) {
         </Tabs.TabPane>
 
         {/* TAB 2: NGHIỆP VỤ TÀI CHÍNH */}
-        <Tabs.TabPane tab={<span><DollarOutlined /> Dòng tiền</span>} key="2">
+        <Tabs.TabPane tab={<span><DollarOutlined /> Tạo giao dịch</span>} key="2">
           <div className="pt-3 space-y-4">
             <MoneyTransferForm
               value={gdPayload}
