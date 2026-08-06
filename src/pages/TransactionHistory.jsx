@@ -1,16 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { Select, DatePicker, Empty, Tag, Button } from 'antd';
-import { FilterOutlined, CalendarOutlined, DollarOutlined, RetweetOutlined, CreditCardOutlined, UserOutlined, SearchOutlined } from '@ant-design/icons';
-import dayjs from 'dayjs';
-import isBetween from 'dayjs/plugin/isBetween';
+import { Select, DatePicker, Empty } from 'antd';
+import { FilterOutlined, CreditCardOutlined } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
-
-dayjs.extend(isBetween);
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const DATE_RANGES = {
+  ALL: 'all',
   TODAY: 'today',
   YESTERDAY: 'yesterday',
   THIS_WEEK: 'this_week',
@@ -22,131 +19,176 @@ const DATE_RANGES = {
   CUSTOM: 'custom'
 };
 
+function getDateRange(type) {
+  const now = new Date();
+  const startOfDay = (d) => { const r = new Date(d); r.setHours(0, 0, 0, 0); return r; };
+  const endOfDay = (d) => { const r = new Date(d); r.setHours(23, 59, 59, 999); return r; };
+
+  switch (type) {
+    case DATE_RANGES.TODAY:
+      return [startOfDay(now), endOfDay(now)];
+    case DATE_RANGES.YESTERDAY: {
+      const d = new Date(now); d.setDate(d.getDate() - 1);
+      return [startOfDay(d), endOfDay(d)];
+    }
+    case DATE_RANGES.THIS_WEEK: {
+      const d = new Date(now);
+      const day = d.getDay() || 7;
+      d.setDate(d.getDate() - day + 1);
+      return [startOfDay(d), endOfDay(now)];
+    }
+    case DATE_RANGES.LAST_WEEK: {
+      const d = new Date(now);
+      const day = d.getDay() || 7;
+      const startThis = new Date(d); startThis.setDate(d.getDate() - day + 1);
+      const end = new Date(startThis); end.setDate(startThis.getDate() - 1);
+      const start = new Date(end); start.setDate(end.getDate() - 6);
+      return [startOfDay(start), endOfDay(end)];
+    }
+    case DATE_RANGES.THIS_MONTH: {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      return [startOfDay(start), endOfDay(end)];
+    }
+    case DATE_RANGES.LAST_MONTH: {
+      const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const end = new Date(now.getFullYear(), now.getMonth(), 0);
+      return [startOfDay(start), endOfDay(end)];
+    }
+    case DATE_RANGES.THIS_YEAR: {
+      const start = new Date(now.getFullYear(), 0, 1);
+      const end = new Date(now.getFullYear(), 11, 31);
+      return [startOfDay(start), endOfDay(end)];
+    }
+    case DATE_RANGES.LAST_YEAR: {
+      const start = new Date(now.getFullYear() - 1, 0, 1);
+      const end = new Date(now.getFullYear() - 1, 11, 31);
+      return [startOfDay(start), endOfDay(end)];
+    }
+    default:
+      return null;
+  }
+}
+
+function isInRange(txDate, range) {
+  const d = new Date(txDate);
+  return d >= range[0] && d <= range[1];
+}
+
+function formatCurrency(val) {
+  if (!val && val !== 0) return '0 ₫';
+  return Number(val).toLocaleString('vi-VN') + ' ₫';
+}
+
 export default function TransactionHistory() {
   const store = useAppStore();
   const [filters, setFilters] = useState({
     nhomMenuId: null,
     loaiDichVuId: null,
-    danhMucId: null, // Ngân hàng/nhà mạng
+    danhMucId: null,
     khachHangId: null,
     trangThaiId: null,
     dateRangeType: DATE_RANGES.TODAY,
     customDateRange: null
   });
 
-  // --- HELPER QUERIES ---
-  const getDateRange = (type) => {
-    const now = dayjs();
-    switch (type) {
-      case DATE_RANGES.TODAY:
-        return [now.startOf('day'), now.endOf('day')];
-      case DATE_RANGES.YESTERDAY:
-        const yest = now.subtract(1, 'day');
-        return [yest.startOf('day'), yest.endOf('day')];
-      case DATE_RANGES.THIS_WEEK:
-        return [now.startOf('week'), now.endOf('week')];
-      case DATE_RANGES.LAST_WEEK:
-        const lastWeek = now.subtract(1, 'week');
-        return [lastWeek.startOf('week'), lastWeek.endOf('week')];
-      case DATE_RANGES.THIS_MONTH:
-        return [now.startOf('month'), now.endOf('month')];
-      case DATE_RANGES.LAST_MONTH:
-        const lastMonth = now.subtract(1, 'month');
-        return [lastMonth.startOf('month'), lastMonth.endOf('month')];
-      case DATE_RANGES.THIS_YEAR:
-        return [now.startOf('year'), now.endOf('year')];
-      case DATE_RANGES.LAST_YEAR:
-        const lastYear = now.subtract(1, 'year');
-        return [lastYear.startOf('year'), lastYear.endOf('year')];
-      default:
-        return null;
-    }
-  };
+  // Danh sách Loại Dịch Vụ lọc theo Nhóm Menu đã chọn
+  const filteredServices = useMemo(() => {
+    if (!filters.nhomMenuId) return store.services || [];
+    return (store.services || []).filter(s => s.id_nhom === filters.nhomMenuId);
+  }, [store.services, filters.nhomMenuId]);
 
-  const formatCurrency = (val) => {
-    if (!val) return '0 ₫';
-    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' ₫';
-  };
+  // Danh sách Danh mục (ngân hàng) lọc theo Loại Dịch Vụ đã chọn
+  const filteredBanks = useMemo(() => {
+    if (!filters.loaiDichVuId) return store.banks || [];
+    return (store.banks || []).filter(b => b.id_loai_dich_vu === filters.loaiDichVuId);
+  }, [store.banks, filters.loaiDichVuId]);
 
-  // --- LỌC DỮ LIỆU ---
+  // Lọc danh sách giao dịch
   const filteredTransactions = useMemo(() => {
-    return store.allTransactions.filter(tx => {
-      // 1. Tìm File liên kết
-      const file = store.allServiceFiles?.find(f => f.id_ho_so_dich_vu === tx.id_ho_so_dich_vu);
-      if (!file) return false;
+    const txs = store.allTransactions || [];
+    const files = store.allServiceFiles || [];
+    const contracts = store.ma_hop_dong || [];
+    const customers = store.customers || [];
+    const banks = store.banks || [];
+    const services = store.services || [];
 
-      // 2. Tìm Contract, Customer, Category, Service
-      const contract = store.ma_hop_dong?.find(c => c.id_ma_hop_dong === file.id_ma_hop_dong);
-      const customer = store.customers?.find(c => c.id_khach_hang === file.id_khach_hang);
-      const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === contract?.id_danh_muc_dich_vu);
-      const service = store.services?.find(s => s.id_loai_dich_vu === file.id_loai_dich_vu);
-      const menuGroup = store.menuGroups?.find(m => m.id_nhom_menu === service?.id_nhom);
+    const result = [];
 
-      // --- ÁP DỤNG BỘ LỌC ---
-      if (filters.nhomMenuId && menuGroup?.id_nhom_menu !== filters.nhomMenuId) return false;
-      if (filters.loaiDichVuId && service?.id_loai_dich_vu !== filters.loaiDichVuId) return false;
-      if (filters.danhMucId && bank?.id_danh_muc_dich_vu !== filters.danhMucId) return false;
-      if (filters.khachHangId && customer?.id_khach_hang !== filters.khachHangId) return false;
-      if (filters.trangThaiId && tx.id_trang_thai !== filters.trangThaiId) return false;
+    for (const tx of txs) {
+      const file = files.find(f => f.id_ho_so_dich_vu === tx.id_ho_so_dich_vu);
+      if (!file) continue;
 
-      // Date Range Filter
-      if (filters.dateRangeType) {
-        const txDate = dayjs(tx.thoi_gian_giao_dich || tx.ngay_tao);
-        if (filters.dateRangeType === DATE_RANGES.CUSTOM && filters.customDateRange) {
-          if (!txDate.isBetween(filters.customDateRange[0], filters.customDateRange[1], 'day', '[]')) {
-            return false;
-          }
-        } else if (filters.dateRangeType !== DATE_RANGES.CUSTOM) {
-          const range = getDateRange(filters.dateRangeType);
-          if (range && !txDate.isBetween(range[0], range[1], 'day', '[]')) {
-            return false;
+      const contract = contracts.find(c => c.id_ma_hop_dong === file.id_ma_hop_dong);
+      const customer = customers.find(c => c.id_khach_hang === file.id_khach_hang);
+      const bank = banks.find(b => b.id_danh_muc_dich_vu === contract?.id_danh_muc_dich_vu);
+      const service = services.find(s => s.id_loai_dich_vu === file.id_loai_dich_vu);
+
+      // Lọc Nhóm Menu (dùng id_nhom là PK của sys_nhom_menu)
+      if (filters.nhomMenuId && service?.id_nhom !== filters.nhomMenuId) continue;
+      // Lọc Loại Dịch Vụ
+      if (filters.loaiDichVuId && service?.id_loai_dich_vu !== filters.loaiDichVuId) continue;
+      // Lọc Danh mục (NH/Nhà mạng) - dùng id_danh_muc_dich_vu từ bank của file
+      if (filters.danhMucId && bank?.id_danh_muc_dich_vu !== filters.danhMucId) continue;
+      // Lọc Khách hàng
+      if (filters.khachHangId && customer?.id_khach_hang !== filters.khachHangId) continue;
+      // Lọc Trạng thái
+      if (filters.trangThaiId && tx.id_trang_thai !== filters.trangThaiId) continue;
+
+      // Lọc ngày tháng
+      if (filters.dateRangeType !== DATE_RANGES.ALL) {
+        const txDateStr = tx.thoi_gian_giao_dich || tx.ngay_tao;
+        if (txDateStr) {
+          if (filters.dateRangeType === DATE_RANGES.CUSTOM && filters.customDateRange) {
+            const from = filters.customDateRange[0]?.toDate?.() || new Date(filters.customDateRange[0]);
+            const to = filters.customDateRange[1]?.toDate?.() || new Date(filters.customDateRange[1]);
+            from.setHours(0, 0, 0, 0); to.setHours(23, 59, 59, 999);
+            if (!isInRange(txDateStr, [from, to])) continue;
+          } else if (filters.dateRangeType !== DATE_RANGES.CUSTOM) {
+            const range = getDateRange(filters.dateRangeType);
+            if (range && !isInRange(txDateStr, range)) continue;
           }
         }
       }
 
-      return true;
-    }).map(tx => {
-      // Map all related data for rendering
-      const file = store.allServiceFiles?.find(f => f.id_ho_so_dich_vu === tx.id_ho_so_dich_vu);
-      const contract = store.ma_hop_dong?.find(c => c.id_ma_hop_dong === file?.id_ma_hop_dong);
-      const customer = store.customers?.find(c => c.id_khach_hang === file?.id_khach_hang);
-      const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === contract?.id_danh_muc_dich_vu);
-      const status = store.categories.find(c => c.id_trang_thai === tx.id_trang_thai) || { ten_trang_thai: 'Đang xử lý', icon: '⏳' };
-      
-      return { tx, file, contract, customer, bank, status };
-    });
-  }, [store.allTransactions, store.allServiceFiles, filters]);
+      const status = store.categories.find(c => c.id_trang_thai === tx.id_trang_thai)
+        || { ten_trang_thai: 'Chờ giao dịch', icon: '⏳' };
 
-  // Totals
-  const totalAmount = filteredTransactions.reduce((sum, item) => sum + (item.tx.so_tien_di || 0), 0);
-  const totalFee = filteredTransactions.reduce((sum, item) => sum + (item.tx.phi_dich_vu || 0), 0);
+      result.push({ tx, file, contract, customer, bank, status, service });
+    }
+
+    return result;
+  }, [store.allTransactions, store.allServiceFiles, store.ma_hop_dong, store.customers, store.banks, store.services, store.categories, filters]);
+
+  const totalAmount = filteredTransactions.reduce((s, i) => s + (i.tx.so_tien_di || 0), 0);
+  const totalFee = filteredTransactions.reduce((s, i) => s + (i.tx.phi_dich_vu || 0), 0);
+
+  const fmtDate = (d) => {
+    if (!d) return '---';
+    return new Date(d).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
 
   return (
     <div className="flex flex-col gap-6">
-      
+
       {/* FILTER BAR */}
-      <div className="glass-panel rounded-2xl p-4 lg:p-6 border border-white/5 space-y-4 shadow-xl">
-        <div className="flex items-center gap-2 mb-2">
+      <div className="glass-panel rounded-2xl p-4 lg:p-6 border border-white/5 shadow-xl">
+        <div className="flex items-center gap-2 mb-4">
           <FilterOutlined className="text-violet-400" />
           <h3 className="text-white font-extrabold uppercase tracking-wider text-sm">Bộ lọc tìm kiếm</h3>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
           {/* Thời gian */}
           <div className="space-y-1 lg:col-span-2">
             <label className="text-[10px] text-gray-400 font-bold uppercase block">Giai đoạn</label>
             <div className="flex gap-2">
-              <Select 
-                value={filters.dateRangeType} 
-                onChange={v => {
-                  if (v !== DATE_RANGES.CUSTOM) {
-                    setFilters({...filters, dateRangeType: v, customDateRange: null});
-                  } else {
-                    setFilters({...filters, dateRangeType: v});
-                  }
-                }}
-                className="w-[140px] shrink-0 !bg-white/5"
+              <Select
+                value={filters.dateRangeType}
+                onChange={v => setFilters({ ...filters, dateRangeType: v, customDateRange: null })}
+                className="w-[150px] shrink-0"
               >
+                <Option value={DATE_RANGES.ALL}>Tất cả</Option>
                 <Option value={DATE_RANGES.TODAY}>Hôm nay</Option>
                 <Option value={DATE_RANGES.YESTERDAY}>Hôm qua</Option>
                 <Option value={DATE_RANGES.THIS_WEEK}>Tuần này</Option>
@@ -157,95 +199,103 @@ export default function TransactionHistory() {
                 <Option value={DATE_RANGES.LAST_YEAR}>Năm trước</Option>
                 <Option value={DATE_RANGES.CUSTOM}>Tùy chỉnh...</Option>
               </Select>
-              
-              <RangePicker 
-                className="w-full !bg-white/5 !border-white/10 !text-white" 
+              <RangePicker
+                className="flex-1"
                 placeholder={['Từ ngày', 'Đến ngày']}
                 format="DD/MM/YYYY"
                 value={filters.customDateRange}
-                onChange={dates => setFilters({...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates})}
+                onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
               />
             </div>
           </div>
 
-          {/* Nhóm Menu */}
+          {/* Trạng thái */}
           <div className="space-y-1">
-            <label className="text-[10px] text-gray-400 font-bold uppercase block">Nhóm Menu</label>
-            <Select 
-              allowClear 
-              placeholder="Tất cả" 
+            <label className="text-[10px] text-gray-400 font-bold uppercase block">Trạng thái GD</label>
+            <Select
+              allowClear
+              placeholder="Tất cả"
               className="w-full"
-              value={filters.nhomMenuId}
-              onChange={v => setFilters({...filters, nhomMenuId: v, loaiDichVuId: null, danhMucId: null})}
+              value={filters.trangThaiId}
+              onChange={v => setFilters({ ...filters, trangThaiId: v })}
             >
-              {store.menuGroups.map(m => <Option key={m.id_nhom} value={m.id_nhom}>{m.ten_nhom}</Option>)}
-            </Select>
-          </div>
-
-          {/* Loại Dịch Vụ */}
-          <div className="space-y-1">
-            <label className="text-[10px] text-gray-400 font-bold uppercase block">Loại Dịch Vụ</label>
-            <Select 
-              allowClear 
-              placeholder="Tất cả" 
-              className="w-full"
-              value={filters.loaiDichVuId}
-              onChange={v => setFilters({...filters, loaiDichVuId: v, danhMucId: null})}
-              disabled={!!filters.nhomMenuId && store.services.filter(s => s.id_nhom === filters.nhomMenuId).length === 0}
-            >
-              {store.services
-                .filter(s => !filters.nhomMenuId || s.id_nhom === filters.nhomMenuId)
-                .map(s => <Option key={s.id_loai_dich_vu} value={s.id_loai_dich_vu}>{s.ten_danh_muc}</Option>)}
-            </Select>
-          </div>
-
-          {/* Danh mục (Ngân hàng/Nhà mạng) */}
-          <div className="space-y-1">
-            <label className="text-[10px] text-gray-400 font-bold uppercase block">Danh mục (NH/Nhà mạng)</label>
-            <Select 
-              allowClear 
-              showSearch
-              placeholder="Tất cả" 
-              className="w-full"
-              value={filters.danhMucId}
-              onChange={v => setFilters({...filters, danhMucId: v})}
-              filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
-              disabled={!!filters.loaiDichVuId && store.banks.filter(b => b.id_loai_dich_vu === filters.loaiDichVuId).length === 0}
-            >
-              {store.banks
-                .filter(b => !filters.loaiDichVuId || b.id_loai_dich_vu === filters.loaiDichVuId)
-                .map(b => <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>{b.ten_viet_tat} - {b.ten_dich_vu}</Option>)}
+              {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
+                <Option key={s.id_trang_thai} value={s.id_trang_thai}>{s.icon} {s.ten_trang_thai}</Option>
+              ))}
             </Select>
           </div>
 
           {/* Người thanh toán */}
           <div className="space-y-1">
             <label className="text-[10px] text-gray-400 font-bold uppercase block">Người thanh toán</label>
-            <Select 
-              allowClear 
-              showSearch
-              placeholder="Tất cả khách hàng" 
+            <Select
+              allowClear showSearch
+              placeholder="Tất cả khách hàng"
               className="w-full"
               value={filters.khachHangId}
-              onChange={v => setFilters({...filters, khachHangId: v})}
+              onChange={v => setFilters({ ...filters, khachHangId: v })}
               filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
             >
-              {store.customers.map(c => <Option key={c.id_khach_hang} value={c.id_khach_hang}>{c.ho_va_ten} ({c.so_dien_thoai})</Option>)}
+              {(store.customers || []).map(c => (
+                <Option key={c.id_khach_hang} value={c.id_khach_hang}>{c.ho_va_ten} ({c.so_dien_thoai})</Option>
+              ))}
+            </Select>
+          </div>
+        </div>
+
+        {/* Row 2 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Nhóm Menu */}
+          <div className="space-y-1">
+            <label className="text-[10px] text-gray-400 font-bold uppercase block">Nhóm Menu</label>
+            <Select
+              allowClear
+              placeholder="Tất cả nhóm"
+              className="w-full"
+              value={filters.nhomMenuId}
+              onChange={v => setFilters({ ...filters, nhomMenuId: v, loaiDichVuId: null, danhMucId: null })}
+            >
+              {(store.menuGroups || []).map(m => (
+                <Option key={m.id_nhom} value={m.id_nhom}>{m.ten_nhom}</Option>
+              ))}
             </Select>
           </div>
 
-          {/* Trạng thái */}
+          {/* Loại Dịch Vụ - lọc theo Nhóm Menu */}
           <div className="space-y-1">
-            <label className="text-[10px] text-gray-400 font-bold uppercase block">Trạng thái GD</label>
-            <Select 
-              allowClear 
-              placeholder="Tất cả" 
+            <label className="text-[10px] text-gray-400 font-bold uppercase block">
+              Loại Dịch Vụ {filters.nhomMenuId && <span className="text-violet-400">(đã lọc)</span>}
+            </label>
+            <Select
+              allowClear
+              placeholder="Tất cả dịch vụ"
               className="w-full"
-              value={filters.trangThaiId}
-              onChange={v => setFilters({...filters, trangThaiId: v})}
+              value={filters.loaiDichVuId}
+              onChange={v => setFilters({ ...filters, loaiDichVuId: v, danhMucId: null })}
             >
-              {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
-                <Option key={s.id_trang_thai} value={s.id_trang_thai}>{s.icon} {s.ten_trang_thai}</Option>
+              {filteredServices.map(s => (
+                <Option key={s.id_loai_dich_vu} value={s.id_loai_dich_vu}>{s.ten_danh_muc}</Option>
+              ))}
+            </Select>
+          </div>
+
+          {/* Danh mục (NH/Nhà mạng) - lọc theo Loại DV */}
+          <div className="space-y-1">
+            <label className="text-[10px] text-gray-400 font-bold uppercase block">
+              Danh mục (NH/Nhà mạng) {filters.loaiDichVuId && <span className="text-violet-400">(đã lọc)</span>}
+            </label>
+            <Select
+              allowClear showSearch
+              placeholder="Tất cả"
+              className="w-full"
+              value={filters.danhMucId}
+              onChange={v => setFilters({ ...filters, danhMucId: v })}
+              filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
+            >
+              {filteredBanks.map(b => (
+                <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>
+                  {b.ten_viet_tat} - {b.ten_dich_vu}
+                </Option>
               ))}
             </Select>
           </div>
@@ -253,16 +303,16 @@ export default function TransactionHistory() {
       </div>
 
       {/* SUMMARY */}
-      <div className="flex gap-4">
-        <div className="bg-gradient-to-r from-violet-900/40 to-blue-900/40 border border-violet-500/30 rounded-xl p-4 flex-1">
-          <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tổng tiền giao dịch</div>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-gradient-to-r from-violet-900/40 to-blue-900/40 border border-violet-500/30 rounded-xl p-4">
+          <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tổng tiền GD</div>
           <div className="text-2xl font-black text-white">{formatCurrency(totalAmount)}</div>
         </div>
-        <div className="bg-gradient-to-r from-orange-900/40 to-red-900/40 border border-orange-500/30 rounded-xl p-4 flex-1">
-          <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tổng phí dịch vụ</div>
+        <div className="bg-gradient-to-r from-orange-900/40 to-red-900/40 border border-orange-500/30 rounded-xl p-4">
+          <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tổng phí DV</div>
           <div className="text-2xl font-black text-white">{formatCurrency(totalFee)}</div>
         </div>
-        <div className="bg-gradient-to-r from-green-900/40 to-teal-900/40 border border-green-500/30 rounded-xl p-4 flex-1 flex flex-col justify-center items-center">
+        <div className="bg-gradient-to-r from-green-900/40 to-teal-900/40 border border-green-500/30 rounded-xl p-4 flex flex-col items-center justify-center">
           <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Số lượng GD</div>
           <div className="text-2xl font-black text-white">{filteredTransactions.length}</div>
         </div>
@@ -272,31 +322,32 @@ export default function TransactionHistory() {
       <div className="space-y-3">
         {filteredTransactions.length === 0 ? (
           <div className="glass-panel p-10 flex flex-col items-center justify-center border border-white/5 rounded-2xl">
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<span className="text-gray-400">Không tìm thấy giao dịch nào</span>} />
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<span className="text-gray-400">Không tìm thấy giao dịch nào trong khoảng thời gian này</span>} />
           </div>
         ) : (
           filteredTransactions.map((item, index) => (
-            <div key={item.tx.id_chi_tiet_giao_dich || index} className="group relative overflow-hidden bg-[#0d1426] border border-white/10 rounded-2xl shadow-lg transition-all hover:border-violet-500/50 hover:shadow-violet-500/20">
-              
-              {/* Thẻ Giao dịch ngang (Layout kết hợp) */}
+            <div
+              key={item.tx.id_chi_tiet_giao_dich || index}
+              className="bg-[#0d1426] border border-white/10 rounded-2xl shadow-lg transition-all hover:border-violet-500/50 hover:shadow-violet-500/20"
+            >
               <div className="flex flex-col md:flex-row p-4 gap-4">
-                
-                {/* Trái: Thông tin Hồ sơ / Người nhận */}
+
+                {/* Trái: Logo + Mã HĐ + Chủ TK + KH */}
                 <div className="flex-1 border-b md:border-b-0 md:border-r border-white/5 pb-4 md:pb-0 md:pr-4 flex gap-4">
                   <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 p-2 flex items-center justify-center shrink-0">
-                    {item.bank?.logo ? (
-                      <img src={item.bank.logo} alt="bank" className="w-full h-full object-contain" />
-                    ) : (
-                      <CreditCardOutlined className="text-2xl text-gray-500" />
-                    )}
+                    {item.bank?.logo
+                      ? <img src={item.bank.logo} alt="bank" className="w-full h-full object-contain" />
+                      : <CreditCardOutlined className="text-2xl text-gray-500" />
+                    }
                   </div>
                   <div className="flex-1 flex flex-col justify-center">
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-start gap-2">
                       <div>
-                        <div className="text-lg font-black text-red-400 tracking-wide">{item.contract?.ma_hop_dong || '---'}</div>
+                        <div className="text-base font-black text-red-400 tracking-wide">{item.contract?.ma_hop_dong || '---'}</div>
                         <div className="text-sm text-gray-100 font-bold uppercase">{item.contract?.chu_hop_dong || '---'}</div>
+                        <div className="text-xs text-gray-400 mt-0.5">{item.bank?.ten_viet_tat ? `${item.bank.ten_viet_tat} - ${item.bank.ten_dich_vu}` : item.service?.ten_danh_muc || '---'}</div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right shrink-0">
                         <div className="text-sm font-bold text-gray-200">{item.customer?.ho_va_ten || 'Khách lẻ'}</div>
                         <div className="text-xs text-violet-400">{item.customer?.so_dien_thoai || ''}</div>
                       </div>
@@ -304,10 +355,10 @@ export default function TransactionHistory() {
                   </div>
                 </div>
 
-                {/* Phải: Thông tin Dòng tiền & Trạng thái */}
+                {/* Phải: Số tiền + Trạng thái + Nội dung */}
                 <div className="flex-1 flex flex-col justify-between pl-0 md:pl-2">
                   <div className="flex justify-between items-start mb-2">
-                    <div className="text-xs text-gray-400">{dayjs(item.tx.thoi_gian_giao_dich || item.tx.ngay_tao).format('HH:mm:ss DD/MM/YYYY')}</div>
+                    <div className="text-xs text-gray-400">{fmtDate(item.tx.thoi_gian_giao_dich || item.tx.ngay_tao)}</div>
                     <div className="text-right">
                       <div className="text-xl font-black text-violet-400">{formatCurrency(item.tx.so_tien_di)}</div>
                       {item.tx.phi_dich_vu > 0 && (
@@ -316,29 +367,21 @@ export default function TransactionHistory() {
                     </div>
                   </div>
                   <div className="flex justify-between items-end">
-                    <div className="text-sm text-gray-300 font-medium flex items-center gap-1.5 flex-1 pr-4">
-                      <div className="w-5 h-5 rounded-md bg-white/5 flex items-center justify-center shrink-0 border border-white/5">
-                        <span className="text-[10px]">📝</span>
-                      </div>
-                      <span className="uppercase text-xs truncate max-w-[200px] sm:max-w-[300px]" title={item.tx.noi_dung}>
-                        {item.tx.noi_dung || '---'}
-                      </span>
+                    <div className="text-xs text-gray-300 flex items-center gap-1.5 flex-1 pr-4 truncate">
+                      <span>📝</span>
+                      <span className="uppercase truncate" title={item.tx.noi_dung}>{item.tx.noi_dung || '---'}</span>
                     </div>
-                    <div className="shrink-0">
-                      <div className="px-3 py-1 rounded-lg bg-black/40 border border-white/5 text-[10px] font-bold text-gray-300 flex items-center gap-1.5 shadow-inner">
-                        <span className="text-sm">{item.status?.icon || '⏳'}</span>
-                        <span className="uppercase">{item.status?.ten_trang_thai || 'ĐANG XỬ LÝ'}</span>
-                      </div>
+                    <div className="shrink-0 px-3 py-1 rounded-lg bg-black/40 border border-white/5 text-[10px] font-bold text-gray-300 flex items-center gap-1.5">
+                      <span>{item.status?.icon || '⏳'}</span>
+                      <span className="uppercase">{item.status?.ten_trang_thai || 'CHỜ GIAO DỊCH'}</span>
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
           ))
         )}
       </div>
-
     </div>
   );
 }
