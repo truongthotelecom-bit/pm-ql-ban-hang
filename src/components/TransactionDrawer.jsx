@@ -19,6 +19,7 @@ export default function TransactionDrawer({ open, onClose }) {
   const activeFile = store.selectedServiceFile;
   const activeCust = activeFile ? store.customers.find(c => c.id_khach_hang === activeFile.id_khach_hang) : null;
   const activeHd = activeFile ? store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile.id_ma_hop_dong) : null;
+  const activeBank = activeHd ? store.banks.find(b => b.id_danh_muc_dich_vu === activeHd.id_danh_muc_dich_vu) : null;
 
   // Tự động gán thông minh (Nội dung) khi mở drawer
   useEffect(() => {
@@ -154,10 +155,15 @@ export default function TransactionDrawer({ open, onClose }) {
             
             {activeFile ? (
               <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-3 text-sm text-gray-300">
-                <p><strong>Khách hàng chủ thể:</strong> <span className="text-white font-extrabold">{activeCust?.ho_va_ten || 'Khách lẻ'}</span></p>
+                <p><strong>Khách hàng:</strong> <span className="text-white font-extrabold">{activeCust?.ho_va_ten || 'Khách lẻ'}</span></p>
                 <p><strong>Số điện thoại:</strong> {activeCust?.so_dien_thoai || 'Chưa có'}</p>
                 <p><strong>Địa chỉ cư trú:</strong> {activeCust?.dia_chi || 'Chưa cập nhật'}</p>
-                <p><strong>Mã hợp đồng / Số TK nhận:</strong> <span className="text-red-400 font-extrabold">{activeHd?.ma_hop_dong || 'Chưa liên kết'}</span></p>
+                <p><strong>Mã hợp đồng / Số TK nhận:</strong> <span className="text-red-400 font-extrabold">
+                  {activeHd 
+                    ? `${activeHd.ma_hop_dong}${activeHd.chu_hop_dong ? ` - ${activeHd.chu_hop_dong}` : ''}${activeBank?.ten_viet_tat ? ` - ${activeBank.ten_viet_tat}` : ''}${activeBank?.ten_dich_vu ? ` - ${activeBank.ten_dich_vu}` : ''}`
+                    : 'Chưa liên kết'
+                  }
+                </span></p>
                 <p><strong>Phân hệ dịch vụ:</strong> <span className="text-violet-400 font-extrabold uppercase">{store.selectedService?.ten_danh_muc}</span></p>
                 <p className="border-t border-white/5 pt-2 text-xs text-gray-400">
                   <strong>Mô tả vụ việc:</strong> {activeFile.noi_dung || 'Không có mô tả'}
@@ -179,84 +185,6 @@ export default function TransactionDrawer({ open, onClose }) {
           </div>
         </Tabs.TabPane>
 
-        {/* TAB 3: TẠO MÃ QR */}
-        <Tabs.TabPane tab={<span><QrcodeOutlined /> Mã VietQR</span>} key="3">
-          <div className="pt-3 space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-gray-400">Chọn Ngân hàng nhận thanh toán</label>
-              <Select value={qrBankBin} onChange={setQrBankBin} className="w-full">
-                {store.banks.map(b => (
-                  <Option key={b.id_danh_muc_dich_vu} value={b.ma_bin}>{b.ten_viet_tat}</Option>
-                ))}
-              </Select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-gray-400">Số tài khoản nhận</label>
-              <Input value={qrAccount} onChange={e => setQrAccount(e.target.value)} className="bg-white/5 border-white/5 text-gray-300" />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-gray-400">Tên chủ tài khoản (Không dấu)</label>
-              <Input value={qrAccName} onChange={e => setQrAccName(e.target.value.toUpperCase())} className="bg-white/5 border-white/5 text-gray-300" />
-            </div>
-
-            {qrCodeUrl ? (
-              <div className="flex flex-col items-center justify-center p-5 bg-white rounded-xl shadow-lg mt-4 max-w-[280px] mx-auto border border-gray-200">
-                <p className="text-[10px] font-extrabold text-gray-800 mb-2 uppercase tracking-wide">QUÉT VIETQR CHUYỂN TIỀN TỰ ĐỘNG</p>
-                <img src={qrCodeUrl} className="w-[180px] h-[180px] border border-gray-200 p-2 rounded-lg object-contain bg-white" alt="VietQR Realtime" />
-                <p className="text-[9px] text-gray-400 mt-2 text-center font-bold">Số tiền và nội dung đã mã hóa sẵn sàng</p>
-              </div>
-            ) : (
-              <p className="text-xs text-gray-500 italic text-center">Vui lòng điền số tài khoản để tạo VietQR.</p>
-            )}
-          </div>
-        </Tabs.TabPane>
-
-        {/* TAB 4: KIỂM DUYỆT HÓA ĐƠN */}
-        <Tabs.TabPane tab={<span><SafetyCertificateOutlined /> Kiểm duyệt</span>} key="4">
-          <div className="pt-3 space-y-4 text-center">
-            <Alert message="Tải lên biên lai xác minh giao dịch (Bill chuyển khoản/biên nhận POS) để kiểm toán sau này." type="info" showIcon className="bg-violet-600/10 border-none text-violet-300" />
-            
-            <div className="mt-4 flex flex-col items-center gap-3">
-              <Upload maxCount={1} showUploadList={false} onChange={handleUploadReceipt} customRequest={({ onSuccess }) => onSuccess("ok")}>
-                <Button icon={<UploadOutlined />} className="bg-white/5 border-white/5 text-gray-300 rounded-lg hover:border-violet-500/30">Tải ảnh hóa đơn lên kho</Button>
-              </Upload>
-
-              {receiptUrl && (
-                <div className="mt-3 border border-white/5 rounded-xl p-2.5 bg-gray-950 max-w-[320px] shadow-lg">
-                  <p className="text-[10px] text-gray-500 font-bold mb-2 uppercase tracking-wide">Ảnh xem trước biên nhận</p>
-                  <img src={receiptUrl} className="rounded-lg max-h-[190px] object-contain w-full" alt="Receipt preview" />
-                </div>
-              )}
-            </div>
-          </div>
-        </Tabs.TabPane>
-
-        {/* TAB 5: IN ẤN HÓA ĐƠN */}
-        <Tabs.TabPane tab={<span><PrinterOutlined /> In Hóa Đơn</span>} key="5">
-          <div className="pt-3 space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-gray-400">Chọn mẫu chữ ký hiển thị ở chân trang</label>
-              <Select value={selectedSignature} onChange={setSelectedSignature} className="w-full">
-                <Option value={store.signature?.id_chu_ky}>{store.signature?.ten_chu_ky || 'Quản lý quầy'} - {store.signature?.ten_cua_hang}</Option>
-              </Select>
-            </div>
-
-            <div className="p-4 border border-dashed border-white/10 rounded-xl bg-gray-950/70 text-gray-400 text-xs leading-relaxed space-y-1.5 shadow-inner">
-              <h4 className="text-center font-extrabold text-gray-200 mb-2 uppercase tracking-wide">MẪU IN THỬ ĐẦU RA</h4>
-              <p>------------------------------------------</p>
-              <p className="font-extrabold text-gray-200 text-center uppercase">{store.signature.ten_cua_hang}</p>
-              <p className="text-center">Đ/C: {store.signature.dia_chi}</p>
-              <p className="text-center">Hotline: {store.signature.sdt1}</p>
-              <p>------------------------------------------</p>
-              <p>Khách hàng: {activeCust?.ho_va_ten || 'Khách lẻ'}</p>
-              <p>Mã hợp đồng: {activeHd?.ma_hop_dong || '-'}</p>
-              <p>Thực thu POS: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(netAmount)}</p>
-              <p>Nội dung: {gdPayload.noi_dung || '[Thanh toán dịch vụ]'}</p>
-              <p>------------------------------------------</p>
-              <p className="text-center italic font-bold">Cảm ơn quý khách đã tin dùng!</p>
-            </div>
-          </div>
-        </Tabs.TabPane>
       </Tabs>
     </Drawer>
   );
