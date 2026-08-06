@@ -70,8 +70,10 @@ export default function ServiceMenu() {
               className="p-4 rounded-xl bg-[#0d1426]/80 backdrop-blur-md border border-gray-800 hover:border-violet-500/50 hover:bg-[#131b33] transition-all flex items-center justify-between cursor-pointer group hover:scale-[1.02] active:scale-95 shadow-lg"
             >
               <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${getGradient(selectedGroupId)} flex items-center justify-center text-xl shadow-md group-hover:rotate-3 transition-transform duration-300`}>
-                  {service.icon || '💼'}
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${getGradient(selectedGroupId)} flex items-center justify-center text-xl shadow-md group-hover:rotate-3 transition-transform duration-300 overflow-hidden`}>
+                  {service.icon?.startsWith('http') 
+                    ? <img src={service.icon} alt="icon" className="w-8 h-8 object-contain drop-shadow-md" />
+                    : (service.icon || '💼')}
                 </div>
                 <div>
                   <span className="font-bold text-xs text-gray-200 tracking-wide uppercase block">{service.ten_danh_muc}</span>
