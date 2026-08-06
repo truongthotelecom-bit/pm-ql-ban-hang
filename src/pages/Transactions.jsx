@@ -407,14 +407,15 @@ export default function Transactions() {
                             </div>
                           )}
 
-                          {/* Dòng dưới: Ngày tạo (trái) & GD cuối (phải) */}
-                          <div className="flex justify-between items-center mt-2 pt-2 border-t border-white/5 text-[9px] font-medium">
-                            <span className="text-gray-600">
-                              Tạo: {file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}
-                            </span>
-                            {file._lastTxDate && (
+                          {/* Dòng dưới: Ngày tạo hoặc GD cuối (canh phải) */}
+                          <div className="flex justify-end items-center mt-2 pt-2 border-t border-white/5 text-[9px] font-medium">
+                            {file._lastTxDate ? (
                               <span className="text-violet-400/70">
                                 GD cuối: {file._lastTxDate.toLocaleDateString('vi-VN')} {file._lastTxDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            ) : (
+                              <span className="text-gray-500">
+                                Tạo: {file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}
                               </span>
                             )}
                           </div>
