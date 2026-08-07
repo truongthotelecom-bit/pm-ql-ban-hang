@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
-import useAuthStore from '../../store/useAuthStore';
+import { supabase } from '../lib/supabaseClient';
+import useAuthStore from '../store/useAuthStore';
 
-export default function AdminStaff() {
+export default function StaffManagement() {
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const user = useAuthStore(state => state.user);

@@ -10,7 +10,6 @@ const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminCategoryPage = lazy(() => import('./pages/admin/AdminCategoryPage'));
 const AdminStores = lazy(() => import('./pages/admin/AdminStores'));
-const AdminStaff = lazy(() => import('./pages/admin/AdminStaff'));
 
 // Main pages (lazy)
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -19,6 +18,7 @@ const Transactions = lazy(() => import('./pages/Transactions'));
 const TransactionHistory = lazy(() => import('./pages/TransactionHistory'));
 const CustomersPage = lazy(() => import('./pages/CustomersPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const StaffManagement = lazy(() => import('./pages/StaffManagement'));
 
 function PageLoader() {
   return (
@@ -59,6 +59,7 @@ export default function App() {
             <Route path="lich-su" element={<Suspense fallback={<PageLoader />}><TransactionHistory /></Suspense>} />
             <Route path="khach-hang" element={<Suspense fallback={<PageLoader />}><CustomersPage /></Suspense>} />
             <Route path="cai-dat" element={<Suspense fallback={<PageLoader />}><SettingsPage /></Suspense>} />
+            <Route path="nhan-vien" element={<Suspense fallback={<PageLoader />}><StaffManagement /></Suspense>} />
           </Route>
 
           {/* Protected Route cho Admin (Chỉ Admin mới vào được) */}
@@ -74,8 +75,7 @@ export default function App() {
             <Route path="danh-muc" element={<Navigate to="/admin/danh-muc/dm_trang_thai_giao_dich" replace />} />
             <Route path="danh-muc/:tableName" element={<Suspense fallback={<PageLoader />}><AdminCategoryPage /></Suspense>} />
             <Route path="diem-ban" element={<Suspense fallback={<PageLoader />}><AdminStores /></Suspense>} />
-            <Route path="nhan-vien" element={<Suspense fallback={<PageLoader />}><AdminStaff /></Suspense>} />
-            <Route path="tai-khoan" element={<Navigate to="/admin/nhan-vien" replace />} />
+            <Route path="tai-khoan" element={<div className="p-4 text-white">Quản lý Tài khoản (Đang xây dựng)</div>} />
             <Route path="cai-dat" element={<div className="p-4 text-white">Cài đặt hệ thống (Đang xây dựng)</div>} />
           </Route>
         </Routes>
