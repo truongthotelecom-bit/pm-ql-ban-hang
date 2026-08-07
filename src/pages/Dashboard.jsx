@@ -2,8 +2,11 @@ import React, { useEffect } from 'react';
 import useAppStore from '../store/useAppStore';
 import { ArrowUpRight, ArrowDownRight, Users, Repeat } from 'lucide-react';
 import { PlusCircleOutlined } from '@ant-design/icons';
+import { useOutletContext } from 'react-router-dom';
 
-export default function Dashboard({ onNewTransaction }) {
+export default function Dashboard(props) {
+  const context = useOutletContext();
+  const onNewTransaction = props.onNewTransaction || context?.setDrawerOpen;
   const store = useAppStore();
 
   useEffect(() => {

@@ -7,7 +7,13 @@ import LoginPage from './pages/LoginPage';
 import AdminLayout from './layouts/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminCategoryPage from './pages/admin/AdminCategoryPage';
-// Import các trang Admin khác sau này...
+
+import Dashboard from './pages/Dashboard';
+import ServiceMenu from './pages/ServiceMenu';
+import Transactions from './pages/Transactions';
+import TransactionHistory from './pages/TransactionHistory';
+import CustomersPage from './pages/CustomersPage';
+import SettingsPage from './pages/SettingsPage';
 
 export default function App() {
   const { initAuth } = useAuthStore();
@@ -30,7 +36,15 @@ export default function App() {
               <IndexPage />
             </AuthGuard>
           } 
-        />
+        >
+          {/* Outlet của IndexPage */}
+          <Route index element={<Dashboard />} />
+          <Route path="dich-vu" element={<ServiceMenu />} />
+          <Route path="giao-dich" element={<Transactions />} />
+          <Route path="lich-su" element={<TransactionHistory />} />
+          <Route path="khach-hang" element={<CustomersPage />} />
+          <Route path="cai-dat" element={<SettingsPage />} />
+        </Route>
 
         {/* Protected Route cho Admin (Chỉ Admin mới vào được) */}
         <Route 
