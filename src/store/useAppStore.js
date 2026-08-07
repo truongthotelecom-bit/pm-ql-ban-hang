@@ -36,8 +36,12 @@ const useAppStore = create((set, get) => ({
   setSelectedServiceFile: (file) => set({ selectedServiceFile: file }),
   setSelectedDetail: (detail) => set({ selectedDetail: detail }),
 
+  // Flag: đã khởi động hệ thống chưa
+  isBootstrapped: false,
   // Actions
   fetchSystemConfig: async () => {
+    // Chỉ fetch 1 lần trong suốt phiên làm việc
+    if (get().isBootstrapped) return;
     try {
       const [
         { data: resTrangThai },
@@ -93,7 +97,8 @@ const useAppStore = create((set, get) => ({
         services: resLdv || [],
         loaiHopDongs: resLhd || [],
         bieuPhis: resBp || [],
-        dbOnline: true
+        dbOnline: true,
+        isBootstrapped: true
       });
 
       if (resLdv?.length > 0 && !get().selectedService) {
