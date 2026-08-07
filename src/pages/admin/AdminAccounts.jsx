@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import { Select, message } from 'antd';
+import { Select, message, Modal, Form, Input, Button, Switch } from 'antd';
 
 export default function AdminAccounts() {
   const [accounts, setAccounts] = useState([]);
   const [stores, setStores] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [form] = Form.useForm();
 
   const fetchData = async () => {
     setLoading(true);
@@ -42,10 +44,50 @@ export default function AdminAccounts() {
     }
   };
 
+  const handleAddUser = async (values) => {
+    try {
+      const email = `${values.username}@aura.local`;
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email,
+        password: values.password,
+      });
+
+      if (authError) throw authError;
+      const newUserId = authData.user?.id;
+
+      if (newUserId) {
+        const { error: dbError } = await supabase.from('tai_khoan_nguoi_dung').insert([{
+          id_tai_khoan: newUserId,
+          username: values.username,
+          ho_ten: values.ho_ten,
+          id_nhom_quyen: values.id_nhom_quyen,
+          id_diem_ban: values.id_diem_ban,
+          is_active: values.is_active
+        }]);
+        
+        if (dbError) throw dbError;
+        
+        message.success('Tạo tài khoản thành công!');
+        setIsModalVisible(false);
+        form.resetFields();
+        fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+      message.error(err.message || 'Lỗi khi tạo tài khoản');
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-white">Phân Quyền Hệ Thống (Dành cho Dev)</h1>
+        <button 
+          onClick={() => { form.resetFields(); form.setFieldsValue({ is_active: true }); setIsModalVisible(true); }}
+          className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg font-medium shadow-lg transition-colors"
+        >
+          + Thêm Tài Khoản
+        </button>
       </div>
       
       <div className="bg-[#1A1D27] rounded-xl border border-gray-800 overflow-hidden shadow-2xl">
@@ -96,6 +138,44 @@ export default function AdminAccounts() {
           </tbody>
         </table>
       </div>
+
+      <Modal
+        title={<span className="text-gray-800">Tạo Tài Khoản Mới</span>}
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+        destroyOnClose
+      >
+        <Form form={form} layout="vertical" onFinish={handleAddUser} className="mt-4">
+          <Form.Item name="username" label="Username" rules={[{ required: true }]}>
+            <Input placeholder="VD: admin_hcm" />
+          </Form.Item>
+          <Form.Item name="password" label="Mật khẩu" rules={[{ required: true }, { min: 6 }]}>
+            <Input.Password placeholder="Tối thiểu 6 ký tự" />
+          </Form.Item>
+          <Form.Item name="ho_ten" label="Họ tên" rules={[{ required: true }]}>
+            <Input placeholder="Nguyễn Văn A" />
+          </Form.Item>
+          
+          <div className="flex gap-4">
+            <Form.Item name="id_nhom_quyen" label="Quyền hạn" className="flex-1">
+              <Select options={roles.map(r => ({ value: r.id_nhom_quyen, label: r.ten_nhom_quyen }))} placeholder="Chọn quyền" />
+            </Form.Item>
+            <Form.Item name="id_diem_ban" label="Điểm bán" className="flex-1">
+              <Select options={[{ value: null, label: 'Toàn hệ thống' }, ...stores.map(s => ({ value: s.id_diem_ban, label: s.ten_diem_ban }))]} placeholder="Chọn điểm bán" />
+            </Form.Item>
+          </div>
+
+          <Form.Item name="is_active" label="Hoạt động" valuePropName="checked">
+            <Switch checkedChildren="Bật" unCheckedChildren="Khóa" />
+          </Form.Item>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <Button onClick={() => setIsModalVisible(false)}>Hủy</Button>
+            <Button type="primary" htmlType="submit" className="bg-violet-600">Tạo Mới</Button>
+          </div>
+        </Form>
+      </Modal>
     </div>
   );
 }
