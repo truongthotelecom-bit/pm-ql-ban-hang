@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabaseClient';
+import useAuthStore from './useAuthStore';
 
 const useAppStore = create((set, get) => ({
   classifications: [],
@@ -114,7 +115,12 @@ const useAppStore = create((set, get) => ({
   // Khách hàng CRM
   fetchCustomers: async () => {
     try {
-      const { data, error } = await supabase.from('khach_hang').select('*').order('ngay_tao', { ascending: false });
+      const user = useAuthStore.getState().user;
+      let query = supabase.from('khach_hang').select('*').order('ngay_tao', { ascending: false });
+      if (user?.id_diem_ban) {
+        query = query.eq('id_diem_ban', user.id_diem_ban);
+      }
+      const { data, error } = await query;
       if (!error) set({ customers: data || [] });
     } catch (err) {
       console.error('Lỗi tải khách hàng:', err);
@@ -137,6 +143,11 @@ const useAppStore = create((set, get) => ({
       );
       // Gán ID đã tạo vào payload
       clean.id_khach_hang = generatedId;
+
+      const user = useAuthStore.getState().user;
+      if (user?.id_diem_ban) {
+        clean.id_diem_ban = user.id_diem_ban;
+      }
 
       const { data, error } = await supabase.from('khach_hang').insert([clean]).select().single();
       if (error) {
@@ -199,9 +210,18 @@ const useAppStore = create((set, get) => ({
   // Lấy hồ sơ dịch vụ
   fetchServiceFiles: async (serviceId) => {
     try {
+      const user = useAuthStore.getState().user;
+      let filesQuery = supabase.from('ho_so_dich_vu').select('*').order('ngay_tao', { ascending: false });
+      let txQuery = supabase.from('chi_tiet_giao_dich').select('*').order('thoi_gian_giao_dich', { ascending: false });
+
+      if (user?.id_diem_ban) {
+        filesQuery = filesQuery.eq('id_diem_ban', user.id_diem_ban);
+        txQuery = txQuery.eq('id_diem_ban', user.id_diem_ban);
+      }
+
       const [{ data: filesData }, { data: allTxData }] = await Promise.all([
-        supabase.from('ho_so_dich_vu').select('*').order('ngay_tao', { ascending: false }),
-        supabase.from('chi_tiet_giao_dich').select('*').order('thoi_gian_giao_dich', { ascending: false })
+        filesQuery,
+        txQuery
       ]);
 
       const filtered = serviceId
@@ -234,6 +254,10 @@ const useAppStore = create((set, get) => ({
       if (!activeSvc) return;
 
       const fullPayload = { ...payload, id_loai_dich_vu: activeSvc.id_loai_dich_vu };
+      const user = useAuthStore.getState().user;
+      if (user?.id_diem_ban) {
+        fullPayload.id_diem_ban = user.id_diem_ban;
+      }
       Object.keys(fullPayload).forEach(key => {
         if (fullPayload[key] === '') fullPayload[key] = null;
       });
@@ -283,9 +307,15 @@ const useAppStore = create((set, get) => ({
   // Lấy chi tiết giao dịch của hồ sơ
   fetchTransactionDetails: async (fileId) => {
     try {
+      const user = useAuthStore.getState().user;
+      let ledgerQuery = supabase.from('lich_su_thu_chi').select('*').order('ngay_tao', { ascending: false });
+      if (user?.id_diem_ban) {
+        ledgerQuery = ledgerQuery.eq('id_diem_ban', user.id_diem_ban);
+      }
+
       const [{ data: details }, { data: ledgerData }] = await Promise.all([
         supabase.from('chi_tiet_giao_dich').select('*').eq('id_ho_so_dich_vu', fileId).order('thoi_gian_giao_dich', { ascending: false }),
-        supabase.from('lich_su_thu_chi').select('*').order('ngay_tao', { ascending: false })
+        ledgerQuery
       ]);
 
       set({
@@ -325,6 +355,10 @@ const useAppStore = create((set, get) => ({
         id_loai_dich_vu: activeSvc.id_loai_dich_vu,
         thoi_gian_giao_dich: new Date().toISOString()
       };
+      const user = useAuthStore.getState().user;
+      if (user?.id_diem_ban) {
+        fullPayload.id_diem_ban = user.id_diem_ban;
+      }
 
       const { data, error } = await supabase.from('chi_tiet_giao_dich').insert([fullPayload]).select().single();
 
