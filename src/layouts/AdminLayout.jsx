@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
-import { HomeOutlined, SettingOutlined, UsergroupAddOutlined, AppstoreOutlined, LogoutOutlined, DownOutlined, RightOutlined } from '@ant-design/icons';
+import { HomeOutlined, SettingOutlined, UsergroupAddOutlined, AppstoreOutlined, LogoutOutlined, DownOutlined, RightOutlined, ShopOutlined } from '@ant-design/icons';
 import { Database } from 'lucide-react';
 import { adminCategoriesConfig } from '../config/adminConfig';
 
@@ -36,7 +36,8 @@ export default function AdminLayout() {
       icon: <Database size={16} />,
       childrenGroups: categoryGroups
     },
-    { path: '/admin/tai-khoan', label: 'Quản lý Tài khoản', icon: <UsergroupAddOutlined /> },
+    { path: '/admin/diem-ban', label: 'Quản lý Điểm bán', icon: <ShopOutlined /> },
+    { path: '/admin/tai-khoan', label: 'Quản lý Tài khoản (Dev)', icon: <UsergroupAddOutlined /> },
     { path: '/admin/cai-dat', label: 'Cài đặt hệ thống', icon: <SettingOutlined /> },
   ];
 
