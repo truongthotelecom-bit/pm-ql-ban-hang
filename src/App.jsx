@@ -10,6 +10,7 @@ const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminCategoryPage = lazy(() => import('./pages/admin/AdminCategoryPage'));
 const AdminStores = lazy(() => import('./pages/admin/AdminStores'));
+const AdminAccounts = lazy(() => import('./pages/admin/AdminAccounts'));
 
 // Main pages (lazy)
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -75,7 +76,7 @@ export default function App() {
             <Route path="danh-muc" element={<Navigate to="/admin/danh-muc/dm_trang_thai_giao_dich" replace />} />
             <Route path="danh-muc/:tableName" element={<Suspense fallback={<PageLoader />}><AdminCategoryPage /></Suspense>} />
             <Route path="diem-ban" element={<Suspense fallback={<PageLoader />}><AdminStores /></Suspense>} />
-            <Route path="tai-khoan" element={<div className="p-4 text-white">Quản lý Tài khoản (Đang xây dựng)</div>} />
+            <Route path="tai-khoan" element={<Suspense fallback={<PageLoader />}><AdminAccounts /></Suspense>} />
             <Route path="cai-dat" element={<div className="p-4 text-white">Cài đặt hệ thống (Đang xây dựng)</div>} />
           </Route>
         </Routes>
