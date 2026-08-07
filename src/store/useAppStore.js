@@ -258,6 +258,9 @@ const useAppStore = create((set, get) => ({
       if (user?.id_diem_ban) {
         fullPayload.id_diem_ban = user.id_diem_ban;
       }
+      if (user?.id_tai_khoan) {
+        fullPayload.id_tai_khoan_tao = user.id_tai_khoan;
+      }
       Object.keys(fullPayload).forEach(key => {
         if (fullPayload[key] === '') fullPayload[key] = null;
       });
@@ -358,6 +361,9 @@ const useAppStore = create((set, get) => ({
       const user = useAuthStore.getState().user;
       if (user?.id_diem_ban) {
         fullPayload.id_diem_ban = user.id_diem_ban;
+      }
+      if (user?.id_tai_khoan) {
+        fullPayload.id_tai_khoan_tao = user.id_tai_khoan;
       }
 
       const { data, error } = await supabase.from('chi_tiet_giao_dich').insert([fullPayload]).select().single();

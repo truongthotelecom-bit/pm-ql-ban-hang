@@ -81,6 +81,8 @@ export default function Transactions() {
   // Edit Customer Form State
   const [editCustPayload, setEditCustPayload] = useState({});
 
+  const currentUser = useAuthStore(state => state.user);
+
   useEffect(() => {
     store.fetchCustomers();
     if (store.selectedService) {
@@ -406,13 +408,53 @@ export default function Transactions() {
     };
   };
 
-  // (Đã xóa block if !store.selectedService để cho phép hiển thị tất cả hồ sơ khi chưa chọn dịch vụ)
-
   const activeFile = store.selectedServiceFile;
   const activeCust = store.customers.find(c => c.id_khach_hang === activeFile?.id_khach_hang);
   const activeHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong);
   const activeBank = store.banks.find(b => b.id_danh_muc_dich_vu === activeHd?.id_danh_muc_dich_vu);
   const activeDetail = store.selectedDetail;
+
+  // Quyền thao tác
+  const isSuperAdminOrOwner = currentUser?.dm_nhom_quyen?.is_admin || currentUser?.dm_nhom_quyen?.ma_quyen === 'CHU_DIEM_BAN';
+  
+  const canEditFile = () => {
+    if (isSuperAdminOrOwner) return true;
+    if (!activeFile) return false;
+    return activeFile.id_tai_khoan_tao === currentUser?.id_tai_khoan;
+  };
+
+  const canCancelTransaction = () => {
+    if (isSuperAdminOrOwner) return true;
+    if (!activeDetail) return false;
+    // b0000001-0000-0000-0000-000000000001 = Thành công, 003 = Thất bại/Hủy
+    const isCompletedOrCanceled = activeDetail.id_trang_thai === 'b0000001-0000-0000-0000-000000000001' || activeDetail.id_trang_thai === 'b0000001-0000-0000-0000-000000000003';
+    return activeDetail.id_tai_khoan_tao === currentUser?.id_tai_khoan && !isCompletedOrCanceled;
+  };
+
+  const handleCancelTransaction = async () => {
+    if (!activeDetail) return;
+    Modal.confirm({
+      title: 'Xác nhận Hủy Giao Dịch?',
+      content: 'Bạn có chắc chắn muốn chuyển trạng thái giao dịch này thành THẤT BẠI/HỦY?',
+      okText: 'Hủy Giao Dịch',
+      okType: 'danger',
+      cancelText: 'Đóng',
+      onOk: async () => {
+        try {
+          const { error } = await store.supabase
+            .from('chi_tiet_giao_dich')
+            .update({ id_trang_thai: 'b0000001-0000-0000-0000-000000000003' }) // ID Thất bại/Hủy
+            .eq('id_chi_tiet_giao_dich', activeDetail.id_chi_tiet_giao_dich);
+          
+          if (error) throw error;
+          message.success('Đã hủy giao dịch thành công!');
+          await store.fetchTransactionDetails(activeFile.id_ho_so_dich_vu);
+        } catch (err) {
+          message.error('Lỗi khi hủy giao dịch: ' + err.message);
+        }
+      }
+    });
+  };
 
   // Link VietQR động cho dòng tiền đang chọn
   const activeQrUrl = activeDetail && activeHd
@@ -695,7 +737,9 @@ export default function Transactions() {
                     size="small" 
                     icon={<EditOutlined />} 
                     onClick={openEditFileModal}
-                    className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400"
+                    disabled={!canEditFile()}
+                    title={!canEditFile() ? 'Bạn chỉ có thể sửa hồ sơ do mình tạo' : ''}
+                    className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400 disabled:opacity-30 disabled:hover:text-gray-300"
                   >
                     Sửa hồ sơ
                   </Button>
@@ -703,17 +747,19 @@ export default function Transactions() {
                     size="small" 
                     icon={<EditOutlined />} 
                     onClick={() => openEditCustModal(activeCust)}
-                    className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400"
+                    disabled={!canEditFile()}
+                    className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400 disabled:opacity-30"
                   >
-                    Sửa thông tin khách
+                    Sửa khách
                   </Button>
                   <Button 
                     size="small" 
                     icon={<EditOutlined />} 
                     onClick={openEditContractModal}
-                    className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400"
+                    disabled={!canEditFile()}
+                    className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400 disabled:opacity-30"
                   >
-                    Sửa hợp đồng
+                    Sửa HĐ
                   </Button>
                   <Button 
                     size="small" 
@@ -789,21 +835,30 @@ export default function Transactions() {
 
           {activeDetail ? (
             <div className="space-y-4">
-              {/* Thao tác In & QR */}
-              <div className="grid grid-cols-2 gap-2 text-center">
+              {/* Thao tác In & QR & Hủy */}
+              <div className="grid grid-cols-3 gap-2 text-center">
                 <button 
                   onClick={() => setShowQrModal(true)}
                   className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-violet-500/40 hover:bg-[#131b33]/40 transition-all group"
                 >
                   <div className="w-8 h-8 rounded-full bg-violet-600/10 text-violet-400 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-all"><QrcodeOutlined /></div>
-                  <span className="text-[9px] text-gray-400 font-extrabold leading-tight uppercase">TẠO QR THANH TOÁN</span>
+                  <span className="text-[9px] text-gray-400 font-extrabold leading-tight uppercase">TẠO QR</span>
                 </button>
                 <button 
                   onClick={handlePrintInvoice}
                   className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-violet-500/40 hover:bg-[#131b33]/40 transition-all group"
                 >
                   <div className="w-8 h-8 rounded-full bg-violet-600/10 text-violet-400 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-all"><PrinterOutlined /></div>
-                  <span className="text-[9px] text-gray-400 font-extrabold leading-tight uppercase">IN HÓA ĐƠN POS</span>
+                  <span className="text-[9px] text-gray-400 font-extrabold leading-tight uppercase">IN HÓA ĐƠN</span>
+                </button>
+                <button 
+                  onClick={handleCancelTransaction}
+                  disabled={!canCancelTransaction()}
+                  title={!canCancelTransaction() ? 'Bạn không thể hủy GD này' : ''}
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-red-500/40 hover:bg-red-500/10 transition-all group disabled:opacity-30 disabled:hover:bg-white/[0.02] disabled:hover:border-white/5"
+                >
+                  <div className="w-8 h-8 rounded-full bg-red-600/10 text-red-400 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-all">✖</div>
+                  <span className="text-[9px] text-gray-400 font-extrabold leading-tight uppercase">HỦY GD</span>
                 </button>
               </div>
 

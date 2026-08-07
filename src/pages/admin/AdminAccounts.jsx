@@ -46,7 +46,10 @@ export default function AdminAccounts() {
 
   const handleAddUser = async (values) => {
     try {
-      const email = `${values.username}@aura.local`;
+      // Check if username is already an email format
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.username);
+      const email = isEmail ? values.username : `${values.username}@aura.local`;
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: email,
         password: values.password,

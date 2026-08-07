@@ -35,8 +35,9 @@ export default function StaffManagement() {
 
   const handleAddStaff = async (values) => {
     try {
-      // Vì Supabase yêu cầu email cho auth, ta tạo email giả từ username nếu người dùng ko nhập email thật
-      const email = `${values.username}@aura.local`;
+      // Check if username is already an email format
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.username);
+      const email = isEmail ? values.username : `${values.username}@aura.local`;
       
       // BƯỚC 1: Tạo tài khoản trên Supabase Auth 
       // (Lưu ý: Trong thực tế, gọi signUp ở Client sẽ tự động đăng nhập user mới. 
