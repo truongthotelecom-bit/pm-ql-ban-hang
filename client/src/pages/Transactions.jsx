@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import useAppStore from '../store/useAppStore';
 import useAuthStore from '../store/useAuthStore';
 import { supabase } from '../lib/supabaseClient';
@@ -28,9 +28,11 @@ import { adminCategoriesConfig } from '../config/adminConfig';
 import { FixedSizeList as List } from 'react-window';
 
 const { Option } = Select;
+const { Search } = Input;
 
 export default function Transactions() {
   const store = useAppStore();
+  const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCustId, setFilterCustId] = useState(undefined);
   const [filterCategoryId, setFilterCategoryId] = useState(undefined);
@@ -101,38 +103,45 @@ export default function Transactions() {
     }
   }, [store.selectedService]);
 
-  // Bộ lọc danh sách hồ sơ dịch vụ
-  const filteredFiles = store.serviceFiles.filter(file => {
-    const cust = store.customers.find(c => c.id_khach_hang === file.id_khach_hang);
-    const contract = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
-    
-    // Lọc theo Khách hàng
-    if (filterCustId && file.id_khach_hang !== filterCustId) return false;
+  // 1. Tiền xử lý tính toán thời gian sắp xếp một lần (Chỉ chạy khi có dữ liệu mới)
+  const baseFilesWithSort = useMemo(() => {
+    return store.serviceFiles.map(file => {
+      const txs = store.allTransactions?.filter(t => t.id_ho_so_dich_vu === file.id_ho_so_dich_vu) || [];
+      let latestDate = new Date(file.ngay_tao || 0).getTime();
+      if (txs.length > 0) {
+        latestDate = txs.reduce((latest, t) => {
+          const tDate = new Date(t.thoi_gian_giao_dich || t.ngay_tao || 0).getTime();
+          return Math.max(latest, tDate);
+        }, latestDate);
+      }
+      return {
+        ...file,
+        _sortTime: latestDate,
+        _lastTxDate: txs.length > 0 && latestDate > 0 ? new Date(latestDate) : null
+      };
+    }).sort((a, b) => b._sortTime - a._sortTime);
+  }, [store.serviceFiles, store.allTransactions]);
 
-    // Lọc theo Danh mục dịch vụ (qua Mã hợp đồng)
-    if (filterCategoryId && contract?.id_danh_muc_dich_vu !== filterCategoryId) return false;
+  // 2. Bộ lọc danh sách hồ sơ dịch vụ (Chỉ chạy khi filter thay đổi)
+  const filteredFiles = useMemo(() => {
+    return baseFilesWithSort.filter(file => {
+      const cust = store.customers.find(c => c.id_khach_hang === file.id_khach_hang);
+      const contract = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
+      
+      if (filterCustId && file.id_khach_hang !== filterCustId) return false;
+      if (filterCategoryId && contract?.id_danh_muc_dich_vu !== filterCategoryId) return false;
 
-    // Lọc theo Tìm kiếm Text
-    const searchStr = `${cust?.ho_va_ten || ''} ${cust?.so_dien_thoai || ''} ${contract?.ma_hop_dong || ''} ${file.noi_dung || ''}`.toLowerCase();
-    return searchStr.includes(searchTerm.toLowerCase());
-  });
+      if (searchTerm) {
+        const searchStr = `${cust?.ho_va_ten || ''} ${cust?.so_dien_thoai || ''} ${contract?.ma_hop_dong || ''} ${file.noi_dung || ''}`.toLowerCase();
+        if (!searchStr.includes(searchTerm.toLowerCase())) return false;
+      }
+      
+      return true;
+    });
+  }, [baseFilesWithSort, store.customers, store.ma_hop_dong, filterCustId, filterCategoryId, searchTerm]);
 
-  // Tính toán thời gian giao dịch cuối cùng và sắp xếp
-  const sortedFiles = [...filteredFiles].map(file => {
-    const txs = store.allTransactions?.filter(t => t.id_ho_so_dich_vu === file.id_ho_so_dich_vu) || [];
-    let latestDate = new Date(file.ngay_tao || 0).getTime();
-    if (txs.length > 0) {
-      latestDate = txs.reduce((latest, t) => {
-        const tDate = new Date(t.thoi_gian_giao_dich || t.ngay_tao || 0).getTime();
-        return Math.max(latest, tDate);
-      }, latestDate);
-    }
-    return {
-      ...file,
-      _sortTime: latestDate,
-      _lastTxDate: txs.length > 0 && latestDate > 0 ? new Date(latestDate) : null
-    };
-  }).sort((a, b) => b._sortTime - a._sortTime);
+  // sortedFiles đã được sort ở bước 1, không cần sort lại
+  const sortedFiles = filteredFiles;
 
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text);
@@ -530,12 +539,14 @@ export default function Transactions() {
         {/* Bộ lọc nâng cao */}
         <div className="flex flex-col gap-2">
           <div className="flex gap-2">
-            <Input 
-              prefix={<SearchOutlined className="text-gray-500" />} 
-              placeholder="Tìm hợp đồng, tên, SĐT khách..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="bg-white/5 border-white/5 text-gray-300 rounded-xl py-2 hover:border-violet-500/30 focus:border-violet-500 flex-1"
+            <Search 
+              placeholder="Nhập hợp đồng, tên, SĐT và bấm tìm (Enter)..." 
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              onSearch={value => setSearchTerm(value)}
+              enterButton={<span className="font-semibold tracking-wide">TÌM KIẾM</span>}
+              className="bg-[#0d1426]/50 border-white/10 text-white flex-1 search-btn-violet custom-search-input shadow-inner h-[40px]"
+              allowClear
             />
             <Button 
               type="text" 
