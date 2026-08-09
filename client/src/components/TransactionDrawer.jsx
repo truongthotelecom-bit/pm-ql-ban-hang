@@ -32,7 +32,13 @@ export default function TransactionDrawer({ open, onClose }) {
         if (isChuyenKhoan) {
           defaultNoiDung = 'Chuyển tiền';
         } else {
-          const lastSameCategoryTx = store.allTransactions?.find(t => t.id_loai_dich_vu === store.selectedService?.id_loai_dich_vu && t.noi_dung);
+          const getLoaiDichVuId = (tx) => {
+            const file = store.allServiceFiles?.find(f => f.id_ho_so_dich_vu === tx.id_ho_so_dich_vu);
+            const hd = store.ma_hop_dong?.find(h => h.id_ma_hop_dong === file?.id_ma_hop_dong);
+            const dm = store.banks?.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
+            return dm?.id_loai_dich_vu;
+          };
+          const lastSameCategoryTx = store.allTransactions?.find(t => getLoaiDichVuId(t) === store.selectedService?.id_loai_dich_vu && t.noi_dung);
           if (lastSameCategoryTx) {
             defaultNoiDung = lastSameCategoryTx.noi_dung;
           }

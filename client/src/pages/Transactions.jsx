@@ -1160,7 +1160,11 @@ export default function Transactions() {
                 className="w-full"
                 value={newFilePayload.id_ma_hop_dong || undefined}
                 onChange={v => setNewFilePayload({ ...newFilePayload, id_ma_hop_dong: v })}
-                options={store.ma_hop_dong.filter(h => !store.selectedService || h.id_loai_dich_vu === store.selectedService.id_loai_dich_vu || !h.id_loai_dich_vu).map(h => {
+                options={store.ma_hop_dong.filter(h => {
+                  if (!store.selectedService) return true;
+                  const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === h.id_danh_muc_dich_vu);
+                  return !bank || bank.id_loai_dich_vu === store.selectedService.id_loai_dich_vu;
+                }).map(h => {
                   const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === h.id_danh_muc_dich_vu);
                   const prefix = bank?.ten_viet_tat ? `${bank.ten_viet_tat} - ` : '';
                   return {

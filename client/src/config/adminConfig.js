@@ -100,7 +100,6 @@ export const adminCategoriesConfig = [
     columns: [
       { key: 'ma_hop_dong', label: 'Mã HĐ/Thẻ', type: 'text', required: true },
       { key: 'chu_hop_dong', label: 'Tên chủ thẻ/HĐ', type: 'text' },
-      { key: 'id_loai_dich_vu', label: 'Loại dịch vụ', type: 'lookup', lookup: { table: 'sys_loai_dich_vu', labelField: 'ten_danh_muc', valueField: 'id_loai_dich_vu' } },
       { key: 'id_danh_muc_dich_vu', label: 'Ngân hàng/POS', type: 'lookup', lookup: { table: 'sys_danh_muc_dich_vu', labelField: 'ten_dich_vu', valueField: 'id_danh_muc_dich_vu' } },
       { key: 'ghi_chu', label: 'Ghi chú', type: 'text' }
     ]
@@ -124,18 +123,15 @@ export const adminCategoriesConfig = [
           formatLabel: (l) => l.so_dien_thoai ? `${l.ho_va_ten} - ${l.so_dien_thoai}` : l.ho_va_ten
         } 
       },
-      { key: 'id_loai_dich_vu', label: 'Lọc Mã HĐ theo Loại Dịch Vụ', type: 'lookup', lookup: { table: 'sys_loai_dich_vu', labelField: 'ten_danh_muc', valueField: 'id_loai_dich_vu' } },
       { 
         key: 'id_ma_hop_dong', 
         label: 'Mã Hợp Đồng', 
         type: 'lookup', 
-        dependsOn: 'id_loai_dich_vu', 
-        filterField: 'id_loai_dich_vu', 
         lookup: { 
           table: 'ma_hop_dong', 
           labelField: 'ma_hop_dong', 
           valueField: 'id_ma_hop_dong', 
-          extraSelect: 'id_loai_dich_vu, chu_hop_dong, sys_danh_muc_dich_vu(ten_viet_tat)',
+          extraSelect: 'chu_hop_dong, sys_danh_muc_dich_vu(ten_viet_tat)',
           formatLabel: (l) => {
             const parts = [];
             if (l.sys_danh_muc_dich_vu?.ten_viet_tat) parts.push(l.sys_danh_muc_dich_vu.ten_viet_tat);
@@ -167,7 +163,6 @@ export const adminCategoriesConfig = [
     primaryKey: 'id_bieu_phi',
     columns: [
       { key: 'ten_bieu_phi', label: 'Tên quy tắc', type: 'text', required: true },
-      { key: 'id_loai_dich_vu', label: 'Phân hệ DV', type: 'lookup', lookup: { table: 'sys_loai_dich_vu', labelField: 'ten_danh_muc', valueField: 'id_loai_dich_vu' } },
       { key: 'id_danh_muc_dich_vu', label: 'Ngân hàng/POS', type: 'lookup', lookup: { table: 'sys_danh_muc_dich_vu', labelField: 'ten_dich_vu', valueField: 'id_danh_muc_dich_vu' } },
       { key: 'id_loai_hop_dong', label: 'Loại hợp đồng', type: 'lookup', lookup: { table: 'dm_loai_hop_dong', labelField: 'ten_loai', valueField: 'id_loai_hop_dong' } },
       { key: 'phi_dich_vu_mac_dinh', label: 'Mức Phí DV', type: 'number' },
@@ -190,7 +185,6 @@ export const adminCategoriesConfig = [
         required: true,
         lookup: { table: 'sys_danh_sach_bang', labelField: 'ten_bang', valueField: 'id_bang' }
       },
-      { key: 'id_loai_dich_vu', label: 'Loại Dịch Vụ', type: 'lookup', lookup: { table: 'sys_loai_dich_vu', labelField: 'ten_danh_muc', valueField: 'id_loai_dich_vu' } },
       { 
         key: 'id_ten_cot', 
         label: 'Trường dữ liệu (Mã Cột)', 

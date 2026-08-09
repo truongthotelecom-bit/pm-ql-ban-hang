@@ -64,23 +64,36 @@ export default function MoneyTransferForm({ value, onChange }) {
   useEffect(() => {
     if (!activeFile || Object.keys(value || {}).length > 1) return; // Chỉ tự động điền khi là tạo mới
 
-    const idLoaiDV = activeFile.id_loai_dich_vu;
-    const idHoSo = activeFile.id_ho_so_dich_vu;
+    const idLoaiDV = store.banks?.find(b => b.id_danh_muc_dich_vu === activeContract?.id_danh_muc_dich_vu)?.id_loai_dich_vu;
+    const idHoSo = activeFile?.id_ho_so_dich_vu;
     const idDanhMuc = activeContract?.id_danh_muc_dich_vu;
 
     let lastTx = null;
     
+    const getLoaiDichVuId = (tx) => {
+      const file = store.allServiceFiles?.find(f => f.id_ho_so_dich_vu === tx.id_ho_so_dich_vu);
+      const hd = store.ma_hop_dong?.find(h => h.id_ma_hop_dong === file?.id_ma_hop_dong);
+      const dm = store.banks?.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
+      return dm?.id_loai_dich_vu;
+    };
+    
+    const getDanhMucId = (tx) => {
+      const file = store.allServiceFiles?.find(f => f.id_ho_so_dich_vu === tx.id_ho_so_dich_vu);
+      const hd = store.ma_hop_dong?.find(h => h.id_ma_hop_dong === file?.id_ma_hop_dong);
+      return hd?.id_danh_muc_dich_vu;
+    };
+
     // Ưu tiên 1: Cùng hồ sơ
     lastTx = store.allTransactions?.find(t => t.id_ho_so_dich_vu === idHoSo);
     
     // Ưu tiên 2: Cùng danh mục dịch vụ
     if (!lastTx) {
-      lastTx = store.allTransactions?.find(t => t.id_danh_muc_dich_vu === idDanhMuc);
+      lastTx = store.allTransactions?.find(t => getDanhMucId(t) === idDanhMuc);
     }
     
     // Ưu tiên 3: Cùng loại dịch vụ
     if (!lastTx) {
-      lastTx = store.allTransactions?.find(t => t.id_loai_dich_vu === idLoaiDV);
+      lastTx = store.allTransactions?.find(t => getLoaiDichVuId(t) === idLoaiDV);
     }
 
     if (lastTx) {
@@ -113,7 +126,7 @@ export default function MoneyTransferForm({ value, onChange }) {
 
   const resolveFeeSchedule = (amount) => {
     // 1. Tìm biểu phí phù hợp nhất
-    const id_loai_dich_vu = activeFile?.id_loai_dich_vu;
+    const id_loai_dich_vu = store.banks?.find(b => b.id_danh_muc_dich_vu === activeContract?.id_danh_muc_dich_vu)?.id_loai_dich_vu;
     const id_danh_muc_dich_vu = activeContract?.id_danh_muc_dich_vu;
     const id_loai_hop_dong = activeFile?.id_loai_hop_dong;
 
@@ -248,12 +261,13 @@ export default function MoneyTransferForm({ value, onChange }) {
     const defaultCol = store.danhSachCot?.find(c => c.id_bang === 'chi_tiet_giao_dich' && c.id_cot === fieldName);
     const defaultLabel = defaultCol ? defaultCol.ten_cot : hardcodedDefault;
 
-    if (!activeFile?.id_loai_dich_vu) return { label: defaultLabel, hidden: false };
+    const currentLoaiDV = store.banks?.find(b => b.id_danh_muc_dich_vu === activeContract?.id_danh_muc_dich_vu)?.id_loai_dich_vu;
+    if (!currentLoaiDV) return { label: defaultLabel, hidden: false };
     
     // 2. Nếu có cấu hình ghi đè (ẩn/hiện, đổi nhãn) cho Dịch vụ này trong sys_ql_cot_du_lieu
     const config = store.columnsConfig?.find(
       c => c.id_ten_bang === 'chi_tiet_giao_dich' &&
-           c.id_loai_dich_vu === activeFile.id_loai_dich_vu &&
+           c.id_loai_dich_vu === currentLoaiDV &&
            c.id_ten_cot === fieldName
     );
     if (!config) return { label: defaultLabel, hidden: false };

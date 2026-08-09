@@ -132,20 +132,12 @@ const useAppStore = create((set, get) => ({
 
   addCustomer: async (customer) => {
     try {
-      // Sinh mã khách hàng theo format YYYY-MM-DD-XXXXXXXX
-      const now = new Date();
-      const yyyy = now.getFullYear();
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const dd = String(now.getDate()).padStart(2, '0');
-      const rand8 = Math.random().toString(36).substring(2, 10).toUpperCase().padEnd(8, '0');
-      const generatedId = `${yyyy}-${mm}-${dd}-${rand8}`;
-
       // Loại bỏ các trường rỗng để tránh lỗi DB
       const clean = Object.fromEntries(
         Object.entries(customer).filter(([, v]) => v !== '' && v !== undefined && v !== null)
       );
-      // Gán ID đã tạo vào payload
-      clean.id_khach_hang = generatedId;
+      // Sử dụng chuẩn quốc tế UUID v4 cho mã khách hàng
+      clean.id_khach_hang = crypto.randomUUID();
 
       const user = useAuthStore.getState().user;
       if (user?.id_diem_ban) {
@@ -227,8 +219,16 @@ const useAppStore = create((set, get) => ({
         txQuery
       ]);
 
+      const state = get();
+      
+      const getLoaiDichVuId = (id_ma_hop_dong) => {
+        const hd = state.ma_hop_dong.find(h => h.id_ma_hop_dong === id_ma_hop_dong);
+        const dm = state.banks.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
+        return dm?.id_loai_dich_vu;
+      };
+
       const filtered = serviceId
-        ? (filesData || []).filter(f => f.id_loai_dich_vu === serviceId)
+        ? (filesData || []).filter(f => getLoaiDichVuId(f.id_ma_hop_dong) === serviceId)
         : (filesData || []);
 
       set({ serviceFiles: filtered, allServiceFiles: filesData || [], allTransactions: allTxData || [] });
@@ -256,7 +256,7 @@ const useAppStore = create((set, get) => ({
       const activeSvc = get().selectedService;
       if (!activeSvc) return;
 
-      const fullPayload = { ...payload, id_loai_dich_vu: activeSvc.id_loai_dich_vu };
+      const fullPayload = { ...payload };
       const user = useAuthStore.getState().user;
       if (user?.id_diem_ban) {
         fullPayload.id_diem_ban = user.id_diem_ban;
@@ -360,16 +360,10 @@ const useAppStore = create((set, get) => ({
         ...detailPayload,
         id_chi_tiet_giao_dich: generatedId,
         id_ho_so_dich_vu: activeFile.id_ho_so_dich_vu,
-        id_loai_dich_vu: activeSvc.id_loai_dich_vu,
-        thoi_gian_giao_dich: new Date().toISOString()
+        thoi_gian_giao_dich: new Date().toISOString(),
+        id_diem_ban: detailPayload.id_diem_ban || get().user?.id_diem_ban || null,
+        id_tai_khoan_tao: detailPayload.id_tai_khoan_tao || get().user?.id_tai_khoan || null
       };
-      const user = useAuthStore.getState().user;
-      if (user?.id_diem_ban) {
-        fullPayload.id_diem_ban = user.id_diem_ban;
-      }
-      if (user?.id_tai_khoan) {
-        fullPayload.id_tai_khoan_tao = user.id_tai_khoan;
-      }
 
       const { data, error } = await supabase.from('chi_tiet_giao_dich').insert([fullPayload]).select().single();
 
@@ -404,10 +398,9 @@ const useAppStore = create((set, get) => ({
   // Thêm mã hợp đồng mới
   addContract: async (contractPayload) => {
     try {
-      const activeSvc = get().selectedService;
       const fullPayload = {
         ...contractPayload,
-        id_loai_dich_vu: activeSvc ? activeSvc.id_loai_dich_vu : null
+        id_diem_ban: contractPayload.id_diem_ban || get().user?.id_diem_ban || null
       };
 
       const { data, error } = await supabase.from('ma_hop_dong').insert([fullPayload]).select().single();
