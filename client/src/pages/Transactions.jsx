@@ -300,7 +300,7 @@ export default function Transactions() {
       <div class="data-row"><div class="data-label">- Họ và tên</div><div class="data-value">: ${activeCust?.ho_va_ten || 'Khách lẻ'}</div></div>
       <div class="data-row"><div class="data-label">- Sđt</div><div class="data-value">: ${activeCust?.so_dien_thoai || ''}</div></div>
 
-      <div class="section-title">⌨ THÔNG TIN CHI TIỬT</div>
+      <div class="section-title">⌨ THÔNG TIN CHI TIẾT</div>
       <div class="data-row"><div class="data-label">- Nội dung</div><div class="data-value">: ${activeDetail.noi_dung || ''}</div></div>
       <div class="data-row"><div class="data-label">- Số tiền</div><div class="data-value">: ${fmtVND(activeDetail.so_tien)}</div></div>
       <div class="data-row"><div class="data-label">- Phí DV</div><div class="data-value">: ${fmtVND(activeDetail.phi_dich_vu)}</div></div>
@@ -373,8 +373,8 @@ export default function Transactions() {
       .footer-ad { text-align:center; font-weight:bold; font-size:12px; }
     </style></head><body>
       <div class="page-container">
-        ${createPane('Liên 1: Giao khách hàng')}
-        ${createPane('Liên 2: Cửa hàng lưu')}
+        ${createPane('Liên 1: Cửa hàng lưu')}
+        ${createPane('Liên 2: Giao khách hàng')}
       </div>
     </body></html>`);
     doc.close();
