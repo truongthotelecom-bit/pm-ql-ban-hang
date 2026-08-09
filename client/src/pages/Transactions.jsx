@@ -21,6 +21,7 @@ import {
   PhoneOutlined
 } from '@ant-design/icons';
 import TransactionDrawer from '../components/TransactionDrawer';
+import MoneyTransferForm from '../components/MoneyTransferForm';
 import SearchableDropdown from '../components/SearchableDropdown';
 import { adminCategoriesConfig } from '../config/adminConfig';
 import { FixedSizeList as List } from 'react-window';
@@ -1611,6 +1612,50 @@ export default function Transactions() {
             type="primary" 
             onClick={handleEditContractSubmit} 
             className="w-full bg-violet-600 border-none font-bold mt-2"
+          >
+            Lưu thay đổi
+          </Button>
+        </div>
+      </Modal>
+
+      {/* ============================================================
+         MODAL 8: SỬA CHI TIẾT GIAO DỊCH
+         ============================================================ */}
+      <Modal
+        title={<span className="font-extrabold text-white text-base">✏️ CHỈNH SỬA GIAO DỊCH</span>}
+        open={showEditDetailModal}
+        onCancel={() => setShowEditDetailModal(false)}
+        footer={null}
+        width={600}
+        className="glass-modal"
+      >
+        <div className="p-4 border border-white/5 rounded-xl bg-[#0d1426] space-y-4">
+          <MoneyTransferForm value={editDetailPayload} onChange={setEditDetailPayload} />
+          <Button 
+            type="primary" 
+            onClick={async () => {
+              if (!editDetailPayload.so_tien || editDetailPayload.so_tien <= 0) {
+                message.error('Vui lòng nhập số tiền hợp lệ!');
+                return;
+              }
+              try {
+                const dataToSave = { ...editDetailPayload };
+                const { error } = await store.supabase
+                  .from('chi_tiet_giao_dich')
+                  .update(dataToSave)
+                  .eq('id_chi_tiet_giao_dich', editDetailPayload.id_chi_tiet_giao_dich);
+                
+                if (error) throw error;
+                message.success('Cập nhật giao dịch thành công!');
+                setShowEditDetailModal(false);
+                if (activeFile) {
+                  await store.fetchTransactionDetails(activeFile.id_ho_so_dich_vu);
+                }
+              } catch (err) {
+                message.error('Lỗi khi cập nhật giao dịch: ' + err.message);
+              }
+            }} 
+            className="w-full bg-violet-600 border-none font-bold mt-2 h-10"
           >
             Lưu thay đổi
           </Button>
