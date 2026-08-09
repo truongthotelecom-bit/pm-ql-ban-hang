@@ -443,7 +443,7 @@ export default function MoneyTransferForm({ value, onChange }) {
         <div>
           <div className="flex justify-between items-end mb-2">
             <div className="text-gray-400 text-xs font-bold uppercase tracking-wider">SỐ TIỀN GIAO DỊCH</div>
-            <div className="text-2xl font-black text-white">{formatCurrency(A - D)}</div>
+            <div className="text-xl font-bold text-white">{formatCurrency(A - D)}</div>
           </div>
           {!f_nguon.hidden && (
             <div className="space-y-1">
@@ -483,18 +483,14 @@ export default function MoneyTransferForm({ value, onChange }) {
         </div>
         )}
 
-        {/* KẾT QUẢ CUỐI CÙNG TÙY THEO LOẠI CƯỚC */}
+        {/* TIỀN THỰC CHUYỂN ĐI */}
         <div className="pt-3 border-t border-white/10">
           <div className="flex justify-between items-end mb-2">
             <div className="text-gray-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-              {form.is_cuoc_trong ? (
-                <><RetweetOutlined className="text-violet-400"/> TIỀN THỰC CHUYỂN ĐI (ĐÍCH)</>
-              ) : (
-                <><DollarOutlined className="text-violet-400"/> TỔNG KHÁCH CẦN THANH TOÁN</>
-              )}
+              <RetweetOutlined className="text-blue-400"/> TIỀN THỰC CHUYỂN ĐI (ĐÍCH)
             </div>
-            <div className="text-xl font-bold text-violet-400">
-              {formatCurrency(form.is_cuoc_trong ? thucChuyenDi : tongThuKhach)}
+            <div className="text-xl font-bold text-blue-400">
+              {formatCurrency(thucChuyenDi)}
             </div>
           </div>
           {!f_di.hidden && (
