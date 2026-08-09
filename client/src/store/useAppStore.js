@@ -249,7 +249,7 @@ const useAppStore = create((set, get) => ({
         .order('ngay_tao', { ascending: false });
 
       if (user?.id_diem_ban) {
-        filesQuery = filesQuery.or(`id_diem_ban.eq.${user.id_diem_ban},id_diem_ban.is.null`);
+        filesQuery = filesQuery.eq('id_diem_ban', user.id_diem_ban);
       }
 
       if (serviceId) {
