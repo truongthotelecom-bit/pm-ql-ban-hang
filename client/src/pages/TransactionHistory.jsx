@@ -357,12 +357,21 @@ export default function TransactionHistory() {
               title: 'Khách hàng',
               key: 'khach_hang',
               render: (_, record) => (
-                <div className="whitespace-nowrap">
-                  <div className="font-bold text-gray-200">{record.customer?.ho_va_ten || 'Khách lẻ'}</div>
-                  <div className="text-xs text-violet-400">{record.customer?.so_dien_thoai || ''}</div>
+                <div className="whitespace-nowrap font-bold text-gray-200">
+                  {record.customer?.ho_va_ten || 'Khách lẻ'}
                 </div>
               ),
-              width: 160,
+              width: 150,
+            },
+            {
+              title: 'SĐT',
+              key: 'sdt',
+              render: (_, record) => (
+                <div className="whitespace-nowrap text-violet-400 font-semibold">
+                  {record.customer?.so_dien_thoai || '---'}
+                </div>
+              ),
+              width: 120,
             },
             {
               title: 'Số tiền',
