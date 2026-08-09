@@ -459,6 +459,47 @@ export default function Transactions() {
   const calcGiam = activeDetail ? parseFloat(activeDetail.so_tien_giam || 0) : 0;
   const calcIsTrong = activeDetail?.is_cuoc_trong;
   const globalCalculatedTotal = calcIsTrong ? (calcAmt - calcGiam) : (calcAmt + calcFee - calcGiam);
+  // Quyền thao tác
+  const isSuperAdminOrOwner = currentUser?.dm_nhom_quyen?.is_admin || currentUser?.dm_nhom_quyen?.ma_quyen === 'CHU_DIEM_BAN';
+  
+  const canEditFile = () => {
+    if (isSuperAdminOrOwner) return true;
+    if (!activeFile) return false;
+    return activeFile.id_tai_khoan_tao === currentUser?.id_tai_khoan;
+  };
+
+  const canCancelTransaction = () => {
+    if (isSuperAdminOrOwner) return true;
+    if (!activeDetail) return false;
+    // b0000001-0000-0000-0000-000000000001 = Thành công, 003 = Thất bại/Hủy
+    const isCompletedOrCanceled = activeDetail.id_trang_thai === 'b0000001-0000-0000-0000-000000000001' || activeDetail.id_trang_thai === 'b0000001-0000-0000-0000-000000000003';
+    return activeDetail.id_tai_khoan_tao === currentUser?.id_tai_khoan && !isCompletedOrCanceled;
+  };
+
+  const handleCancelTransaction = async () => {
+    if (!activeDetail) return;
+    Modal.confirm({
+      title: 'Xác nhận Hủy Giao Dịch?',
+      content: 'Bạn có chắc chắn muốn chuyển trạng thái giao dịch này thành THẤT BẠI/HỦY?',
+      okText: 'Hủy Giao Dịch',
+      okType: 'danger',
+      cancelText: 'Đóng',
+      onOk: async () => {
+        try {
+          const { error } = await supabase
+            .from('chi_tiet_giao_dich')
+            .update({ id_trang_thai: 'b0000001-0000-0000-0000-000000000003' }) // ID Thất bại/Hủy
+            .eq('id_chi_tiet_giao_dich', activeDetail.id_chi_tiet_giao_dich);
+          
+          if (error) throw error;
+          message.success('Đã hủy giao dịch thành công!');
+          await store.fetchTransactionDetails(activeFile.id_ho_so_dich_vu);
+        } catch (err) {
+          message.error('Lỗi khi hủy giao dịch: ' + err.message);
+        }
+      }
+    });
+  };
 
   // Link VietQR động cho dòng tiền đang chọn
   const activeQrUrl = activeDetail && activeHd
