@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #080c14;
+    background-image: 
+      radial-gradient(at 10% 20%, hsla(252, 80%, 50%, 0.12) 0px, transparent 50%),
+      radial-gradient(at 90% 80%, hsla(190, 80%, 50%, 0.08) 0px, transparent 50%);
+    background-attachment: fixed;
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(13, 20, 38, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(20, 27, 48, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(26, 35, 62, 0.7);
+  border-color: rgba(124, 58, 237, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Custom Ant Design Overrides to Match Premium Dark Theme */
+.ant-drawer-content {
+  background-color: #0b0f19 !important;
+  color: #f3f4f6 !important;
+}
+
+.ant-drawer-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background-color: #0d1426 !important;
+}
+
+.ant-drawer-title {
+  color: #f3f4f6 !important;
+}
+
+.ant-tabs-nav-list {
+  color: #9ca3af !important;
+}
+
+.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #8b5cf6 !important;
+}
+
+.ant-tabs-ink-bar {
+  background: #8b5cf6 !important;
+}
+
+.ant-input, .ant-select-selector, .ant-input-number {
+  background-color: rgba(8, 12, 20, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f3f4f6 !important;
+}
+
+.ant-select-dropdown {
+  background-color: #0d1426 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.ant-select-item {
+  color: #d1d5db !important;
+}
+
+.ant-select-item-option-active {
+  background-color: rgba(124, 58, 237, 0.2) !important;
+}
+
+/* Print Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    color: black !important;
+  }
+}
