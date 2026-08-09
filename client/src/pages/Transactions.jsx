@@ -49,6 +49,7 @@ export default function Transactions() {
   const [mobileActionFile, setMobileActionFile] = useState(null); // file được tap trên mobile
   const [showMobileAction, setShowMobileAction] = useState(false);
   const [showMobileDetail, setShowMobileDetail] = useState(false); // Hien thi modal chi tiet tren mobile
+  const [showMobileTxDetail, setShowMobileTxDetail] = useState(false); // Modal chi tiet GD
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1280;
 
   // New Case File Form State
@@ -826,7 +827,10 @@ export default function Transactions() {
                       return (
                         <div 
                           key={detail.id_chi_tiet_giao_dich}
-                          onClick={() => store.setSelectedDetail(detail)}
+                          onClick={() => {
+                            store.setSelectedDetail(detail);
+                            if (isMobile) setShowMobileTxDetail(true);
+                          }}
                           className={`p-3 rounded-xl border transition-all cursor-pointer flex justify-between items-center ${isSelected ? 'bg-violet-600/5 border-violet-500/30' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}
                         >
                           <div>
@@ -859,10 +863,24 @@ export default function Transactions() {
           )}
         </div>
       </div>
+      </div>
 
       {/* ============================================================
          CỘT 3 (BÊN PHẢI): BẢNG TỔNG CỘNG, VIETQR & IN ẤN NHANH
          ============================================================ */}
+      <div className={`${showMobileTxDetail ? 'fixed inset-0 z-[110] bg-[#0d1426] flex flex-col gap-4 p-4 overflow-y-auto animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
+        
+        {/* Nút đóng trên Mobile cho Cột 3 */}
+        <div className="xl:hidden flex justify-between items-center mb-2">
+          <span className="font-extrabold text-white text-lg">CHI TIẾT GIAO DỊCH</span>
+          <button 
+            onClick={() => setShowMobileTxDetail(false)}
+            className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white font-bold active:scale-95"
+          >
+            ✕
+          </button>
+        </div>
+
       <div className="w-full xl:w-[28%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between">
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
@@ -960,7 +978,7 @@ export default function Transactions() {
           )}
         </div>
       </div>
-      {/* Dong wrapper cot 2+3 cho desktop */}
+      {/* Dong wrapper cot 3 cho desktop */}
       </div>
 
       {/* ============================================================
@@ -1024,7 +1042,7 @@ export default function Transactions() {
                   className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all"
                 >
                   <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-2xl">📋</div>
-                  <span className="text-xs font-bold text-gray-200">Xem chi tiet</span>
+                  <span className="text-xs font-bold text-gray-200">Xem hồ sơ</span>
                   <span className="text-[10px] text-gray-500 text-center">Ho so & dong tien</span>
                 </button>
               </div>
