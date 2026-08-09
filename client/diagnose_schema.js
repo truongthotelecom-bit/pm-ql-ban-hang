@@ -5,7 +5,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function run() {
-  const { data, error } = await supabase.from('ho_so_dich_vu').select('*').limit(1);
+  const { data, error } = await supabase.from('vw_ho_so_dich_vu').select('*').limit(1);
   console.log("Ho_so_dich_vu columns:", data ? Object.keys(data[0]) : error);
 }
 

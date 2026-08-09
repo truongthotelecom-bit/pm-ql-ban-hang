@@ -244,7 +244,7 @@ const useAppStore = create((set, get) => ({
     try {
       const user = useAuthStore.getState().user;
       
-      let filesQuery = supabase.from('vw_ho_so_dich_vu')
+      let filesQuery = supabase.from('vw_ho_so_dich_vu_v2')
         .select('*', { count: 'exact' })
         .order('ngay_tao', { ascending: false });
 
