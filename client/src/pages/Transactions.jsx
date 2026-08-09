@@ -452,52 +452,17 @@ export default function Transactions() {
   const activeHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong);
   const activeBank = store.banks.find(b => b.id_danh_muc_dich_vu === activeHd?.id_danh_muc_dich_vu);
   const activeDetail = store.selectedDetail;
-
-  // Quyền thao tác
-  const isSuperAdminOrOwner = currentUser?.dm_nhom_quyen?.is_admin || currentUser?.dm_nhom_quyen?.ma_quyen === 'CHU_DIEM_BAN';
   
-  const canEditFile = () => {
-    if (isSuperAdminOrOwner) return true;
-    if (!activeFile) return false;
-    return activeFile.id_tai_khoan_tao === currentUser?.id_tai_khoan;
-  };
-
-  const canCancelTransaction = () => {
-    if (isSuperAdminOrOwner) return true;
-    if (!activeDetail) return false;
-    // b0000001-0000-0000-0000-000000000001 = Thành công, 003 = Thất bại/Hủy
-    const isCompletedOrCanceled = activeDetail.id_trang_thai === 'b0000001-0000-0000-0000-000000000001' || activeDetail.id_trang_thai === 'b0000001-0000-0000-0000-000000000003';
-    return activeDetail.id_tai_khoan_tao === currentUser?.id_tai_khoan && !isCompletedOrCanceled;
-  };
-
-  const handleCancelTransaction = async () => {
-    if (!activeDetail) return;
-    Modal.confirm({
-      title: 'Xác nhận Hủy Giao Dịch?',
-      content: 'Bạn có chắc chắn muốn chuyển trạng thái giao dịch này thành THẤT BẠI/HỦY?',
-      okText: 'Hủy Giao Dịch',
-      okType: 'danger',
-      cancelText: 'Đóng',
-      onOk: async () => {
-        try {
-          const { error } = await supabase
-            .from('chi_tiet_giao_dich')
-            .update({ id_trang_thai: 'b0000001-0000-0000-0000-000000000003' }) // ID Thất bại/Hủy
-            .eq('id_chi_tiet_giao_dich', activeDetail.id_chi_tiet_giao_dich);
-          
-          if (error) throw error;
-          message.success('Đã hủy giao dịch thành công!');
-          await store.fetchTransactionDetails(activeFile.id_ho_so_dich_vu);
-        } catch (err) {
-          message.error('Lỗi khi hủy giao dịch: ' + err.message);
-        }
-      }
-    });
-  };
+  // Tính tổng tự động
+  const calcAmt = activeDetail ? parseFloat(activeDetail.so_tien || 0) : 0;
+  const calcFee = activeDetail ? parseFloat(activeDetail.phi_dich_vu || 0) : 0;
+  const calcGiam = activeDetail ? parseFloat(activeDetail.so_tien_giam || 0) : 0;
+  const calcIsTrong = activeDetail?.is_cuoc_trong;
+  const globalCalculatedTotal = calcIsTrong ? (calcAmt - calcGiam) : (calcAmt + calcFee - calcGiam);
 
   // Link VietQR động cho dòng tiền đang chọn
   const activeQrUrl = activeDetail && activeHd
-    ? `https://api.vietqr.io/image/970422-${activeHd.ma_hop_dong}-compact.png?amount=${activeDetail.so_tien_di}&addInfo=${encodeURIComponent(activeDetail.noi_dung)}&accountName=${encodeURIComponent(activeCust?.ho_va_ten || 'AURA CUSTOMER')}`
+    ? `https://api.vietqr.io/image/970422-${activeHd.ma_hop_dong}-compact.png?amount=${globalCalculatedTotal}&addInfo=${encodeURIComponent(activeDetail.noi_dung)}&accountName=${encodeURIComponent(activeCust?.ho_va_ten || 'AURA CUSTOMER')}`
     : '';
 
   return (
@@ -964,7 +929,7 @@ export default function Transactions() {
                 )}
                 <div className="border-t border-white/5 my-2 pt-2 flex justify-between text-sm font-extrabold text-violet-400">
                   <span>TỔNG THANH TOÁN:</span>
-                  <span className="text-base">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien_di)}</span>
+                  <span className="text-base">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(globalCalculatedTotal)}</span>
                 </div>
                 <div className="flex justify-between text-xs font-bold mt-2 border-t border-dashed border-white/5 pt-2">
                   <span>TRẠNG THÁI GD:</span>
@@ -972,7 +937,6 @@ export default function Transactions() {
                 </div>
               </div>
 
-              {/* VietQR Live Preview */}
               {activeQrUrl && (
                 <div className="flex flex-col items-center gap-3 w-full">
                   <div 
@@ -1541,7 +1505,7 @@ export default function Transactions() {
               />
             </div>
             <h3 className="text-2xl font-black text-violet-400 mt-6 tracking-wide">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien_di)}
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(globalCalculatedTotal)}
             </h3>
             <div className="flex flex-col gap-1.5 mt-4 text-center w-full bg-white/5 p-3 rounded-xl border border-white/5">
               <p className="text-[13px] text-gray-100 font-bold">{activeBank?.ten_dich_vu || store.selectedService?.ten_danh_muc || '—'}</p>

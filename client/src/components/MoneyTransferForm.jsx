@@ -439,11 +439,11 @@ export default function MoneyTransferForm({ value, onChange }) {
       {/* CỤM 4: TỔNG KẾT BILL */}
       <div className="bg-gradient-to-r from-violet-900/40 to-blue-900/40 border border-violet-500/30 rounded-xl p-4 mt-6 space-y-4">
         
-        {/* TIỀN TỔNG KHÁCH ĐƯA */}
+        {/* SỐ TIỀN GIAO DỊCH */}
         <div>
           <div className="flex justify-between items-end mb-2">
-            <div className="text-gray-400 text-xs font-bold uppercase tracking-wider">TỔNG KHÁCH CẦN THANH TOÁN</div>
-            <div className="text-2xl font-black text-white">{formatCurrency(tongThuKhach)}</div>
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-wider">SỐ TIỀN GIAO DỊCH</div>
+            <div className="text-2xl font-black text-white">{formatCurrency(A - D)}</div>
           </div>
           {!f_nguon.hidden && (
             <div className="space-y-1">
@@ -459,14 +459,16 @@ export default function MoneyTransferForm({ value, onChange }) {
           )}
         </div>
 
-        {/* PHÍ DỊCH VỤ THU NGOÀI */}
-        {form.loai_cuoc_phi === 'ngoai' && B > 0 && (
+        {/* PHÍ DỊCH VỤ */}
+        {B > 0 && (
         <div className="pt-3 border-t border-white/10">
           <div className="flex justify-between items-end mb-2">
-            <div className="text-orange-400/80 text-xs font-bold uppercase tracking-wider">PHÍ DỊCH VỤ THU THÊM</div>
+            <div className="text-orange-400/80 text-xs font-bold uppercase tracking-wider">
+              {form.loai_cuoc_phi === 'trong' ? 'PHÍ DỊCH VỤ (TRỪ VÀO TIỀN GỬI)' : 'PHÍ DỊCH VỤ THU THÊM'}
+            </div>
             <div className="text-lg font-bold text-orange-400">{formatCurrency(B)}</div>
           </div>
-          {!f_pttt_phi.hidden && (
+          {!f_pttt_phi.hidden && form.loai_cuoc_phi === 'ngoai' && (
             <div className="space-y-1">
               <Select
                 className="w-full"
@@ -481,13 +483,19 @@ export default function MoneyTransferForm({ value, onChange }) {
         </div>
         )}
 
-        {/* TIỀN THỰC CHUYỂN ĐI */}
+        {/* KẾT QUẢ CUỐI CÙNG TÙY THEO LOẠI CƯỚC */}
         <div className="pt-3 border-t border-white/10">
           <div className="flex justify-between items-end mb-2">
             <div className="text-gray-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-              <RetweetOutlined className="text-violet-400"/> TIỀN THỰC CHUYỂN ĐI (ĐÍCH)
+              {form.is_cuoc_trong ? (
+                <><RetweetOutlined className="text-violet-400"/> TIỀN THỰC CHUYỂN ĐI (ĐÍCH)</>
+              ) : (
+                <><DollarOutlined className="text-violet-400"/> TỔNG KHÁCH CẦN THANH TOÁN</>
+              )}
             </div>
-            <div className="text-xl font-bold text-violet-400">{formatCurrency(thucChuyenDi)}</div>
+            <div className="text-xl font-bold text-violet-400">
+              {formatCurrency(form.is_cuoc_trong ? thucChuyenDi : tongThuKhach)}
+            </div>
           </div>
           {!f_di.hidden && (
             <div className="space-y-1">
