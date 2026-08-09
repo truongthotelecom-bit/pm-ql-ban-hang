@@ -44,6 +44,25 @@ const useAppStore = create((set, get) => ({
     // Chỉ fetch 1 lần trong suốt phiên làm việc
     if (get().isBootstrapped) return;
     try {
+      // Hàm helper để fetch đệ quy toàn bộ dữ liệu (bỏ qua giới hạn 1000 dòng)
+      const fetchAllRecords = async (query) => {
+        let allData = [];
+        let from = 0;
+        const step = 1000;
+        let hasMore = true;
+        while (hasMore) {
+          const { data, error } = await query.range(from, from + step - 1);
+          if (error || !data || data.length === 0) {
+            hasMore = false;
+          } else {
+            allData = [...allData, ...data];
+            from += step;
+            if (data.length < step) hasMore = false;
+          }
+        }
+        return { data: allData };
+      };
+
       const [
         { data: resTrangThai },
         { data: resPtThanhToan },
@@ -65,7 +84,7 @@ const useAppStore = create((set, get) => ({
         supabase.from('sys_ql_cot_du_lieu').select('*'),
         supabase.from('sys_quan_ly_chu_ky').select('*').limit(1),
         supabase.from('sys_danh_muc_dich_vu').select('*'),
-        supabase.from('ma_hop_dong').select('*').order('ngay_tao', { ascending: false }),
+        fetchAllRecords(supabase.from('ma_hop_dong').select('*').order('ngay_tao', { ascending: false })),
         supabase.from('sys_loai_dich_vu').select('*').order('ngay_tao'),
         supabase.from('dm_loai_hop_dong').select('*'),
         supabase.from('dm_bieu_phi').select('*'),
@@ -118,12 +137,30 @@ const useAppStore = create((set, get) => ({
   // Khách hàng CRM
   fetchCustomers: async () => {
     try {
+      const fetchAllRecords = async (query) => {
+        let allData = [];
+        let from = 0;
+        const step = 1000;
+        let hasMore = true;
+        while (hasMore) {
+          const { data, error } = await query.range(from, from + step - 1);
+          if (error || !data || data.length === 0) {
+            hasMore = false;
+          } else {
+            allData = [...allData, ...data];
+            from += step;
+            if (data.length < step) hasMore = false;
+          }
+        }
+        return { data: allData, error: null };
+      };
+
       const user = useAuthStore.getState().user;
       let query = supabase.from('khach_hang').select('*').order('ngay_tao', { ascending: false });
       if (user?.id_diem_ban) {
         query = query.or(`id_diem_ban.eq.${user.id_diem_ban},id_diem_ban.is.null`);
       }
-      const { data, error } = await query;
+      const { data, error } = await fetchAllRecords(query);
       if (!error) set({ customers: data || [] });
     } catch (err) {
       console.error('Lỗi tải khách hàng:', err);
@@ -218,9 +255,27 @@ const useAppStore = create((set, get) => ({
         txQuery = txQuery.or(`id_diem_ban.eq.${user.id_diem_ban},id_diem_ban.is.null`);
       }
 
+      const fetchAllRecords = async (query) => {
+        let allData = [];
+        let from = 0;
+        const step = 1000;
+        let hasMore = true;
+        while (hasMore) {
+          const { data, error } = await query.range(from, from + step - 1);
+          if (error || !data || data.length === 0) {
+            hasMore = false;
+          } else {
+            allData = [...allData, ...data];
+            from += step;
+            if (data.length < step) hasMore = false;
+          }
+        }
+        return { data: allData };
+      };
+
       const [{ data: filesData }, { data: allTxData }] = await Promise.all([
-        filesQuery,
-        txQuery
+        fetchAllRecords(filesQuery),
+        fetchAllRecords(txQuery)
       ]);
 
       const filtered = serviceId
