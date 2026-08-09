@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useAppStore from '../store/useAppStore';
 import useAuthStore from '../store/useAuthStore';
+import { supabase } from '../lib/supabaseClient';
 import { Button, Tag, message, Modal, Input, Select, Radio, Badge } from 'antd';
 import { 
   SearchOutlined, 
@@ -479,7 +480,7 @@ export default function Transactions() {
       cancelText: 'Đóng',
       onOk: async () => {
         try {
-          const { error } = await store.supabase
+          const { error } = await supabase
             .from('chi_tiet_giao_dich')
             .update({ id_trang_thai: 'b0000001-0000-0000-0000-000000000003' }) // ID Thất bại/Hủy
             .eq('id_chi_tiet_giao_dich', activeDetail.id_chi_tiet_giao_dich);
@@ -1640,7 +1641,7 @@ export default function Transactions() {
               }
               try {
                 const dataToSave = { ...editDetailPayload };
-                const { error } = await store.supabase
+                const { error } = await supabase
                   .from('chi_tiet_giao_dich')
                   .update(dataToSave)
                   .eq('id_chi_tiet_giao_dich', editDetailPayload.id_chi_tiet_giao_dich);
