@@ -545,7 +545,7 @@ export default function Transactions() {
               placeholder="Nhập hợp đồng, tên, SĐT và bấm tìm (Enter)..." 
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
-              onSearch={value => setSearchTerm(value)}
+              onSearch={handleSearch}
               enterButton={<span className="font-semibold tracking-wide">TÌM KIẾM</span>}
               className="bg-[#0d1426]/50 border-white/10 text-white flex-1 search-btn-violet custom-search-input shadow-inner h-[40px]"
               allowClear
