@@ -1123,20 +1123,23 @@ export default function Transactions() {
                 </Button>
               </div>
             ) : (
-              <Select
+              <SearchableDropdown
                 placeholder="Chọn hợp đồng..."
                 className="w-full"
                 value={newFilePayload.id_ma_hop_dong || undefined}
                 onChange={v => setNewFilePayload({ ...newFilePayload, id_ma_hop_dong: v })}
-              >
-                {store.ma_hop_dong.filter(h => !store.selectedService || h.id_loai_dich_vu === store.selectedService.id_loai_dich_vu || !h.id_loai_dich_vu).map(h => {
+                options={store.ma_hop_dong.filter(h => !store.selectedService || h.id_loai_dich_vu === store.selectedService.id_loai_dich_vu || !h.id_loai_dich_vu).map(h => {
                   const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === h.id_danh_muc_dich_vu);
                   const prefix = bank?.ten_viet_tat ? `${bank.ten_viet_tat} - ` : '';
-                  return (
-                    <Option key={h.id_ma_hop_dong} value={h.id_ma_hop_dong}>{prefix}{h.ma_hop_dong} - {h.chu_hop_dong}</Option>
-                  );
+                  return {
+                    ...h,
+                    displayLabel: `${prefix}${h.ma_hop_dong}`
+                  };
                 })}
-              </Select>
+                labelKey="displayLabel"
+                valueKey="id_ma_hop_dong"
+                subLabelKey="chu_hop_dong"
+              />
             )}
           </div>
 
@@ -1180,18 +1183,16 @@ export default function Transactions() {
                 </Button>
               </div>
             ) : (
-              <Select
+              <SearchableDropdown
                 placeholder="Chọn khách hàng từ CRM..."
                 className="w-full"
-                showSearch
-                optionFilterProp="children"
                 value={newFilePayload.id_khach_hang || undefined}
                 onChange={v => setNewFilePayload({ ...newFilePayload, id_khach_hang: v })}
-              >
-                {store.customers.map(c => (
-                  <Option key={c.id_khach_hang} value={c.id_khach_hang}>{c.ho_va_ten} ({c.so_dien_thoai})</Option>
-                ))}
-              </Select>
+                options={store.customers}
+                labelKey="ho_va_ten"
+                valueKey="id_khach_hang"
+                subLabelKey="so_dien_thoai"
+              />
             )}
           </div>
 
