@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Outlet, NavLink } from 'react-router-dom';
 import useAppStore from '../store/useAppStore';
 import useAuthStore from '../store/useAuthStore';
 import { Dropdown } from 'antd';
-import { HomeOutlined, ShoppingCartOutlined, SettingOutlined, UserOutlined, LogoutOutlined, ControlOutlined, AppstoreOutlined, CalendarOutlined, TeamOutlined } from '@ant-design/icons';
+import { HomeOutlined, ShoppingCartOutlined, SettingOutlined, UserOutlined, LogoutOutlined, ControlOutlined, AppstoreOutlined, CalendarOutlined, TeamOutlined, FileProtectOutlined } from '@ant-design/icons';
 import { Sparkles } from 'lucide-react';
 import TransactionDrawer from '../components/TransactionDrawer';
 
@@ -54,6 +54,7 @@ export default function IndexPage() {
     if (location.pathname.startsWith('/giao-dich')) return 'Giao dịch';
     if (location.pathname.startsWith('/lich-su')) return 'Lịch sử';
     if (location.pathname.startsWith('/khach-hang')) return 'Khách hàng';
+    if (location.pathname.startsWith('/hop-dong')) return 'Hợp đồng';
     if (location.pathname.startsWith('/nhan-vien')) return 'Nhân viên';
     if (location.pathname.startsWith('/cai-dat')) return 'Cài đặt';
     return '';
@@ -99,6 +100,9 @@ export default function IndexPage() {
           </NavLink>
           <NavLink to="/khach-hang" className={navLinkClass}>
             <UserOutlined style={{ fontSize: '16px' }} /> Hồ sơ Khách hàng
+          </NavLink>
+          <NavLink to="/hop-dong" className={navLinkClass}>
+            <FileProtectOutlined style={{ fontSize: '16px' }} /> Quản lý Hợp đồng
           </NavLink>
           {user?.dm_nhom_quyen?.ma_quyen === 'CHU_DIEM_BAN' && (
             <NavLink to="/nhan-vien" className={navLinkClass}>
@@ -167,6 +171,10 @@ export default function IndexPage() {
         <NavLink to="/khach-hang" className={mobileNavLinkClass}>
           <UserOutlined style={{ fontSize: '20px' }} />
           <span className="text-[10px] font-semibold">Khách</span>
+        </NavLink>
+        <NavLink to="/hop-dong" className={mobileNavLinkClass}>
+          <FileProtectOutlined style={{ fontSize: '20px' }} />
+          <span className="text-[10px] font-semibold">Hợp đồng</span>
         </NavLink>
         <NavLink to="/cai-dat" className={mobileNavLinkClass}>
           <SettingOutlined style={{ fontSize: '20px' }} />

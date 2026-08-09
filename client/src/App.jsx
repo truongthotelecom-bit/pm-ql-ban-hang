@@ -18,6 +18,7 @@ const ServiceMenu = lazy(() => import('./pages/ServiceMenu'));
 const Transactions = lazy(() => import('./pages/Transactions'));
 const TransactionHistory = lazy(() => import('./pages/TransactionHistory'));
 const CustomersPage = lazy(() => import('./pages/CustomersPage'));
+const ContractsPage = lazy(() => import('./pages/ContractsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const StaffManagement = lazy(() => import('./pages/StaffManagement'));
 
@@ -59,6 +60,7 @@ export default function App() {
             <Route path="giao-dich" element={<Suspense fallback={<PageLoader />}><Transactions /></Suspense>} />
             <Route path="lich-su" element={<Suspense fallback={<PageLoader />}><TransactionHistory /></Suspense>} />
             <Route path="khach-hang" element={<Suspense fallback={<PageLoader />}><CustomersPage /></Suspense>} />
+            <Route path="hop-dong" element={<Suspense fallback={<PageLoader />}><ContractsPage /></Suspense>} />
             <Route path="cai-dat" element={<Suspense fallback={<PageLoader />}><SettingsPage /></Suspense>} />
             <Route path="nhan-vien" element={<Suspense fallback={<PageLoader />}><StaffManagement /></Suspense>} />
           </Route>

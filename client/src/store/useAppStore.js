@@ -233,6 +233,61 @@ const useAppStore = create((set, get) => ({
     }
   },
 
+  fetchContracts: async () => {
+    try {
+      const user = useAuthStore.getState().user;
+      let query = supabase.from('ma_hop_dong').select('*').order('ngay_tao', { ascending: false });
+      if (user?.id_diem_ban) {
+        query = query.eq('id_diem_ban', user.id_diem_ban);
+      }
+      
+      // Use the generic pagination fetcher pattern from fetchSystemConfig or just basic fetch if less than 1000
+      const { data, error } = await query;
+      if (!error) {
+        set({ ma_hop_dong: data || [] });
+      }
+    } catch (err) {
+      console.error('Lỗi tải hợp đồng:', err);
+    }
+  },
+
+  addContract: async (contract) => {
+    try {
+      const clean = Object.fromEntries(
+        Object.entries(contract).filter(([, v]) => v !== '' && v !== undefined && v !== null)
+      );
+      
+      const user = useAuthStore.getState().user;
+      if (user?.id_diem_ban) clean.id_diem_ban = user.id_diem_ban;
+      if (user?.id_tai_khoan) clean.id_tai_khoan_tao = user.id_tai_khoan;
+
+      const { data, error } = await supabase.from('ma_hop_dong').insert([clean]).select().single();
+      if (!error && data) {
+        set(state => ({ ma_hop_dong: [data, ...state.ma_hop_dong] }));
+        return data;
+      }
+    } catch (err) {
+      console.error('Lỗi thêm hợp đồng:', err);
+    }
+  },
+
+  deleteContract: async (contractId) => {
+    try {
+      const { error } = await supabase.from('ma_hop_dong').delete().eq('id_ma_hop_dong', contractId);
+      if (!error) {
+        set(state => ({
+          ma_hop_dong: state.ma_hop_dong.filter(c => c.id_ma_hop_dong !== contractId)
+        }));
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Lỗi xóa hợp đồng:', err);
+      return false;
+    }
+  },
+
+
   // Chọn dịch vụ
   selectService: async (service) => {
     set({ selectedService: service, activeTab: 'transactions' });
