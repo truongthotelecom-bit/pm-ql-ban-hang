@@ -47,7 +47,8 @@ export default function MoneyTransferForm({ value, onChange }) {
     const ckPercent = newForm.chiet_khau || 0;
     const tienGiamCK = Math.round((amt * ckPercent) / 100);
     newForm.so_tien_giam_ck = tienGiamCK; // lưu để hiển thị, không ảnh hưởng so_tien_giam của khách
-    newForm.so_tien_di = isTrong ? (amt - fee) : amt;
+    const giam = newForm.so_tien_giam || 0;
+    newForm.so_tien_di = isTrong ? (amt - giam) : (amt + fee - giam);
     newForm.toggle_so_tien_giam = newForm.so_tien_giam > 0;
     
     onChange(newForm);
