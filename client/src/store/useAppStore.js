@@ -424,8 +424,8 @@ const useAppStore = create((set, get) => ({
       const rand8 = Math.random().toString(36).substring(2, 10).toUpperCase().padEnd(8, '0');
       const generatedId = `${yyyy}-${mm}-${dd}-${rand8}`;
 
-      // Lọc bỏ các trường UI không có trong database schema
-      const { loai_cuoc_phi, is_cuoc_trong, so_tien_giam_ck, ...cleanPayload } = detailPayload;
+      // Lọc bỏ các trường UI không có trong database schema (loai_cuoc_phi, so_tien_giam_ck)
+      const { loai_cuoc_phi, so_tien_giam_ck, ...cleanPayload } = detailPayload;
 
       const fullPayload = {
         ...cleanPayload,
