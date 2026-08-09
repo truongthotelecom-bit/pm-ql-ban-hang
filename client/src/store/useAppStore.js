@@ -432,7 +432,8 @@ const useAppStore = create((set, get) => ({
         id_chi_tiet_giao_dich: generatedId,
         id_ho_so_dich_vu: activeFile.id_ho_so_dich_vu,
         thoi_gian_giao_dich: new Date().toISOString(),
-        id_diem_ban: detailPayload.id_diem_ban || get().user?.id_diem_ban || null
+        id_diem_ban: detailPayload.id_diem_ban || get().user?.id_diem_ban || null,
+        id_tai_khoan_tao: detailPayload.id_tai_khoan_tao || get().user?.id_tai_khoan || null
       };
 
       const { data, error } = await supabase.from('chi_tiet_giao_dich').insert([fullPayload]).select().single();
