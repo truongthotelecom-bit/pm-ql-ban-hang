@@ -65,7 +65,7 @@ const useAppStore = create((set, get) => ({
         supabase.from('sys_ql_cot_du_lieu').select('*'),
         supabase.from('sys_quan_ly_chu_ky').select('*').limit(1),
         supabase.from('sys_danh_muc_dich_vu').select('*'),
-        supabase.from('ma_hop_dong').select('*'),
+        supabase.from('ma_hop_dong').select('*').order('ngay_tao', { ascending: false }),
         supabase.from('sys_loai_dich_vu').select('*').order('ngay_tao'),
         supabase.from('dm_loai_hop_dong').select('*'),
         supabase.from('dm_bieu_phi').select('*'),
@@ -207,7 +207,7 @@ const useAppStore = create((set, get) => ({
     try {
       const user = useAuthStore.getState().user;
       let filesQuery = supabase.from('ho_so_dich_vu')
-        .select(`*, ma_hop_dong ( id_danh_muc_dich_vu, sys_danh_muc_dich_vu ( id_loai_dich_vu ) )`)
+        .select(`*, ma_hop_dong ( *, sys_danh_muc_dich_vu ( id_loai_dich_vu ) )`)
         .order('ngay_tao', { ascending: false });
       let txQuery = supabase.from('chi_tiet_giao_dich')
         .select('*')

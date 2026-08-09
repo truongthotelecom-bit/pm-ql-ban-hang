@@ -104,7 +104,7 @@ export default function Transactions() {
   // Bộ lọc danh sách hồ sơ dịch vụ
   const filteredFiles = store.serviceFiles.filter(file => {
     const cust = store.customers.find(c => c.id_khach_hang === file.id_khach_hang);
-    const contract = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong);
+    const contract = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
     
     // Lọc theo Khách hàng
     if (filterCustId && file.id_khach_hang !== filterCustId) return false;
@@ -239,7 +239,7 @@ export default function Transactions() {
   // Sửa mã hợp đồng
   const handleEditContractSubmit = async () => {
     const activeFile = store.selectedServiceFile;
-    const activeHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong);
+    const activeHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong) || activeFile?.ma_hop_dong;
     if (!activeHd) return;
     
     const data = await store.updateContract(activeHd.id_ma_hop_dong, editContractPayload);
@@ -251,7 +251,7 @@ export default function Transactions() {
 
   const openEditContractModal = () => {
     const activeFile = store.selectedServiceFile;
-    const activeHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong);
+    const activeHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong) || activeFile?.ma_hop_dong;
     if (activeHd) {
       setEditContractPayload(activeHd);
       setShowEditContractModal(true);
@@ -426,7 +426,7 @@ export default function Transactions() {
     
     // 2. Lấy danh sách các mã hợp đồng đã dùng
     const contractsUsed = custFiles.map(f => {
-      const hd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === f.id_ma_hop_dong);
+      const hd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === f.id_ma_hop_dong) || f.ma_hop_dong;
       return hd ? hd.ma_hop_dong : null;
     }).filter(Boolean);
     const uniqueContracts = [...new Set(contractsUsed)];
@@ -449,7 +449,7 @@ export default function Transactions() {
 
   const activeFile = store.selectedServiceFile;
   const activeCust = store.customers.find(c => c.id_khach_hang === activeFile?.id_khach_hang);
-  const activeHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong);
+  const activeHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong) || activeFile?.ma_hop_dong;
   const activeBank = store.banks.find(b => b.id_danh_muc_dich_vu === activeHd?.id_danh_muc_dich_vu);
   const activeDetail = store.selectedDetail;
   
@@ -603,7 +603,7 @@ export default function Transactions() {
                   {({ index, style }) => {
                     const file = sortedFiles[index];
                     const cust = store.customers.find(c => c.id_khach_hang === file.id_khach_hang);
-                    const hd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong);
+                    const hd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
                     const bank = store.banks.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
                     const isSelected = store.selectedServiceFile?.id_ho_so_dich_vu === file.id_ho_so_dich_vu;
                     
@@ -1016,7 +1016,7 @@ export default function Transactions() {
          ============================================================ */}
       {showMobileAction && mobileActionFile && (() => {
         const mFile = mobileActionFile;
-        const mHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === mFile.id_ma_hop_dong);
+        const mHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === mFile.id_ma_hop_dong) || mFile.ma_hop_dong;
         const mCust = store.customers.find(c => c.id_khach_hang === mFile.id_khach_hang);
         const mBank = store.banks.find(b => b.id_danh_muc_dich_vu === mHd?.id_danh_muc_dich_vu);
         return (

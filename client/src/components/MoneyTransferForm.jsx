@@ -13,7 +13,7 @@ export default function MoneyTransferForm({ value, onChange }) {
   const openKb = (field, value, title, unit = 'VNĐ') => setKbConfig({ open: true, field, value, title, unit });
   const store = useAppStore();
   const activeFile = store.selectedServiceFile;
-  const activeContract = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong);
+  const activeContract = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong) || activeFile?.ma_hop_dong;
 
   // Đảm bảo loai_cuoc_phi luôn có giá trị để UI radio button hoạt động đúng
   const initialValue = value ? { ...value } : null;

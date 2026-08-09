@@ -18,7 +18,7 @@ export default function TransactionDrawer({ open, onClose }) {
 
   const activeFile = store.selectedServiceFile;
   const activeCust = activeFile ? store.customers.find(c => c.id_khach_hang === activeFile.id_khach_hang) : null;
-  const activeHd = activeFile ? store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile.id_ma_hop_dong) : null;
+  const activeHd = activeFile ? (store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile.id_ma_hop_dong) || activeFile.ma_hop_dong) : null;
   const activeBank = activeHd ? store.banks.find(b => b.id_danh_muc_dich_vu === activeHd.id_danh_muc_dich_vu) : null;
 
   // Tự động gán thông minh (Nội dung) khi mở drawer

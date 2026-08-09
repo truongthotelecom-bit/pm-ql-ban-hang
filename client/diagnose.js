@@ -5,11 +5,8 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function run() {
-  const { data: hsNullDiemBan } = await supabase.from('ho_so_dich_vu').select('id_ho_so_dich_vu').is('id_diem_ban', null);
-  console.log("Ho so dich vu WITHOUT id_diem_ban:", hsNullDiemBan ? hsNullDiemBan.length : 0);
-  
-  const { data: hs } = await supabase.from('ho_so_dich_vu').select('*, ma_hop_dong(id_danh_muc_dich_vu, sys_danh_muc_dich_vu(id_loai_dich_vu))').limit(3);
-  console.log("Sample nested select:", JSON.stringify(hs, null, 2));
+  const { data: hd, error } = await supabase.from('ma_hop_dong').select('*').limit(5000);
+  console.log("Contracts fetched with limit(5000):", hd ? hd.length : 0);
 }
 
 run();
