@@ -599,6 +599,12 @@ export default function Transactions() {
                     const bank = store.banks.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
                     const isSelected = store.selectedServiceFile?.id_ho_so_dich_vu === file.id_ho_so_dich_vu;
                     
+                    const lastDateObj = file._lastTxDate || (file.ngay_tao ? new Date(file.ngay_tao) : new Date());
+                    const diffDays = (new Date().getTime() - lastDateObj.getTime()) / (1000 * 60 * 60 * 24);
+                    let dotColorClass = "bg-red-500 shadow-red-500/50";
+                    if (diffDays <= 60) dotColorClass = "bg-green-500 shadow-green-500/50";
+                    else if (diffDays <= 180) dotColorClass = "bg-orange-500 shadow-orange-500/50";
+                    
                     return (
                       <div style={{ ...style, paddingBottom: '12px' }}>
                         <div 
@@ -616,7 +622,8 @@ export default function Transactions() {
                         >
                           {/* Dòng trên cùng: Ngày GD cuối (trái) & Ngày tạo (phải) */}
                           <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-white/5 text-[9px] font-medium">
-                            <span className="text-violet-400/80">
+                            <span className="text-violet-400/80 flex items-center gap-1.5">
+                              <span className={`w-2 h-2 rounded-full shadow-sm ${dotColorClass}`}></span>
                               {file._lastTxDate 
                                 ? `GD cuối: ${file._lastTxDate.toLocaleDateString('vi-VN')} ${file._lastTxDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
                                 : `GD cuối: ${file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}`}
