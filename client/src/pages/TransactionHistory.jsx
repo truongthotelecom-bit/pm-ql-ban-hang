@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Select, DatePicker, Empty } from 'antd';
+import { Select, DatePicker, Empty, Table, Tag } from 'antd';
 import { FilterOutlined, CreditCardOutlined } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
 
@@ -318,8 +318,98 @@ export default function TransactionHistory() {
         </div>
       </div>
 
-      {/* LIST */}
-      <div className="space-y-3">
+      {/* DESKTOP TABLE VIEW */}
+      <div className="hidden lg:block glass-panel rounded-2xl border border-white/5 shadow-xl overflow-hidden">
+        <Table
+          dataSource={filteredTransactions}
+          rowKey={(record, index) => record.tx.id_chi_tiet_giao_dich || index}
+          pagination={{ pageSize: 10, position: ['bottomCenter'], showSizeChanger: true }}
+          className="custom-dark-table"
+          scroll={{ x: 1000 }}
+          size="middle"
+          columns={[
+            {
+              title: 'Thời gian',
+              dataIndex: ['tx', 'thoi_gian_giao_dich'],
+              key: 'thoi_gian_giao_dich',
+              render: (val, record) => <span className="text-gray-300 font-medium text-xs whitespace-nowrap">{fmtDate(val || record.tx.ngay_tao)}</span>,
+              width: 150,
+            },
+            {
+              title: 'Mã HĐ',
+              key: 'ma_hd',
+              render: (_, record) => <span className="text-red-400 font-black tracking-wide whitespace-nowrap">{record.contract?.ma_hop_dong || '---'}</span>,
+              width: 130,
+            },
+            {
+              title: 'Chủ HĐ',
+              key: 'chu_hd',
+              render: (_, record) => <span className="text-gray-100 font-bold uppercase">{record.contract?.chu_hop_dong || '---'}</span>,
+              width: 160,
+            },
+            {
+              title: 'Dịch vụ',
+              key: 'dich_vu',
+              render: (_, record) => <span className="text-gray-400 text-xs whitespace-nowrap">{record.bank?.ten_viet_tat ? `${record.bank.ten_viet_tat} - ${record.bank.ten_dich_vu}` : record.service?.ten_danh_muc || '---'}</span>,
+              width: 180,
+            },
+            {
+              title: 'Khách hàng',
+              key: 'khach_hang',
+              render: (_, record) => (
+                <div className="whitespace-nowrap">
+                  <div className="font-bold text-gray-200">{record.customer?.ho_va_ten || 'Khách lẻ'}</div>
+                  <div className="text-xs text-violet-400">{record.customer?.so_dien_thoai || ''}</div>
+                </div>
+              ),
+              width: 160,
+            },
+            {
+              title: 'Số tiền',
+              dataIndex: ['tx', 'so_tien_di'],
+              key: 'so_tien_di',
+              render: (val) => <span className="font-black text-violet-400 whitespace-nowrap">{formatCurrency(val)}</span>,
+              align: 'right',
+              width: 120,
+            },
+            {
+              title: 'Phí',
+              dataIndex: ['tx', 'phi_dich_vu'],
+              key: 'phi_dich_vu',
+              render: (val) => val > 0 ? <span className="text-orange-400 font-medium text-xs whitespace-nowrap">+ {formatCurrency(val)}</span> : null,
+              align: 'right',
+              width: 100,
+            },
+            {
+              title: 'Trạng thái',
+              key: 'trang_thai',
+              render: (_, record) => {
+                let color = 'default';
+                const st = record.tx.id_trang_thai;
+                if (st === 'dm-1') color = 'success';
+                else if (st === 'dm-2' || st === 'dm-4') color = 'warning';
+                else if (st === 'dm-3') color = 'error';
+                return (
+                  <Tag color={color} className="font-bold uppercase whitespace-nowrap">
+                    {record.status?.ten_danh_muc || 'CHỜ GD'}
+                  </Tag>
+                );
+              },
+              width: 130,
+              align: 'center'
+            },
+            {
+              title: 'Nội dung',
+              dataIndex: ['tx', 'noi_dung'],
+              key: 'noi_dung',
+              render: (val) => <span className="text-gray-300 text-xs">{val || '---'}</span>,
+            },
+          ]}
+        />
+      </div>
+
+      {/* MOBILE LIST VIEW */}
+      <div className="block lg:hidden space-y-3">
         {filteredTransactions.length === 0 ? (
           <div className="glass-panel p-10 flex flex-col items-center justify-center border border-white/5 rounded-2xl">
             <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<span className="text-gray-400">Không tìm thấy giao dịch nào trong khoảng thời gian này</span>} />
