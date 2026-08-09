@@ -240,59 +240,76 @@ const useAppStore = create((set, get) => ({
   },
 
   // Lấy hồ sơ dịch vụ
-  fetchServiceFiles: async (serviceId) => {
+  fetchServiceFiles: async (serviceId = null, searchTerm = '', page = 1, pageSize = 50) => {
     try {
       const user = useAuthStore.getState().user;
-      let filesQuery = supabase.from('ho_so_dich_vu')
-        .select(`*, ma_hop_dong ( *, sys_danh_muc_dich_vu ( id_loai_dich_vu ) )`)
+      
+      let filesQuery = supabase.from('vw_ho_so_dich_vu')
+        .select('*', { count: 'exact' })
         .order('ngay_tao', { ascending: false });
-      let txQuery = supabase.from('chi_tiet_giao_dich')
-        .select('*')
-        .order('thoi_gian_giao_dich', { ascending: false });
 
       if (user?.id_diem_ban) {
         filesQuery = filesQuery.or(`id_diem_ban.eq.${user.id_diem_ban},id_diem_ban.is.null`);
-        txQuery = txQuery.or(`id_diem_ban.eq.${user.id_diem_ban},id_diem_ban.is.null`);
       }
 
-      const fetchAllRecords = async (query) => {
-        let allData = [];
-        let from = 0;
-        const step = 1000;
-        let hasMore = true;
-        while (hasMore) {
-          const { data, error } = await query.range(from, from + step - 1);
-          if (error || !data || data.length === 0) {
-            hasMore = false;
-          } else {
-            allData = [...allData, ...data];
-            from += step;
-            if (data.length < step) hasMore = false;
+      if (serviceId) {
+        filesQuery = filesQuery.eq('id_loai_dich_vu', serviceId);
+      }
+
+      if (searchTerm) {
+        filesQuery = filesQuery.ilike('search_text', `%${searchTerm.toLowerCase()}%`);
+      }
+
+      // Pagination
+      const offset = (page - 1) * pageSize;
+      filesQuery = filesQuery.range(offset, offset + pageSize - 1);
+
+      const { data: flatData, count, error } = await filesQuery;
+      
+      if (error) throw error;
+
+      // Chuyển flatData thành dạng nested object mà Transactions.jsx đang dùng
+      const filesData = (flatData || []).map(row => ({
+        ...row,
+        ma_hop_dong: {
+          id_ma_hop_dong: row.id_ma_hop_dong,
+          ma_hop_dong: row.ma_hop_dong_str,
+          chu_hop_dong: row.chu_hop_dong,
+          id_danh_muc_dich_vu: row.id_danh_muc_dich_vu,
+          sys_danh_muc_dich_vu: {
+            id_loai_dich_vu: row.id_loai_dich_vu
           }
         }
-        return { data: allData };
-      };
+      }));
 
-      const [{ data: filesData }, { data: allTxData }] = await Promise.all([
-        fetchAllRecords(filesQuery),
-        fetchAllRecords(txQuery)
-      ]);
+      // Chỉ fetch transaction của những hồ sơ trên trang hiện tại để chống lag
+      const fileIds = filesData.map(f => f.id_ho_so_dich_vu);
+      let txQuery = supabase.from('chi_tiet_giao_dich')
+        .select('*')
+        .in('id_ho_so_dich_vu', fileIds.length > 0 ? fileIds : ['00000000-0000-0000-0000-000000000000'])
+        .order('thoi_gian_giao_dich', { ascending: false });
 
-      const filtered = serviceId
-        ? (filesData || []).filter(f => f.ma_hop_dong?.sys_danh_muc_dich_vu?.id_loai_dich_vu === serviceId)
-        : (filesData || []);
+      if (user?.id_diem_ban) {
+        txQuery = txQuery.or(`id_diem_ban.eq.${user.id_diem_ban},id_diem_ban.is.null`);
+      }
+      
+      const { data: allTxData } = await txQuery;
 
-      set({ serviceFiles: filtered, allServiceFiles: filesData || [], allTransactions: allTxData || [] });
+      set({ 
+        serviceFiles: filesData, 
+        totalServiceFiles: count || 0,
+        allTransactions: allTxData || [] 
+      });
 
-      if (filtered.length > 0) {
-        const firstFile = filtered[0];
+      if (filesData.length > 0) {
+        const firstFile = filesData[0];
         set({ selectedServiceFile: firstFile });
         await get().fetchTransactionDetails(firstFile.id_ho_so_dich_vu);
       } else {
-        set({ selectedServiceFile: null, transactionDetails: [], selectedDetail: null });
+        set({ selectedServiceFile: null, selectedDetail: null, transactionDetails: [] });
       }
     } catch (err) {
-      console.error('Lỗi tải hồ sơ dịch vụ:', err);
+      console.error('Lỗi lấy hồ sơ dịch vụ:', err);
     }
   },
 

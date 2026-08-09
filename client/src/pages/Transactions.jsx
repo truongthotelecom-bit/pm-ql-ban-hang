@@ -604,109 +604,115 @@ export default function Transactions() {
               Chưa có hồ sơ dịch vụ nào được lập cho phân hệ này.
             </div>
           ) : (
-            <List
-              className="scrollbar-thin"
-              height={500}
-              itemCount={sortedFiles.length}
-              itemSize={120}
-              width="100%"
+            <>
+            <div 
+              className="flex-1 overflow-y-auto space-y-3 pb-4 scrollbar-thin" 
+              style={{ maxHeight: '500px' }}
             >
-                  {({ index, style }) => {
-                    const file = sortedFiles[index];
-                    const cust = store.customers.find(c => c.id_khach_hang === file.id_khach_hang);
-                    const hd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
-                    const bank = store.banks.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
-                    const isSelected = store.selectedServiceFile?.id_ho_so_dich_vu === file.id_ho_so_dich_vu;
-                    
-                    const lastDateObj = file._lastTxDate || (file.ngay_tao ? new Date(file.ngay_tao) : new Date());
-                    const diffDays = (new Date().getTime() - lastDateObj.getTime()) / (1000 * 60 * 60 * 24);
-                    let dotColorClass = "bg-red-500 shadow-red-500/50";
-                    if (diffDays <= 7) dotColorClass = "bg-blue-500 shadow-blue-500/50";
-                    else if (diffDays <= 60) dotColorClass = "bg-green-500 shadow-green-500/50";
-                    else if (diffDays <= 180) dotColorClass = "bg-orange-500 shadow-orange-500/50";
-                    
-                    return (
-                      <div style={{ ...style, paddingBottom: '12px' }}>
-                        <div 
-                          onClick={() => {
-                            if (window.innerWidth < 1280) {
-                              // Mobile: hien bottom sheet
-                              setMobileActionFile(file);
-                              setShowMobileAction(true);
-                            } else {
-                              // Desktop: chon file binh thuong
-                              store.selectServiceFile(file);
-                            }
-                          }}
-                          className={`h-full px-3.5 py-3 rounded-xl border transition-all cursor-pointer hover:scale-[1.01] overflow-hidden ${isSelected ? 'bg-violet-600/10 border-violet-500/50 shadow-lg shadow-violet-600/5' : 'bg-[#131c33]/40 border-white/5 hover:border-white/10'}`}
-                        >
-                          {/* Dòng trên cùng: Ngày GD cuối (trái) & Ngày tạo (phải) */}
-                          <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-white/5 text-[9px] font-medium">
-                            <span className="text-violet-400/80 flex items-center gap-1.5">
-                              <span className={`w-2 h-2 rounded-full shadow-sm ${dotColorClass}`}></span>
-                              {file._lastTxDate 
-                                ? `GD cuối: ${file._lastTxDate.toLocaleDateString('vi-VN')} ${file._lastTxDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
-                                : `GD cuối: ${file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}`}
-                            </span>
-                            <span className="text-gray-500">
-                              Ngày tạo: {file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}
-                            </span>
-                          </div>
+              {sortedFiles.map((file, index) => {
+                const cust = store.customers.find(c => c.id_khach_hang === file.id_khach_hang);
+                const hd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
+                const bank = store.banks.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
+                const isSelected = store.selectedServiceFile?.id_ho_so_dich_vu === file.id_ho_so_dich_vu;
+                
+                const lastDateObj = file._lastTxDate || (file.ngay_tao ? new Date(file.ngay_tao) : new Date());
+                const diffDays = (new Date().getTime() - lastDateObj.getTime()) / (1000 * 60 * 60 * 24);
+                let dotColorClass = "bg-red-500 shadow-red-500/50";
+                if (diffDays <= 7) dotColorClass = "bg-blue-500 shadow-blue-500/50";
+                else if (diffDays <= 60) dotColorClass = "bg-green-500 shadow-green-500/50";
+                else if (diffDays <= 180) dotColorClass = "bg-orange-500 shadow-orange-500/50";
+                
+                return (
+                  <div key={file.id_ho_so_dich_vu} style={{ paddingBottom: '12px' }}>
+                    <div 
+                      onClick={() => {
+                        if (window.innerWidth < 1280) {
+                          // Mobile: hien bottom sheet
+                          setMobileActionFile(file);
+                          setShowMobileAction(true);
+                        } else {
+                          // Desktop: chon file binh thuong
+                          store.selectServiceFile(file);
+                        }
+                      }}
+                      className={`h-full px-3.5 py-3 rounded-xl border transition-all cursor-pointer hover:scale-[1.01] overflow-hidden ${isSelected ? 'bg-violet-600/10 border-violet-500/50 shadow-lg shadow-violet-600/5' : 'bg-[#131c33]/40 border-white/5 hover:border-white/10'}`}
+                    >
+                      {/* Dòng trên cùng: Ngày GD cuối (trái) & Ngày tạo (phải) */}
+                      <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-white/5 text-[9px] font-medium">
+                        <span className="text-violet-400/80 flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full shadow-sm ${dotColorClass}`}></span>
+                          {file._lastTxDate 
+                            ? `GD cuối: ${file._lastTxDate.toLocaleDateString('vi-VN')} ${file._lastTxDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
+                            : `GD cuối: ${file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}`}
+                        </span>
+                        <span className="text-gray-500">
+                          Ngày tạo: {file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}
+                        </span>
+                      </div>
 
-                          {/* Dòng giữa: Logo + Thông tin chia 2 bên */}
-                          <div className="flex items-center gap-3">
-                            {/* Logo dịch vụ */}
-                            <div className="flex-shrink-0 w-10 h-10 bg-white/5 rounded-xl border border-white/10 p-1 flex items-center justify-center overflow-hidden">
-                              {bank?.logo ? (
-                                <img src={bank.logo} alt={bank.ten_viet_tat} className="w-full h-full object-contain" />
-                              ) : (
-                                <span className="text-lg">{store.selectedService?.icon || '📁'}</span>
-                              )}
-                            </div>
-
-                            {/* Thông tin chia 2 cột: Trái & Phải */}
-                            <div className="flex flex-1 justify-between items-start min-w-0 gap-2">
-                              {/* TRÁI: Mã HĐ (dòng 1) + Chủ HĐ (dòng 2) */}
-                              <div className="flex flex-col min-w-0">
-                                <h4 className="font-extrabold text-sm text-red-400 leading-tight uppercase tracking-wide truncate">
-                                  {hd?.ma_hop_dong || 'CHƯA CÓ HĐ'}
-                                </h4>
-                                <span className="text-[11px] text-gray-300 font-semibold truncate mt-0.5">
-                                  {hd?.chu_hop_dong || '—'}
-                                </span>
-                              </div>
-
-                              {/* PHẢI: Tên người TT (dòng 1) + SĐT (dòng 2) */}
-                              <div className="flex flex-col items-end flex-shrink-0 text-right">
-                                <span className="text-[11px] text-gray-200 font-bold truncate max-w-[110px]">
-                                  {cust?.ho_va_ten || 'Khách lẻ'}
-                                </span>
-                                {cust?.so_dien_thoai ? (
-                                  <span className="text-[10px] text-violet-400/80 font-semibold mt-0.5">
-                                    {cust.so_dien_thoai}
-                                  </span>
-                                ) : (
-                                  <span className="text-[10px] text-gray-600 mt-0.5">—</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Nội dung mặc định (nếu có) */}
-                          {file.noi_dung && (
-                            <div className="mt-2 flex items-center gap-1.5">
-                              <span className="text-[10px] text-gray-400/80 font-medium italic truncate">
-                                📝 {file.noi_dung}
-                              </span>
-                            </div>
+                      {/* Dòng giữa: Logo + Thông tin chia 2 bên */}
+                      <div className="flex items-center gap-3">
+                        {/* Logo dịch vụ */}
+                        <div className="flex-shrink-0 w-10 h-10 bg-white/5 rounded-xl border border-white/10 p-1 flex items-center justify-center overflow-hidden">
+                          {bank?.logo ? (
+                            <img src={bank.logo} alt={bank.ten_viet_tat} className="w-full h-full object-contain" />
+                          ) : (
+                            <span className="text-lg">{store.selectedService?.icon || '📁'}</span>
                           )}
+                        </div>
 
-                          {/* Dòng dưới đã được chuyển lên trên cùng */}
+                        {/* Thông tin chia 2 cột: Trái & Phải */}
+                        <div className="flex flex-1 justify-between items-start min-w-0 gap-2">
+                          {/* TRÁI: Mã HĐ (dòng 1) + Chủ HĐ (dòng 2) */}
+                          <div className="flex flex-col min-w-0">
+                            <h4 className="font-extrabold text-sm text-red-400 leading-tight uppercase tracking-wide truncate">
+                              {hd?.ma_hop_dong || 'CHƯA CÓ HĐ'}
+                            </h4>
+                            <span className="text-[11px] text-gray-300 font-semibold truncate mt-0.5">
+                              {hd?.chu_hop_dong || '—'}
+                            </span>
+                          </div>
+
+                          {/* PHẢI: Tên người TT (dòng 1) + SĐT (dòng 2) */}
+                          <div className="flex flex-col items-end flex-shrink-0 text-right">
+                            <span className="text-[11px] text-gray-200 font-bold truncate max-w-[110px]">
+                              {cust?.ho_va_ten || 'Khách lẻ'}
+                            </span>
+                            {cust?.so_dien_thoai ? (
+                              <span className="text-[10px] text-violet-400/80 font-semibold mt-0.5">
+                                {cust.so_dien_thoai}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-gray-600 mt-0.5">—</span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    );
-                  }}
-            </List>
+
+                      {/* Nội dung mặc định (nếu có) */}
+                      {file.noi_dung && (
+                        <div className="mt-2 flex items-center gap-1.5">
+                          <span className="text-[10px] text-gray-400/80 font-medium italic truncate">
+                            📝 {file.noi_dung}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-4 pb-20 md:pb-0">
+              <Pagination 
+                currentPage={currentPage}
+                totalCount={store.totalServiceFiles || 0}
+                pageSize={pageSize}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+              />
+            </div>
+            </>
           )}
         </div>
       </div>
