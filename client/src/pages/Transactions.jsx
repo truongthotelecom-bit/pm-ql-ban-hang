@@ -602,7 +602,8 @@ export default function Transactions() {
                     const lastDateObj = file._lastTxDate || (file.ngay_tao ? new Date(file.ngay_tao) : new Date());
                     const diffDays = (new Date().getTime() - lastDateObj.getTime()) / (1000 * 60 * 60 * 24);
                     let dotColorClass = "bg-red-500 shadow-red-500/50";
-                    if (diffDays <= 60) dotColorClass = "bg-green-500 shadow-green-500/50";
+                    if (diffDays <= 7) dotColorClass = "bg-blue-500 shadow-blue-500/50";
+                    else if (diffDays <= 60) dotColorClass = "bg-green-500 shadow-green-500/50";
                     else if (diffDays <= 180) dotColorClass = "bg-orange-500 shadow-orange-500/50";
                     
                     return (
