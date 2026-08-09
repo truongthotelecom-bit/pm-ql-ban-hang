@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA BAN HÀNG - Quản Lý Bán Hàng Premium</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="logo-circle">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h2>AURA<span>SALES</span></h2>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <a href="#dashboard" class="menu-item active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </a>
+                <a href="#customers" class="menu-item" data-tab="customers">
+                    <i class="fa-solid fa-users"></i> Khách hàng
+                </a>
+                <a href="#transactions" class="menu-item" data-tab="transactions">
+                    <i class="fa-solid fa-wallet"></i> Quản lý Giao dịch
+                </a>
+                <a href="#qr-generator" class="menu-item" data-tab="qr-generator">
+                    <i class="fa-solid fa-qrcode"></i> Tạo mã QR
+                </a>
+                <a href="#cash-counter" class="menu-item" data-tab="cash-counter">
+                    <i class="fa-solid fa-coins"></i> Phiếu đếm tiền
+                </a>
+                <a href="#settings" class="menu-item" data-tab="settings">
+                    <i class="fa-solid fa-gears"></i> Thiết lập & Chữ ký
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p>Phiên bản 1.0.0 Premium</p>
+                <div class="status-indicator">
+                    <span class="status-dot online"></span>
+                    <span id="db-status">Đang tải...</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Tìm kiếm nhanh đơn hàng, khách hàng...">
+                </div>
+                <div class="header-profile">
+                    <div class="notification-bell">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="bell-badge">3</span>
+                    </div>
+                    <div class="profile-info">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Avatar">
+                        <div class="profile-text">
+                            <h4>Admin Aura</h4>
+                            <p>Chủ cửa hàng</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Tab -->
+            <section id="dashboard-tab" class="tab-content active">
+                <div class="welcome-banner">
+                    <div>
+                        <h1>Chào mừng trở lại, Admin! 👋</h1>
+                        <p>Dưới đây là tổng quan hiệu quả kinh doanh và quỹ thu chi dòng tiền hôm nay.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="switchTab('transactions')">
+                        <i class="fa-solid fa-plus"></i> Lập Giao Dịch Mới
+                    </button>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon income">
+                            <i class="fa-solid fa-arrow-trend-up"></i>
+                        </div>
+                        <div class="stat-data">
+                            <h3>12,500,000 đ</h3>
+                            <p>Tổng Doanh Thu Thu</p>
+                            <span class="stat-change positive"><i class="fa-solid fa-caret-up"></i> +12% so với hôm qua</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon expense">
+                            <i class="fa-solid fa-arrow-trend-down"></i>
+                        </div>
+                        <div class="stat-data">
+                            <h3>0 đ</h3>
+                            <p>Tổng Chi Dịch Vụ</p>
+                            <span class="stat-change"><i class="fa-solid fa-caret-right"></i> Ổn định</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon users-icon">
+                            <i class="fa-solid fa-user-plus"></i>
+                        </div>
+                        <div class="stat-data">
+                            <h3 id="dash-customer-count">2</h3>
+                            <p>Khách Hàng Mới</p>
+                            <span class="stat-change positive"><i class="fa-solid fa-caret-up"></i> Tăng trưởng tốt</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon order-icon">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                        </div>
+                        <div class="stat-data">
+                            <h3 id="dash-transaction-count">1</h3>
+                            <p>Giao Dịch Hôm Nay</p>
+                            <span class="stat-change positive"><i class="fa-solid fa-caret-up"></i> Hoàn thành 100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Xu hướng doanh thu & Dòng tiền tuần này</h3>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    <div class="chart-card text-center flex-center">
+                        <h3>Cấu trúc Phương thức thanh toán</h3>
+                        <div style="max-height: 250px; width: 100%;">
+                            <canvas id="paymentMethodChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Customers Tab -->
+            <section id="customers-tab" class="tab-content">
+                <div class="section-title">
+                    <div>
+                        <h2>Danh Sách Khách Hàng</h2>
+                        <p>Quản lý hồ sơ và lịch sử phân loại khách hàng của cửa hàng.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('customer-modal')">
+                        <i class="fa-solid fa-user-plus"></i> Thêm Khách Hàng
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table id="customers-table">
+                        <thead>
+                            <tr>
+                                <th>Họ & Tên</th>
+                                <th>Số điện thoại</th>
+                                <th>Địa chỉ</th>
+                                <th>Nhóm đối tượng</th>
+                                <th>Giới tính</th>
+                                <th>Hạng Level</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-list">
+                            <!-- JS Generated -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Transactions Tab -->
+            <section id="transactions-tab" class="tab-content">
+                <div class="section-title">
+                    <div>
+                        <h2>Quản Lý Giao Dịch & Sổ Cái</h2>
+                        <p>Theo dõi dòng tiền chuyển khoản chi tiết, phí dịch vụ, chiết khấu và duyệt bill.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('transaction-modal')">
+                        <i class="fa-solid fa-cash-register"></i> Lập Phiếu Giao Dịch
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table id="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Khách Hàng</th>
+                                <th>Nội Dung</th>
+                                <th>Số Tiền</th>
+                                <th>Phí Dịch Vụ</th>
+                                <th>Chiết Khấu</th>
+                                <th>Thực Đi</th>
+                                <th>Trạng Thái</th>
+                                <th>Phương thức</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-list">
+                            <!-- JS Generated -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- QR Generator Tab -->
+            <section id="qr-generator-tab" class="tab-content">
+                <div class="section-title">
+                    <h2>Tạo Mã QR VietQR Thanh Toán</h2>
+                    <p>Nhập thông tin giao dịch để sinh mã QR chuyển khoản nhanh kèm nội dung tự động.</p>
+                </div>
+
+                <div class="qr-layout">
+                    <div class="qr-form-card card">
+                        <h3>Thông tin chuyển khoản</h3>
+                        <form id="qr-form" onsubmit="generateVietQR(event)">
+                            <div class="form-group">
+                                <label for="qr-bank">Ngân hàng thụ hưởng</label>
+                                <select id="qr-bank" class="form-control" required>
+                                    <!-- JS Generated -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="qr-account">Số tài khoản nhận</label>
+                                <input type="text" id="qr-account" class="form-control" value="0988888888" placeholder="Nhập số tài khoản thụ hưởng" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="qr-account-name">Tên chủ tài khoản (Không dấu)</label>
+                                <input type="text" id="qr-account-name" class="form-control" value="NGUYEN VAN A" placeholder="VD: NGUYEN VAN A" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="qr-amount">Số tiền chuyển (VND)</label>
+                                <input type="number" id="qr-amount" class="form-control" placeholder="Ví dụ: 12500000" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="qr-desc">Nội dung chuyển khoản</label>
+                                <input type="text" id="qr-desc" class="form-control" placeholder="VD: AURA SHOP GD SIM 0988" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Tạo Mã QR VietQR</button>
+                        </form>
+                    </div>
+
+                    <div class="qr-preview-card card text-center flex-center">
+                        <h3>Mã VietQR Thanh Toán Nhanh</h3>
+                        <p class="subtitle">Khách hàng chỉ cần quét mã bằng App Ngân hàng để thanh toán tự động</p>
+                        <div class="qr-image-wrapper">
+                            <img id="qr-result-image" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=AURA-WELCOME" alt="VietQR Code">
+                        </div>
+                        <div class="qr-details" id="qr-result-details" style="display:none;">
+                            <p><strong>Thụ hưởng:</strong> <span id="res-bank">Vietinbank</span></p>
+                            <p><strong>STK:</strong> <span id="res-stk">0988888888</span></p>
+                            <p><strong>Số tiền:</strong> <span id="res-money">0 đ</span></p>
+                            <button class="btn btn-secondary" onclick="printQR()"><i class="fa-solid fa-print"></i> In Phiếu QR</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cash Counter Tab -->
+            <section id="cash-counter-tab" class="tab-content">
+                <div class="section-title">
+                    <h2>Phiếu Đếm Tiền Mặt Đối Soát Quỹ</h2>
+                    <p>Hỗ trợ nhân viên đếm tiền và tính tổng quỹ tiền mặt cuối ca cực kỳ chính xác.</p>
+                </div>
+
+                <div class="cash-layout">
+                    <div class="card cash-counting-card">
+                        <h3>Bảng kiểm kê mệnh giá</h3>
+                        <div class="cash-grid">
+                            <div class="cash-row">
+                                <span class="denom">500,000 đ</span>
+                                <input type="number" class="cash-input" id="c-500k" value="0" min="0" oninput="calcCashTotal()">
+                                <span class="cash-subtotal" id="s-500k">0 đ</span>
+                            </div>
+                            <div class="cash-row">
+                                <span class="denom">200,000 đ</span>
+                                <input type="number" class="cash-input" id="c-200k" value="0" min="0" oninput="calcCashTotal()">
+                                <span class="cash-subtotal" id="s-200k">0 đ</span>
+                            </div>
+                            <div class="cash-row">
+                                <span class="denom">100,000 đ</span>
+                                <input type="number" class="cash-input" id="c-100k" value="0" min="0" oninput="calcCashTotal()">
+                                <span class="cash-subtotal" id="s-100k">0 đ</span>
+                            </div>
+                            <div class="cash-row">
+                                <span class="denom">50,000 đ</span>
+                                <input type="number" class="cash-input" id="c-50k" value="0" min="0" oninput="calcCashTotal()">
+                                <span class="cash-subtotal" id="s-50k">0 đ</span>
+                            </div>
+                            <div class="cash-row">
+                                <span class="denom">20,000 đ</span>
+                                <input type="number" class="cash-input" id="c-20k" value="0" min="0" oninput="calcCashTotal()">
+                                <span class="cash-subtotal" id="s-20k">0 đ</span>
+                            </div>
+                            <div class="cash-row">
+                                <span class="denom">10,000 đ</span>
+                                <input type="number" class="cash-input" id="c-10k" value="0" min="0" oninput="calcCashTotal()">
+                                <span class="cash-subtotal" id="s-10k">0 đ</span>
+                            </div>
+                            <div class="cash-row">
+                                <span class="denom">5,000 đ</span>
+                                <input type="number" class="cash-input" id="c-5k" value="0" min="0" oninput="calcCashTotal()">
+                                <span class="cash-subtotal" id="s-5k">0 đ</span>
+                            </div>
+                            <div class="cash-row">
+                                <span class="denom">2,000 đ</span>
+                                <input type="number" class="cash-input" id="c-2k" value="0" min="0" oninput="calcCashTotal()">
+                                <span class="cash-subtotal" id="s-2k">0 đ</span>
+                            </div>
+                            <div class="cash-row">
+                                <span class="denom">1,000 đ</span>
+                                <input type="number" class="cash-input" id="c-1k" value="0" min="0" oninput="calcCashTotal()">
+                                <span class="cash-subtotal" id="s-1k">0 đ</span>
+                            </div>
+                            <div class="cash-row">
+                                <span class="denom">500 đ</span>
+                                <input type="number" class="cash-input" id="c-500d" value="0" min="0" oninput="calcCashTotal()">
+                                <span class="cash-subtotal" id="s-500d">0 đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card cash-summary-card text-center flex-center">
+                        <h3>Tổng Giá Trị Quỹ Đếm</h3>
+                        <h1 class="total-denom-display" id="total-cash-display">0 đ</h1>
+                        <p class="subtitle">Xác minh quỹ khớp hoàn hảo trước khi giao ca.</p>
+                        <div class="form-group" style="width: 100%; text-align: left; margin-top: 15px;">
+                            <label>Người đếm tiền</label>
+                            <input type="text" id="cash-counter-name" class="form-control" value="Admin Aura">
+                        </div>
+                        <button class="btn btn-primary btn-block" onclick="saveCashSlip()"><i class="fa-solid fa-file-signature"></i> Lưu Phiếu Kiểm Kê</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Tab -->
+            <section id="settings-tab" class="tab-content">
+                <div class="section-title">
+                    <h2>Cấu Hình Thương Hiệu & Chữ Ký</h2>
+                    <p>Thiết lập thông tin hiển thị của cửa hàng dùng để in bill hóa đơn thanh toán.</p>
+                </div>
+
+                <div class="card" style="max-width: 600px;">
+                    <h3>Thông tin in ấn hóa đơn</h3>
+                    <form id="signature-form" onsubmit="saveSignature(event)">
+                        <div class="form-group">
+                            <label>Tên cửa hàng</label>
+                            <input type="text" id="sig-shop-name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Địa chỉ</label>
+                            <input type="text" id="sig-address" class="form-control" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Số điện thoại 1</label>
+                                <input type="text" id="sig-phone1" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Số điện thoại 2</label>
+                                <input type="text" id="sig-phone2" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Zalo</label>
+                                <input type="text" id="sig-zalo" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Facebook</label>
+                                <input type="text" id="sig-facebook" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Tên chữ ký hóa đơn (VD: Giám đốc/Kế toán)</label>
+                            <input type="text" id="sig-title" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Lưu Thiết Lập</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Customer Modal -->
+    <div id="customer-modal" class="modal">
+        <div class="modal-content glass">
+            <span class="close-btn" onclick="closeModal('customer-modal')">&times;</span>
+            <h2>Thêm Khách Hàng Mới</h2>
+            <form id="customer-form" onsubmit="saveCustomer(event)">
+                <div class="form-group">
+                    <label>Họ & Tên *</label>
+                    <input type="text" id="c-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Số điện thoại *</label>
+                    <input type="text" id="c-phone" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Địa chỉ</label>
+                    <input type="text" id="c-address" class="form-control">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Giới tính</label>
+                        <select id="c-gender" class="form-control">
+                            <!-- JS Generated -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Hạng Level</label>
+                        <select id="c-level" class="form-control">
+                            <!-- JS Generated -->
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Lưu Khách Hàng</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div id="transaction-modal" class="modal">
+        <div class="modal-content glass" style="max-width: 650px;">
+            <span class="close-btn" onclick="closeModal('transaction-modal')">&times;</span>
+            <h2>Tạo Giao Dịch / Chuyển Khoản Mới</h2>
+            <form id="transaction-form" onsubmit="saveTransaction(event)">
+                <div class="form-group">
+                    <label>Khách hàng thực hiện *</label>
+                    <select id="t-customer" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Nội dung giao dịch chính *</label>
+                    <input type="text" id="t-desc" class="form-control" placeholder="Ví dụ: Mua SIM số VIP Lộc Phát" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Số tiền giao dịch (đ) *</label>
+                        <input type="number" id="t-amount" class="form-control" oninput="calcNetAmt()" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phương thức thanh toán *</label>
+                        <select id="t-paymethod" class="form-control" required></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Chiết khấu (%)</label>
+                        <input type="number" id="t-discount" class="form-control" value="0" min="0" max="100" oninput="calcNetAmt()">
+                    </div>
+                    <div class="form-group">
+                        <label>Phí dịch vụ ngoài (đ)</label>
+                        <input type="number" id="t-fee" class="form-control" value="0" min="0" oninput="calcNetAmt()">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tổng số tiền chuyển đi thực tế (Thực đi)</label>
+                    <h3 id="t-net-amount" style="color: var(--primary-light);">0 đ</h3>
+                </div>
+                <div class="form-group">
+                    <label>Trạng thái giao dịch</label>
+                    <select id="t-status" class="form-control">
+                        <!-- JS Generated -->
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Duyệt & Lưu Giao Dịch</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Print Modal -->
+    <div id="print-modal" class="modal">
+        <div class="modal-content glass" style="max-width: 450px; background: white; color: black;">
+            <span class="close-btn" style="color: black;" onclick="closeModal('print-modal')">&times;</span>
+            <div id="bill-print-area">
+                <!-- Injected Dynamically -->
+            </div>
+            <button class="btn btn-primary btn-block no-print" onclick="window.print()" style="margin-top: 15px;">Thực hiện in hóa đơn</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
