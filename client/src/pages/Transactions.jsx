@@ -958,16 +958,25 @@ export default function Transactions() {
 
               {/* VietQR Live Preview */}
               {activeQrUrl && (
-                <div 
-                  onClick={() => setShowQrModal(true)}
-                  className="p-3 bg-white rounded-xl shadow-lg flex flex-col items-center max-w-[200px] mx-auto border border-gray-200 cursor-pointer hover:scale-102 transition-all"
-                >
-                  <img 
-                    src={activeQrUrl}
-                    className="w-[140px] h-[140px] object-contain" 
-                    alt="VietQR code preview" 
-                  />
-                  <span className="text-[8px] text-gray-500 font-extrabold mt-1.5 uppercase tracking-wide">Quét chuyển tiền realtime</span>
+                <div className="flex flex-col items-center gap-3 w-full">
+                  <div 
+                    onClick={() => setShowQrModal(true)}
+                    className="p-3 bg-white rounded-xl shadow-lg flex flex-col items-center max-w-[200px] mx-auto border border-gray-200 cursor-pointer hover:scale-[1.02] transition-all"
+                  >
+                    <img 
+                      src={activeQrUrl}
+                      className="w-[140px] h-[140px] object-contain" 
+                      alt="VietQR code preview" 
+                    />
+                    <span className="text-[8px] text-gray-500 font-extrabold mt-1.5 uppercase tracking-wide">Quét chuyển tiền realtime</span>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 text-center w-full bg-white/5 p-3 rounded-xl border border-white/5">
+                    <p className="text-[12px] text-gray-100 font-bold">{activeBank?.ten_dich_vu || store.selectedService?.ten_danh_muc || '—'}</p>
+                    <p className="text-[12px] text-violet-300 font-black">{activeHd?.ma_hop_dong || '—'}</p>
+                    <p className="text-[12px] text-gray-100 font-bold">{activeHd?.chu_hop_dong || '—'}</p>
+                    <p className="text-[12px] text-gray-300 font-semibold"><span className="text-[10px] text-gray-500 mr-1">NỘI DUNG:</span>{activeDetail?.noi_dung || '—'}</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -1518,11 +1527,11 @@ export default function Transactions() {
             <h3 className="text-2xl font-black text-violet-400 mt-6 tracking-wide">
               {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien_di)}
             </h3>
-            <div className="flex flex-col gap-1.5 mt-4 text-left w-full bg-white/5 p-3 rounded-xl border border-white/5">
-              <p className="text-xs text-gray-400 font-semibold">DỊCH VỤ: <span className="text-gray-100 font-bold ml-1">{activeBank?.ten_dich_vu || store.selectedService?.ten_danh_muc || '—'}</span></p>
-              <p className="text-xs text-gray-400 font-semibold">MÃ HỢP ĐỒNG: <span className="text-violet-300 font-bold ml-1">{activeHd?.ma_hop_dong || '—'}</span></p>
-              <p className="text-xs text-gray-400 font-semibold">CHỦ HỢP ĐỒNG: <span className="text-gray-100 font-bold ml-1">{activeHd?.chu_hop_dong || '—'}</span></p>
-              <p className="text-xs text-gray-400 font-semibold">NỘI DUNG: <span className="text-gray-100 font-bold ml-1">{activeDetail?.noi_dung || '—'}</span></p>
+            <div className="flex flex-col gap-1.5 mt-4 text-center w-full bg-white/5 p-3 rounded-xl border border-white/5">
+              <p className="text-[13px] text-gray-100 font-bold">{activeBank?.ten_dich_vu || store.selectedService?.ten_danh_muc || '—'}</p>
+              <p className="text-[14px] text-violet-300 font-black tracking-wide">{activeHd?.ma_hop_dong || '—'}</p>
+              <p className="text-[13px] text-gray-100 font-bold">{activeHd?.chu_hop_dong || '—'}</p>
+              <p className="text-[12px] text-gray-300 font-semibold"><span className="text-[10px] text-gray-500 mr-1">NỘI DUNG:</span>{activeDetail?.noi_dung || '—'}</p>
             </div>
           </div>
         )}
