@@ -1518,7 +1518,12 @@ export default function Transactions() {
             <h3 className="text-2xl font-black text-violet-400 mt-6 tracking-wide">
               {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien_di)}
             </h3>
-            <p className="text-xs text-gray-500 font-bold mt-2 uppercase tracking-wide">Mã hợp đồng nhận: {activeHd?.ma_hop_dong}</p>
+            <div className="flex flex-col gap-1.5 mt-4 text-left w-full bg-white/5 p-3 rounded-xl border border-white/5">
+              <p className="text-xs text-gray-400 font-semibold">DỊCH VỤ: <span className="text-gray-100 font-bold ml-1">{activeBank?.ten_dich_vu || store.selectedService?.ten_danh_muc || '—'}</span></p>
+              <p className="text-xs text-gray-400 font-semibold">MÃ HỢP ĐỒNG: <span className="text-violet-300 font-bold ml-1">{activeHd?.ma_hop_dong || '—'}</span></p>
+              <p className="text-xs text-gray-400 font-semibold">CHỦ HỢP ĐỒNG: <span className="text-gray-100 font-bold ml-1">{activeHd?.chu_hop_dong || '—'}</span></p>
+              <p className="text-xs text-gray-400 font-semibold">NỘI DUNG: <span className="text-gray-100 font-bold ml-1">{activeDetail?.noi_dung || '—'}</span></p>
+            </div>
           </div>
         )}
       </Modal>
