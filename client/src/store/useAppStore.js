@@ -427,13 +427,15 @@ const useAppStore = create((set, get) => ({
       // Lọc bỏ các trường UI không có trong database schema (loai_cuoc_phi, so_tien_giam_ck)
       const { loai_cuoc_phi, so_tien_giam_ck, ...cleanPayload } = detailPayload;
 
+      const currentUser = useAuthStore.getState().user;
+
       const fullPayload = {
         ...cleanPayload,
         id_chi_tiet_giao_dich: generatedId,
         id_ho_so_dich_vu: activeFile.id_ho_so_dich_vu,
         thoi_gian_giao_dich: new Date().toISOString(),
-        id_diem_ban: detailPayload.id_diem_ban || get().user?.id_diem_ban || null,
-        id_tai_khoan_tao: detailPayload.id_tai_khoan_tao || get().user?.id_tai_khoan || null
+        id_diem_ban: detailPayload.id_diem_ban || currentUser?.id_diem_ban || null,
+        id_tai_khoan_tao: detailPayload.id_tai_khoan_tao || currentUser?.id_tai_khoan || null
       };
 
       const { data, error } = await supabase.from('chi_tiet_giao_dich').insert([fullPayload]).select().single();
