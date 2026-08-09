@@ -849,11 +849,17 @@ export default function Transactions() {
                             </span>
                           </div>
                           
-                          <div className="text-right">
-                            <span className="text-sm font-extrabold text-violet-400 block">
+                          <div className="text-right flex flex-col items-end">
+                            <span className={`text-[13px] font-extrabold block ${
+                              detail.id_trang_thai === 'dm-1' ? 'text-green-400' :
+                              detail.id_trang_thai === 'dm-3' ? 'text-red-400' :
+                              'text-orange-400'
+                            }`}>
                               {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.so_tien_di)}
                             </span>
-                            <span className="block mt-1">{getStatusTag(detail.id_trang_thai)}</span>
+                            <span className="text-[9px] text-gray-400 font-semibold mt-1.5 bg-white/5 px-1.5 py-0.5 rounded border border-white/5 uppercase tracking-wide">
+                              Phí: <span className="text-gray-200">+{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.phi_dich_vu)}</span>
+                            </span>
                           </div>
                         </div>
                       );
