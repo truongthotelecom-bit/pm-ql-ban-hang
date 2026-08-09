@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import useAppStore from '../store/useAppStore';
 import useAuthStore from '../store/useAuthStore';
 import { supabase } from '../lib/supabaseClient';
-import { Button, Tag, message, Modal, Input, Select, Radio, Badge } from 'antd';
+import { Button, Tag, message, Modal, Input, Select, Radio, Badge, Pagination } from 'antd';
 import { 
   SearchOutlined, 
   PlusOutlined, 
@@ -25,7 +25,6 @@ import TransactionDrawer from '../components/TransactionDrawer';
 import MoneyTransferForm from '../components/MoneyTransferForm';
 import SearchableDropdown from '../components/SearchableDropdown';
 import { adminCategoriesConfig } from '../config/adminConfig';
-import { FixedSizeList as List } from 'react-window';
 
 const { Option } = Select;
 const { Search } = Input;
@@ -34,6 +33,8 @@ export default function Transactions() {
   const store = useAppStore();
   const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
   const [filterCustId, setFilterCustId] = useState(undefined);
   const [filterCategoryId, setFilterCategoryId] = useState(undefined);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -96,15 +97,37 @@ export default function Transactions() {
 
   useEffect(() => {
     store.fetchCustomers();
-    if (store.selectedService) {
-      store.fetchServiceFiles(store.selectedService.id_loai_dich_vu);
-    } else {
+  }, []);
+
+  useEffect(() => {
+    if (!store.isBootstrapped) {
       store.fetchSystemConfig();
     }
-  }, [store.selectedService]);
+  }, []);
 
-  // 1. Tiền xử lý tính toán thời gian sắp xếp một lần (Chỉ chạy khi có dữ liệu mới)
-  const baseFilesWithSort = useMemo(() => {
+  useEffect(() => {
+    if (store.isBootstrapped) {
+      store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, searchTerm, currentPage, pageSize);
+    }
+  }, [store.selectedService, currentPage, pageSize]);
+
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, value, 1, pageSize);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (size) => {
+    setPageSize(size);
+    setCurrentPage(1);
+  };
+
+  // 1. Tiền xử lý tính toán thời gian (Cho dữ liệu trang hiện tại)
+  const sortedFiles = useMemo(() => {
     return store.serviceFiles.map(file => {
       const txs = store.allTransactions?.filter(t => t.id_ho_so_dich_vu === file.id_ho_so_dich_vu) || [];
       let latestDate = new Date(file.ngay_tao || 0).getTime();
@@ -121,27 +144,6 @@ export default function Transactions() {
       };
     }).sort((a, b) => b._sortTime - a._sortTime);
   }, [store.serviceFiles, store.allTransactions]);
-
-  // 2. Bộ lọc danh sách hồ sơ dịch vụ (Chỉ chạy khi filter thay đổi)
-  const filteredFiles = useMemo(() => {
-    return baseFilesWithSort.filter(file => {
-      const cust = store.customers.find(c => c.id_khach_hang === file.id_khach_hang);
-      const contract = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
-      
-      if (filterCustId && file.id_khach_hang !== filterCustId) return false;
-      if (filterCategoryId && contract?.id_danh_muc_dich_vu !== filterCategoryId) return false;
-
-      if (searchTerm) {
-        const searchStr = `${cust?.ho_va_ten || ''} ${cust?.so_dien_thoai || ''} ${contract?.ma_hop_dong || ''} ${file.noi_dung || ''}`.toLowerCase();
-        if (!searchStr.includes(searchTerm.toLowerCase())) return false;
-      }
-      
-      return true;
-    });
-  }, [baseFilesWithSort, store.customers, store.ma_hop_dong, filterCustId, filterCategoryId, searchTerm]);
-
-  // sortedFiles đã được sort ở bước 1, không cần sort lại
-  const sortedFiles = filteredFiles;
 
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text);
@@ -703,13 +705,21 @@ export default function Transactions() {
               })}
             </div>
 
-            <div className="mt-4 pb-20 md:pb-0">
+            <div className="mt-4 pb-20 md:pb-0 flex justify-center">
               <Pagination 
-                currentPage={currentPage}
-                totalCount={store.totalServiceFiles || 0}
+                current={currentPage}
+                total={store.totalServiceFiles || 0}
                 pageSize={pageSize}
-                onPageChange={handlePageChange}
-                onPageSizeChange={handlePageSizeChange}
+                onChange={(page, size) => {
+                  if (size !== pageSize) {
+                    handlePageSizeChange(size);
+                  } else {
+                    handlePageChange(page);
+                  }
+                }}
+                showSizeChanger
+                showTotal={(total, range) => `Hiển thị ${range[0]}-${range[1]} trong ${total} hồ sơ`}
+                pageSizeOptions={['10', '20', '50', '100']}
               />
             </div>
             </>
