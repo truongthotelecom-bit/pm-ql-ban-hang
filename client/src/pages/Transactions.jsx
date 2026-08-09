@@ -943,11 +943,11 @@ export default function Transactions() {
               {/* Bảng tính toán tiền chi tiết */}
               <div className="p-4 rounded-xl bg-gray-950/80 border border-white/5 space-y-2.5">
                 <div className="flex justify-between text-xs text-gray-400 font-bold">
-                  <span>LOẠI HÌNH:</span>
+                  <span>DỊCH VỤ:</span>
                   <span className="text-gray-200 uppercase">{store.selectedService?.ten_danh_muc || 'KHÁC'}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold text-gray-300">
-                  <span>MỆNH GIÁ GD:</span>
+                  <span>SỐ TIỀN:</span>
                   <span className="text-white font-extrabold text-sm">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien)}</span>
                 </div>
                 <div className="flex justify-between text-xs text-gray-400">
@@ -961,7 +961,7 @@ export default function Transactions() {
                   </div>
                 )}
                 <div className="border-t border-white/5 my-2 pt-2 flex justify-between text-sm font-extrabold text-violet-400">
-                  <span>THỰC THU POS:</span>
+                  <span>TỔNG THANH TOÁN:</span>
                   <span className="text-base">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien_di)}</span>
                 </div>
                 <div className="flex justify-between text-xs font-bold mt-2 border-t border-dashed border-white/5 pt-2">
