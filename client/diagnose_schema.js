@@ -5,8 +5,8 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function run() {
-  const { data, error } = await supabase.from('vw_ho_so_dich_vu').select('*').limit(1);
-  console.log("Ho_so_dich_vu columns:", data ? Object.keys(data[0]) : error);
+  const { data, error } = await supabase.from('chi_tiet_giao_dich').select('invalid_column_to_get_schema').limit(1);
+  console.log("chi_tiet_giao_dich columns error:", error);
 }
 
 run();
