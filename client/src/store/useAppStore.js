@@ -206,8 +206,12 @@ const useAppStore = create((set, get) => ({
   fetchServiceFiles: async (serviceId) => {
     try {
       const user = useAuthStore.getState().user;
-      let filesQuery = supabase.from('ho_so_dich_vu').select('*').order('ngay_tao', { ascending: false });
-      let txQuery = supabase.from('chi_tiet_giao_dich').select('*').order('thoi_gian_giao_dich', { ascending: false });
+      let filesQuery = supabase.from('ho_so_dich_vu')
+        .select(`*, ma_hop_dong ( id_danh_muc_dich_vu, sys_danh_muc_dich_vu ( id_loai_dich_vu ) )`)
+        .order('ngay_tao', { ascending: false });
+      let txQuery = supabase.from('chi_tiet_giao_dich')
+        .select('*')
+        .order('thoi_gian_giao_dich', { ascending: false });
 
       if (user?.id_diem_ban) {
         filesQuery = filesQuery.eq('id_diem_ban', user.id_diem_ban);
@@ -219,16 +223,8 @@ const useAppStore = create((set, get) => ({
         txQuery
       ]);
 
-      const state = get();
-      
-      const getLoaiDichVuId = (id_ma_hop_dong) => {
-        const hd = state.ma_hop_dong.find(h => h.id_ma_hop_dong === id_ma_hop_dong);
-        const dm = state.banks.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
-        return dm?.id_loai_dich_vu;
-      };
-
       const filtered = serviceId
-        ? (filesData || []).filter(f => getLoaiDichVuId(f.id_ma_hop_dong) === serviceId)
+        ? (filesData || []).filter(f => f.ma_hop_dong?.sys_danh_muc_dich_vu?.id_loai_dich_vu === serviceId)
         : (filesData || []);
 
       set({ serviceFiles: filtered, allServiceFiles: filesData || [], allTransactions: allTxData || [] });
