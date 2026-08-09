@@ -1076,9 +1076,6 @@ export default function Transactions() {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-xs font-bold text-gray-400">1. CHỌN MÃ SỐ HỢP ĐỒNG *</label>
-              <Button type="link" size="small" onClick={() => setAddNewContractInline(!addNewContractInline)} className="text-violet-400 hover:text-violet-300 font-bold p-0 text-xs">
-                {addNewContractInline ? 'Chọn mã có sẵn' : '+ Thêm hợp đồng mới'}
-              </Button>
             </div>
 
             {addNewContractInline ? (
@@ -1118,9 +1115,14 @@ export default function Transactions() {
                   onChange={e => setNewContractPayload({ ...newContractPayload, ghi_chu: e.target.value })}
                   className="bg-white/5 border-white/5 text-gray-300"
                 />
-                <Button type="primary" size="small" onClick={handleCreateContractInline} className="bg-violet-600 border-none font-bold w-full rounded">
-                  Lưu & Áp dụng
-                </Button>
+                <div className="flex gap-2">
+                  <Button type="default" size="small" onClick={() => setAddNewContractInline(false)} className="bg-white/5 text-gray-300 border-white/10 w-1/3 rounded">
+                    Hủy
+                  </Button>
+                  <Button type="primary" size="small" onClick={handleCreateContractInline} className="bg-violet-600 border-none font-bold flex-1 rounded">
+                    Lưu & Áp dụng
+                  </Button>
+                </div>
               </div>
             ) : (
               <SearchableDropdown
@@ -1139,6 +1141,8 @@ export default function Transactions() {
                 labelKey="displayLabel"
                 valueKey="id_ma_hop_dong"
                 subLabelKey="chu_hop_dong"
+                onAddNew={() => setAddNewContractInline(true)}
+                addNewText="+ Thêm hợp đồng mới"
               />
             )}
           </div>
@@ -1147,9 +1151,6 @@ export default function Transactions() {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-xs font-bold text-gray-400">2. CHỌN KHÁCH HÀNG CRM *</label>
-              <Button type="link" size="small" onClick={() => setAddNewCustInline(!addNewCustInline)} className="text-violet-400 hover:text-violet-300 font-bold p-0 text-xs">
-                {addNewCustInline ? 'Chọn khách hàng có sẵn' : '+ Tạo mới khách hàng'}
-              </Button>
             </div>
 
             {addNewCustInline ? (
@@ -1178,9 +1179,14 @@ export default function Transactions() {
                   onChange={e => setNewCustPayload({ ...newCustPayload, dia_chi: e.target.value })}
                   className="bg-white/5 border-white/5 text-gray-300"
                 />
-                <Button type="primary" size="small" onClick={handleCreateCustInline} className="bg-violet-600 border-none font-bold w-full rounded">
-                  Lưu & Áp dụng
-                </Button>
+                <div className="flex gap-2">
+                  <Button type="default" size="small" onClick={() => setAddNewCustInline(false)} className="bg-white/5 text-gray-300 border-white/10 w-1/3 rounded">
+                    Hủy
+                  </Button>
+                  <Button type="primary" size="small" onClick={handleCreateCustInline} className="bg-violet-600 border-none font-bold flex-1 rounded">
+                    Lưu & Áp dụng
+                  </Button>
+                </div>
               </div>
             ) : (
               <SearchableDropdown
@@ -1192,6 +1198,8 @@ export default function Transactions() {
                 labelKey="ho_va_ten"
                 valueKey="id_khach_hang"
                 subLabelKey="so_dien_thoai"
+                onAddNew={() => setAddNewCustInline(true)}
+                addNewText="+ Tạo mới khách hàng"
               />
             )}
           </div>
