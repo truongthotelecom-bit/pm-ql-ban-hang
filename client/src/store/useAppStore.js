@@ -121,7 +121,7 @@ const useAppStore = create((set, get) => ({
       const user = useAuthStore.getState().user;
       let query = supabase.from('khach_hang').select('*').order('ngay_tao', { ascending: false });
       if (user?.id_diem_ban) {
-        query = query.eq('id_diem_ban', user.id_diem_ban);
+        query = query.or(`id_diem_ban.eq.${user.id_diem_ban},id_diem_ban.is.null`);
       }
       const { data, error } = await query;
       if (!error) set({ customers: data || [] });
@@ -207,15 +207,15 @@ const useAppStore = create((set, get) => ({
     try {
       const user = useAuthStore.getState().user;
       let filesQuery = supabase.from('ho_so_dich_vu')
-        .select('*')
+        .select(`*, ma_hop_dong ( id_danh_muc_dich_vu, sys_danh_muc_dich_vu ( id_loai_dich_vu ) )`)
         .order('ngay_tao', { ascending: false });
       let txQuery = supabase.from('chi_tiet_giao_dich')
         .select('*')
         .order('thoi_gian_giao_dich', { ascending: false });
 
       if (user?.id_diem_ban) {
-        filesQuery = filesQuery.eq('id_diem_ban', user.id_diem_ban);
-        txQuery = txQuery.eq('id_diem_ban', user.id_diem_ban);
+        filesQuery = filesQuery.or(`id_diem_ban.eq.${user.id_diem_ban},id_diem_ban.is.null`);
+        txQuery = txQuery.or(`id_diem_ban.eq.${user.id_diem_ban},id_diem_ban.is.null`);
       }
 
       const [{ data: filesData }, { data: allTxData }] = await Promise.all([
@@ -223,18 +223,8 @@ const useAppStore = create((set, get) => ({
         txQuery
       ]);
 
-      // Lọc hồ sơ theo loại dịch vụ bằng cách dò ngược qua chuỗi:
-      // ho_so_dich_vu.id_ma_hop_dong -> ma_hop_dong.id_danh_muc_dich_vu -> sys_danh_muc_dich_vu.id_loai_dich_vu
-      const { ma_hop_dong: hopDongList, banks: bankList } = get();
-
-      const getLoaiDichVuOfFile = (file) => {
-        const hd = hopDongList.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong);
-        const dm = bankList.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
-        return dm?.id_loai_dich_vu ?? null;
-      };
-
       const filtered = serviceId
-        ? (filesData || []).filter(f => getLoaiDichVuOfFile(f) === serviceId)
+        ? (filesData || []).filter(f => f.ma_hop_dong?.sys_danh_muc_dich_vu?.id_loai_dich_vu === serviceId)
         : (filesData || []);
 
       set({ serviceFiles: filtered, allServiceFiles: filesData || [], allTransactions: allTxData || [] });
