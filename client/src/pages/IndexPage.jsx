@@ -127,7 +127,7 @@ export default function IndexPage() {
       <main className="flex-1 md:ml-64 p-4 sm:p-8 pb-24 md:pb-8 flex flex-col gap-6">
         
         {/* HEADER */}
-        <header className="flex justify-between items-center bg-[#0d1426]/40 backdrop-blur border border-white/5 rounded-2xl p-4 sm:px-6">
+        <header className="hidden md:flex justify-between items-center bg-[#0d1426]/40 backdrop-blur border border-white/5 rounded-2xl p-4 sm:px-6">
           <div>
             <h2 className="text-xl font-bold text-gray-100 capitalize">Phân hệ {getPageTitle()}</h2>
             <p className="text-xs text-gray-400 mt-0.5">Hệ thống chuyển khoản chi tiết & định dạng in hóa đơn nhanh</p>

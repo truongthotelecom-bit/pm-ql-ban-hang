@@ -542,15 +542,17 @@ export default function Transactions() {
         {/* Bộ lọc nâng cao */}
         <div className="flex flex-col gap-2">
           <div className="flex gap-2">
-            <Search 
-              placeholder="Nhập hợp đồng, tên, SĐT và bấm tìm (Enter)..." 
-              value={searchInput}
-              onChange={e => setSearchInput(e.target.value)}
-              onSearch={handleSearch}
-              enterButton={<span className="font-semibold tracking-wide">TÌM KIẾM</span>}
-              className="bg-[#0d1426]/50 border-white/10 text-white flex-1 search-btn-violet custom-search-input shadow-inner h-[40px]"
-              allowClear
-            />
+            <form onSubmit={(e) => { e.preventDefault(); handleSearch(searchInput); }} className="flex-1 flex">
+              <Search 
+                placeholder="Nhập hợp đồng, tên, SĐT..." 
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+                onSearch={handleSearch}
+                enterButton={<span className="font-semibold tracking-wide px-1">TÌM</span>}
+                className="bg-[#0d1426]/50 border-white/10 text-white flex-1 search-btn-violet custom-search-input shadow-inner h-[40px]"
+                allowClear
+              />
+            </form>
             <Button 
               type="text" 
               icon={<FilterOutlined />} 
