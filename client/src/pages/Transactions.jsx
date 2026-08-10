@@ -533,13 +533,13 @@ export default function Transactions() {
     : '';
 
   return (
-    <div className="flex flex-col xl:flex-row gap-5 min-h-[650px] animate-fadeIn">
+    <div className="flex flex-col xl:flex-row gap-5 h-[calc(100vh-112px)] md:h-[calc(100vh-140px)] animate-fadeIn">
       
       {/* ============================================================
          CỘT 1 (BÊN TRÁI): DANH SÁCH HỒ SƠ DỊCH VỤ (CASE MANAGEMENT)
          ============================================================ */}
-      <div className="w-full xl:w-[32%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md">
-        <div className="flex justify-between items-center border-b border-white/5 pb-3">
+      <div className="w-full xl:w-[32%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md h-full">
+        <div className="flex justify-between items-center border-b border-white/5 pb-3 flex-shrink-0">
           <div className="flex items-center gap-2">
             {store.selectedService?.icon?.startsWith('http') 
               ? <img src={store.selectedService.icon} alt="icon" className="h-6 w-6 object-contain" />
@@ -624,7 +624,7 @@ export default function Transactions() {
             </div>
           ) : (
             <>
-            <div className="flex-1 space-y-3 pb-4">
+            <div className="flex-1 space-y-3 pb-4 overflow-y-auto scrollbar-thin pr-1 min-h-0">
               {sortedFiles.map((file, index) => {
                 const cust = store.customers.find(c => c.id_khach_hang === file.id_khach_hang);
                 const hd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
@@ -705,7 +705,6 @@ export default function Transactions() {
                         </div>
                       </div>
 
-                      {/* Nội dung mặc định (nếu có) */}
                       {file.noi_dung && (
                         <div className="mt-2 flex items-center gap-1.5">
                           <span className="text-[10px] text-gray-400/80 font-medium italic truncate">
@@ -717,7 +716,6 @@ export default function Transactions() {
                   </div>
                 );
               })}
-              {/* Load more trigger */}
               <div ref={observerTarget} className="h-10 mt-4 pb-20 md:pb-0 flex justify-center items-center">
                 {store.hasMoreServiceFiles && (
                   <span className="text-gray-500 text-xs animate-pulse font-medium">Đang tải thêm dữ liệu...</span>
@@ -727,7 +725,6 @@ export default function Transactions() {
                 )}
               </div>
             </div>
-            </>
           )}
         </div>
       </div>
@@ -737,9 +734,9 @@ export default function Transactions() {
          ============================================================ */}
       <div className={`${showMobileDetail ? 'fixed inset-0 z-[100] bg-[#0d1426] flex flex-col gap-4 p-4 overflow-y-auto animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
         
-        {/* Nút đóng trên Mobile */}
-        <div className="xl:hidden flex justify-between items-center mb-2">
-          <span className="font-extrabold text-white text-lg">CHI TIẾT HỒ SƠ</span>
+        {/* Nút đóng trên Mobile cho Cột 2 */}
+        <div className="xl:hidden flex justify-between items-center mb-2 flex-shrink-0">
+          <span className="font-extrabold text-white text-lg">HỒ SƠ GIAO DỊCH</span>
           <button 
             onClick={() => setShowMobileDetail(false)}
             className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white font-bold active:scale-95"
@@ -925,7 +922,7 @@ export default function Transactions() {
       <div className={`${showMobileTxDetail ? 'fixed inset-0 z-[110] bg-[#0d1426] flex flex-col gap-4 p-4 overflow-y-auto animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
         
         {/* Nút đóng trên Mobile cho Cột 3 */}
-        <div className="xl:hidden flex justify-between items-center mb-2">
+        <div className="xl:hidden flex justify-between items-center mb-2 flex-shrink-0">
           <span className="font-extrabold text-white text-lg">CHI TIẾT GIAO DỊCH</span>
           <button 
             onClick={() => setShowMobileTxDetail(false)}
@@ -935,7 +932,7 @@ export default function Transactions() {
           </button>
         </div>
 
-      <div className="w-full xl:w-[28%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between">
+      <div className="w-full xl:w-[28%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between h-full overflow-y-auto scrollbar-thin">
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">CHI TIẾT GIAO DỊCH</span>
