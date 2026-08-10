@@ -98,6 +98,12 @@ export default function Transactions() {
 
   useEffect(() => {
     store.fetchCustomers();
+    
+    // Khóa cuộn trang toàn cục trên màn hình Giao Dịch để giữ form cố định
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
   }, []);
 
   useEffect(() => {
@@ -624,7 +630,7 @@ export default function Transactions() {
             </div>
           ) : (
             <>
-            <div className="flex-1 space-y-3 pb-4 overflow-y-auto scrollbar-thin pr-1 min-h-0">
+            <div className="flex-1 space-y-3 pb-4 overflow-y-auto scrollbar-thin pr-1 min-h-0 overscroll-none">
               {sortedFiles.map((file, index) => {
                 const cust = store.customers.find(c => c.id_khach_hang === file.id_khach_hang);
                 const hd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
