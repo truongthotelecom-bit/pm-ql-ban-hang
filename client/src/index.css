@@ -200,6 +200,27 @@
   background: rgba(255, 255, 255, 0.08) !important;
 }
 
+.search-btn-light-violet .ant-input-search-button {
+  background: linear-gradient(135deg, #9333ea, #8b5cf6) !important;
+  border: none !important;
+  border-radius: 0 8px 8px 0 !important;
+  box-shadow: 0 4px 15px -3px rgba(147, 51, 234, 0.4) !important;
+  transition: all 0.2s ease !important;
+}
+.search-btn-light-violet .ant-input-search-button:hover {
+  background: linear-gradient(135deg, #a855f7, #9333ea) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -3px rgba(147, 51, 234, 0.6) !important;
+}
+.search-btn-light-violet .ant-input {
+  border-radius: 8px 0 0 8px !important;
+  padding: 8px 14px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+.search-btn-light-violet .ant-input:hover, .search-btn-light-violet .ant-input:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
 /* Appsheet style very thin scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;

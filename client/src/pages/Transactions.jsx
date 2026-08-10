@@ -796,10 +796,10 @@ export default function Transactions() {
                     }}
                     enterButton={
                       <span className="font-semibold tracking-wide px-1 flex items-center gap-1">
-                        {isResetMode ? '✖ RESET' : 'TÌM'}
+                        {isResetMode ? <><ReloadOutlined /> RESET</> : 'TÌM'}
                       </span>
                     }
-                    className={`bg-[#0d1426]/50 border-white/10 text-white flex-1 custom-search-input shadow-inner h-[40px] ${isResetMode ? 'search-btn-red' : 'search-btn-violet'}`}
+                    className={`bg-[#0d1426]/50 border-white/10 text-white flex-1 custom-search-input shadow-inner h-[40px] ${isResetMode ? 'search-btn-light-violet' : 'search-btn-violet'}`}
                     allowClear
                   />
                 );
