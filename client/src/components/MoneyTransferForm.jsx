@@ -302,7 +302,7 @@ export default function MoneyTransferForm({ value, onChange }) {
             onClick={() => openKb('so_tien', form.so_tien, f_tien.label, 'VNĐ')}
           >
             <span>{form.so_tien ? form.so_tien.toLocaleString('vi-VN') : '0'}</span>
-            <span className="text-violet-400 text-sm flex items-center gap-2 font-bold">VNĐ <span className="text-[10px] bg-violet-600 px-2 py-1 rounded-md text-white shadow-md">⌨ BẤM ĐỂ NHẬP</span></span>
+            <span className="text-violet-400 text-sm flex items-center gap-2 font-bold">VNĐ <span className="text-[10px] bg-violet-600 px-2 py-1 rounded-md text-white shadow-md">⌨ NHẬP</span></span>
           </div>
         </div>
         )}
