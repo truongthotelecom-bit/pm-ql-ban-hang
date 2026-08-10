@@ -322,7 +322,7 @@ export default function TransactionHistory() {
       <div className="hidden lg:block glass-panel rounded-2xl border border-white/5 shadow-xl overflow-hidden">
         <Table
           dataSource={filteredTransactions}
-          rowKey={(record, index) => record.tx.id_chi_tiet_giao_dich || index}
+          rowKey={(record) => record.tx.id_chi_tiet_giao_dich || record.tx.ngay_tao || Math.random().toString()}
           pagination={{ pageSize: 10, position: ['bottomCenter'], showSizeChanger: true }}
           className="custom-dark-table"
           scroll={{ x: 1000 }}

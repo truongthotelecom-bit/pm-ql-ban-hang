@@ -143,7 +143,7 @@ export default function SearchableDropdown({
       placeholder={placeholder}
       optionFilterProp="children"
       onChange={onChange}
-      dropdownRender={(menu) => (
+      popupRender={(menu) => (
         <>
           {onAddNew && (
             <>
