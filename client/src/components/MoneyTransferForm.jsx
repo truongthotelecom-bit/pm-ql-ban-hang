@@ -294,9 +294,6 @@ export default function MoneyTransferForm({ value, onChange }) {
     <div className="bg-[#0f172a] border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
       {/* CỤM 1: NGUỒN TIỀN & ĐÍCH ĐẾN */}
       <div className="mb-6 space-y-4">
-        <h4 className="text-violet-400 font-extrabold text-xs tracking-wider uppercase flex items-center gap-2 mb-3">
-          <SwapOutlined /> 1. Luồng Giao Dịch
-        </h4>
         {!f_tien.hidden && (
         <div className="space-y-1 mt-4">
           <label className="text-white text-xs font-bold block uppercase">{f_tien.label} <span className="text-red-500">*</span></label>
@@ -315,41 +312,37 @@ export default function MoneyTransferForm({ value, onChange }) {
 
       {/* CỤM 2: PHÍ & ƯU ĐÃI */}
       <div className="mb-6 space-y-4">
-        <h4 className="text-orange-400 font-extrabold text-xs tracking-wider uppercase flex items-center gap-2 mb-3">
-          <DollarOutlined /> 2. Cước Phí & Ưu Đãi
-        </h4>
-        {!f_cuoc.hidden && (
-        <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 mb-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="text-white font-bold text-sm flex items-center gap-1">
-              {f_cuoc.label}
-              <Popover
-                content={
-                  <div className="max-w-[250px] text-sm text-gray-700">
-                    {form.loai_cuoc_phi === 'mien_phi' ? 'Giao dịch này được miễn phí dịch vụ.' : 
-                     form.loai_cuoc_phi === 'trong' ? 'Phí dịch vụ sẽ được TRỪ TRỰC TIẾP vào số tiền chuyển đi. Khách chỉ cần đưa đúng số chẵn.' : 
-                     'Khách hàng sẽ trả CỘNG THÊM phí dịch vụ ở ngoài.'}
-                  </div>
-                }
-                title="Giải thích cước phí"
-                trigger={['hover', 'click']}
-              >
-                <InfoCircleOutlined className="text-orange-400 cursor-pointer ml-1" />
-              </Popover>
-            </div>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-orange-400 font-extrabold text-xs tracking-wider uppercase flex items-center gap-2 m-0">
+            <DollarOutlined /> PHÍ DỊCH VỤ
+            <Popover
+              content={
+                <div className="max-w-[250px] text-sm text-gray-700">
+                  {form.loai_cuoc_phi === 'mien_phi' ? 'Giao dịch này được miễn phí dịch vụ.' : 
+                   form.loai_cuoc_phi === 'trong' ? 'Phí dịch vụ sẽ được TRỪ TRỰC TIẾP vào số tiền chuyển đi. Khách chỉ cần đưa đúng số chẵn.' : 
+                   'Khách hàng sẽ trả CỘNG THÊM phí dịch vụ ở ngoài.'}
+                </div>
+              }
+              title="Giải thích cước phí"
+              trigger={['hover', 'click']}
+            >
+              <InfoCircleOutlined className="text-orange-400 cursor-pointer ml-1" />
+            </Popover>
+          </h4>
+          {!f_cuoc.hidden && (
             <Radio.Group 
               value={form.loai_cuoc_phi} 
               onChange={(e) => handleFeeModeChange(e.target.value)}
               optionType="button"
               buttonStyle="solid"
+              size="small"
             >
               <Radio.Button value="mien_phi">Miễn phí</Radio.Button>
               <Radio.Button value="trong">Phí trong</Radio.Button>
               <Radio.Button value="ngoai">Phí ngoài</Radio.Button>
             </Radio.Group>
-          </div>
+          )}
         </div>
-        )}
 
         <div className="space-y-4">
           {!f_phi.hidden && form.loai_cuoc_phi !== 'mien_phi' && (
