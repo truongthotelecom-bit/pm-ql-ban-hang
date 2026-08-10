@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Input, InputNumber, Select, Switch, Button, Divider, Alert, Radio } from 'antd';
-import { SwapOutlined, CheckCircleOutlined, DollarOutlined, RetweetOutlined } from '@ant-design/icons';
+import { Input, InputNumber, Select, Switch, Button, Divider, Alert, Radio, Popover } from 'antd';
+import { SwapOutlined, CheckCircleOutlined, DollarOutlined, RetweetOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
 import PosAmountKeyboard from './PosAmountKeyboard';
 
@@ -319,7 +319,22 @@ export default function MoneyTransferForm({ value, onChange }) {
         {!f_cuoc.hidden && (
         <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 mb-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="text-white font-bold text-sm">{f_cuoc.label}</div>
+            <div className="text-white font-bold text-sm flex items-center gap-1">
+              {f_cuoc.label}
+              <Popover
+                content={
+                  <div className="max-w-[250px] text-sm text-gray-700">
+                    {form.loai_cuoc_phi === 'mien_phi' ? 'Giao dịch này được miễn phí dịch vụ.' : 
+                     form.loai_cuoc_phi === 'trong' ? 'Phí dịch vụ sẽ được TRỪ TRỰC TIẾP vào số tiền chuyển đi. Khách chỉ cần đưa đúng số chẵn.' : 
+                     'Khách hàng sẽ trả CỘNG THÊM phí dịch vụ ở ngoài.'}
+                  </div>
+                }
+                title="Giải thích cước phí"
+                trigger={['hover', 'click']}
+              >
+                <InfoCircleOutlined className="text-orange-400 cursor-pointer ml-1" />
+              </Popover>
+            </div>
             <Radio.Group 
               value={form.loai_cuoc_phi} 
               onChange={(e) => handleFeeModeChange(e.target.value)}
@@ -330,11 +345,6 @@ export default function MoneyTransferForm({ value, onChange }) {
               <Radio.Button value="trong">Phí trong</Radio.Button>
               <Radio.Button value="ngoai">Phí ngoài</Radio.Button>
             </Radio.Group>
-          </div>
-          <div className="text-orange-200/60 text-xs italic">
-            {form.loai_cuoc_phi === 'mien_phi' ? 'Giao dịch này được miễn phí dịch vụ.' : 
-             form.loai_cuoc_phi === 'trong' ? 'Phí dịch vụ sẽ được TRỪ TRỰC TIẾP vào số tiền chuyển đi. Khách chỉ cần đưa đúng số chẵn.' : 
-             'Khách hàng sẽ trả CỘNG THÊM phí dịch vụ ở ngoài.'}
           </div>
         </div>
         )}
