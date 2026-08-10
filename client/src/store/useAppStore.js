@@ -301,7 +301,7 @@ const useAppStore = create((set, get) => ({
       
       let filesQuery = supabase.from('vw_ho_so_dich_vu_v2')
         .select('*', { count: 'exact' })
-        .order('ngay_tao', { ascending: false });
+        .order('ngay_sua', { ascending: false });
 
       if (user?.id_diem_ban) {
         filesQuery = filesQuery.eq('id_diem_ban', user.id_diem_ban);
