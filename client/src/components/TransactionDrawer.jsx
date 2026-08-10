@@ -103,7 +103,6 @@ export default function TransactionDrawer({ open, onClose }) {
 
     const transactionPayload = {
       ...gdPayload,
-      so_tien_nhap_tay: gdPayload.so_tien || 0,
       so_tien_di: netAmount,
       noi_dung: gdPayload.noi_dung || `Thanh toán hợp đồng ${activeHd?.ma_hop_dong || ''}`,
       id_trang_thai: gdPayload.id_trang_thai || '11111111-1111-1111-1111-111111111111',
