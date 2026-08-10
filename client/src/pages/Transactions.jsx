@@ -771,7 +771,7 @@ export default function Transactions() {
                 
                 <div className="flex justify-between items-stretch gap-4">
                   {/* Phần ưu tiên (2/3): Logo, Mã HĐ, Tên Chủ HĐ */}
-                  <div className="flex flex-1 items-center gap-3.5">
+                  <div className="flex flex-1 items-center gap-3.5 min-w-0">
                     <div className="w-14 h-14 bg-white/5 rounded-xl border border-white/10 p-1 flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {activeBank?.logo ? (
                         <img src={activeBank.logo} alt="logo" className="w-full h-full object-contain" />
