@@ -733,7 +733,7 @@ export default function Transactions() {
       {/* ============================================================
          CỘT 2 + 3: Chi TIET - an tren mobile, hien tren desktop
          ============================================================ */}
-      <div className={`${showMobileDetail ? 'fixed inset-0 z-[100] bg-[#0d1426] flex flex-col gap-4 p-4 overflow-y-auto animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
+      <div className={`${showMobileDetail ? 'fixed inset-0 z-[100] bg-[#0d1426] flex flex-col gap-4 p-4 animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
         
         {/* Nút đóng trên Mobile cho Cột 2 */}
         <div className="xl:hidden flex justify-between items-center mb-2 flex-shrink-0">
@@ -746,7 +746,7 @@ export default function Transactions() {
           </button>
         </div>
 
-      <div className="w-full xl:w-[40%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between">
+      <div className="w-full xl:w-[40%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 overflow-y-auto scrollbar-thin xl:h-full">
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">THÔNG TIN HỒ SƠ</span>
@@ -920,7 +920,7 @@ export default function Transactions() {
       {/* ============================================================
          CỘT 3 (BÊN PHẢI): BẢNG TỔNG CỘNG, VIETQR & IN ẤN NHANH
          ============================================================ */}
-      <div className={`${showMobileTxDetail ? 'fixed inset-0 z-[110] bg-[#0d1426] flex flex-col gap-4 p-4 overflow-y-auto animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
+      <div className={`${showMobileTxDetail ? 'fixed inset-0 z-[110] bg-[#0d1426] flex flex-col gap-4 p-4 animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
         
         {/* Nút đóng trên Mobile cho Cột 3 */}
         <div className="xl:hidden flex justify-between items-center mb-2 flex-shrink-0">
@@ -933,7 +933,7 @@ export default function Transactions() {
           </button>
         </div>
 
-      <div className="w-full xl:w-[28%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between h-full overflow-y-auto scrollbar-thin">
+      <div className="w-full xl:w-[28%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 overflow-y-auto scrollbar-thin xl:h-full">
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">CHI TIẾT GIAO DỊCH</span>
