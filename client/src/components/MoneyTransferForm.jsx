@@ -204,7 +204,8 @@ export default function MoneyTransferForm({ value, onChange }) {
           phi_dich_vu: newPhi, 
           chiet_khau: newCk,
           loai_cuoc_phi: newLoaiCuoc,
-          is_cuoc_trong: newLoaiCuoc === 'trong' 
+          is_cuoc_trong: newLoaiCuoc === 'trong',
+          id_cach_tinh_phi: bestMatch.id_cach_tinh_phi
         };
       });
     }
