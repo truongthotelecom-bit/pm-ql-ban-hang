@@ -34,10 +34,11 @@ export default function Transactions() {
   const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
+  const [pageSize, setPageSize] = useState(40);
   const [filterCustId, setFilterCustId] = useState(undefined);
   const [filterCategoryId, setFilterCategoryId] = useState(undefined);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const observerTarget = React.useRef(null);
   
   // Modals state
   const [showNewFileModal, setShowNewFileModal] = useState(false);
@@ -107,24 +108,37 @@ export default function Transactions() {
 
   useEffect(() => {
     if (store.isBootstrapped) {
-      store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, searchTerm, currentPage, pageSize);
+      setCurrentPage(1);
+      store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, searchTerm, 1, pageSize, false);
     }
-  }, [store.selectedService, currentPage, pageSize, store.refetchTrigger]);
+  }, [store.selectedService, pageSize, store.refetchTrigger]);
 
   const handleSearch = (value) => {
     setSearchTerm(value);
     setCurrentPage(1);
-    store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, value, 1, pageSize);
+    store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, value, 1, pageSize, false);
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const handlePageSizeChange = (size) => {
-    setPageSize(size);
-    setCurrentPage(1);
-  };
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && store.hasMoreServiceFiles) {
+          const nextPage = currentPage + 1;
+          setCurrentPage(nextPage);
+          store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, searchTerm, nextPage, pageSize, true);
+        }
+      },
+      { threshold: 1.0 }
+    );
+    
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+    
+    return () => {
+      if (observerTarget.current) observer.unobserve(observerTarget.current);
+    };
+  }, [observerTarget, store.hasMoreServiceFiles, currentPage, searchTerm, pageSize, store.selectedService]);
 
   // 1. Tiền xử lý tính toán thời gian (Cho dữ liệu trang hiện tại)
   const sortedFiles = useMemo(() => {
@@ -610,10 +624,7 @@ export default function Transactions() {
             </div>
           ) : (
             <>
-            <div 
-              className="flex-1 overflow-y-auto space-y-3 pb-4 scrollbar-thin" 
-              style={{ maxHeight: '500px' }}
-            >
+            <div className="flex-1 space-y-3 pb-4">
               {sortedFiles.map((file, index) => {
                 const cust = store.customers.find(c => c.id_khach_hang === file.id_khach_hang);
                 const hd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
@@ -706,24 +717,15 @@ export default function Transactions() {
                   </div>
                 );
               })}
-            </div>
-
-            <div className="mt-4 pb-20 md:pb-0 flex justify-center">
-              <Pagination 
-                current={currentPage}
-                total={store.totalServiceFiles || 0}
-                pageSize={pageSize}
-                onChange={(page, size) => {
-                  if (size !== pageSize) {
-                    handlePageSizeChange(size);
-                  } else {
-                    handlePageChange(page);
-                  }
-                }}
-                showSizeChanger
-                showTotal={(total, range) => `Hiển thị ${range[0]}-${range[1]} trong ${total} hồ sơ`}
-                pageSizeOptions={['10', '20', '50', '100']}
-              />
+              {/* Load more trigger */}
+              <div ref={observerTarget} className="h-10 mt-4 pb-20 md:pb-0 flex justify-center items-center">
+                {store.hasMoreServiceFiles && (
+                  <span className="text-gray-500 text-xs animate-pulse font-medium">Đang tải thêm dữ liệu...</span>
+                )}
+                {!store.hasMoreServiceFiles && sortedFiles.length > 0 && (
+                  <span className="text-gray-600 text-xs italic">Đã hiển thị toàn bộ hồ sơ.</span>
+                )}
+              </div>
             </div>
             </>
           )}

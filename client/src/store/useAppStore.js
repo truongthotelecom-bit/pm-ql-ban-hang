@@ -298,8 +298,10 @@ const useAppStore = create((set, get) => ({
     await get().fetchServiceFiles(service ? service.id_loai_dich_vu : null);
   },
 
+  hasMoreServiceFiles: false,
+
   // Lấy hồ sơ dịch vụ
-  fetchServiceFiles: async (serviceId = null, searchTerm = '', page = 1, pageSize = 50) => {
+  fetchServiceFiles: async (serviceId = null, searchTerm = '', page = 1, pageSize = 40, isAppend = false) => {
     try {
       const user = useAuthStore.getState().user;
       
@@ -354,11 +356,12 @@ const useAppStore = create((set, get) => ({
       
       const { data: allTxData } = await txQuery;
 
-      set({ 
-        serviceFiles: filesData, 
-        totalServiceFiles: count || 0,
+      set((state) => ({ 
+        serviceFiles: isAppend ? [...state.serviceFiles, ...filesData] : filesData, 
+        totalServiceFiles: count,
+        hasMoreServiceFiles: (offset + pageSize) < count,
         allTransactions: allTxData || [] 
-      });
+      }));
 
       if (filesData.length > 0) {
         const firstFile = filesData[0];
