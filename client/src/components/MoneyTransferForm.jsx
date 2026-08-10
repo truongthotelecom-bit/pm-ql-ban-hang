@@ -312,9 +312,10 @@ export default function MoneyTransferForm({ value, onChange }) {
 
       {/* CỤM 2: PHÍ & ƯU ĐÃI */}
       <div className="mb-6 space-y-4">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-orange-400 font-extrabold text-xs tracking-wider uppercase flex items-center gap-2 m-0">
-            <DollarOutlined /> PHÍ DỊCH VỤ
+        {!f_cuoc.hidden && (
+        <div className="space-y-1">
+          <label className="text-gray-400 text-xs font-bold block mb-2 uppercase flex items-center gap-2">
+            TÍNH PHÍ
             <Popover
               content={
                 <div className="max-w-[250px] text-sm text-gray-700">
@@ -326,23 +327,35 @@ export default function MoneyTransferForm({ value, onChange }) {
               title="Giải thích cước phí"
               trigger={['hover', 'click']}
             >
-              <InfoCircleOutlined className="text-orange-400 cursor-pointer ml-1" />
+              <InfoCircleOutlined className="text-gray-500 cursor-pointer" />
             </Popover>
-          </h4>
-          {!f_cuoc.hidden && (
-            <Radio.Group 
-              value={form.loai_cuoc_phi} 
-              onChange={(e) => handleFeeModeChange(e.target.value)}
-              optionType="button"
-              buttonStyle="solid"
-              size="small"
-            >
-              <Radio.Button value="mien_phi">Miễn phí</Radio.Button>
-              <Radio.Button value="trong">Phí trong</Radio.Button>
-              <Radio.Button value="ngoai">Phí ngoài</Radio.Button>
-            </Radio.Group>
-          )}
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { value: 'mien_phi', label: 'Miễn phí', icon: '🆓' },
+              { value: 'trong', label: 'Phí trong', icon: '📥' },
+              { value: 'ngoai', label: 'Phí ngoài', icon: '📤' }
+            ].map(s => {
+              const isActive = form.loai_cuoc_phi === s.value;
+              return (
+                <button
+                  key={s.value}
+                  type="button"
+                  onClick={() => handleFeeModeChange(s.value)}
+                  className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl text-[10px] font-bold border transition-all active:scale-95 ${
+                    isActive
+                      ? 'bg-orange-600/20 border-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.3)] text-orange-400'
+                      : 'bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <span className="text-sm mb-1">{s.icon}</span>
+                  <span className="truncate w-full text-center">{s.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
+        )}
 
         <div className="space-y-4">
           {!f_phi.hidden && form.loai_cuoc_phi !== 'mien_phi' && (
