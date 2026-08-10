@@ -513,8 +513,9 @@ export default function Transactions() {
   };
 
   // Link VietQR động cho dòng tiền đang chọn
+  const binCode = activeBank?.ma_bin || '970422'; // fallback về MBBank
   const activeQrUrl = activeDetail && activeHd
-    ? `https://api.vietqr.io/image/970422-${activeHd.ma_hop_dong}-compact.png?amount=${activeDetail.so_tien_di}&addInfo=${encodeURIComponent(activeDetail.noi_dung)}&accountName=${encodeURIComponent(activeCust?.ho_va_ten || 'AURA CUSTOMER')}`
+    ? `https://api.vietqr.io/image/${binCode}-${activeHd.ma_hop_dong}-compact.png?amount=${activeDetail.so_tien_di}&addInfo=${encodeURIComponent(activeDetail.noi_dung)}&accountName=${encodeURIComponent(activeCust?.ho_va_ten || 'AURA CUSTOMER')}`
     : '';
 
   return (
