@@ -514,7 +514,7 @@ export default function Transactions() {
 
   // Link VietQR động cho dòng tiền đang chọn
   const activeQrUrl = activeDetail && activeHd
-    ? `https://api.vietqr.io/image/970422-${activeHd.ma_hop_dong}-compact.png?amount=${globalCalculatedTotal}&addInfo=${encodeURIComponent(activeDetail.noi_dung)}&accountName=${encodeURIComponent(activeCust?.ho_va_ten || 'AURA CUSTOMER')}`
+    ? `https://api.vietqr.io/image/970422-${activeHd.ma_hop_dong}-compact.png?amount=${activeDetail.so_tien_di}&addInfo=${encodeURIComponent(activeDetail.noi_dung)}&accountName=${encodeURIComponent(activeCust?.ho_va_ten || 'AURA CUSTOMER')}`
     : '';
 
   return (
@@ -1577,7 +1577,7 @@ export default function Transactions() {
               />
             </div>
             <h3 className="text-2xl font-black text-violet-400 mt-6 tracking-wide">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(globalCalculatedTotal)}
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien_di)}
             </h3>
             <div className="flex flex-col gap-1.5 mt-4 text-center w-full bg-white/5 p-3 rounded-xl border border-white/5">
               <p className="text-[13px] text-gray-100 font-bold">{activeBank?.ten_dich_vu || store.selectedService?.ten_danh_muc || '—'}</p>
