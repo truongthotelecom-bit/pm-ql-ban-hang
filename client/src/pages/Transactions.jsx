@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import useAppStore from '../store/useAppStore';
 import useAuthStore from '../store/useAuthStore';
 import { supabase } from '../lib/supabaseClient';
-import { Button, Tag, message, Modal, Input, Select, Radio, Badge, Pagination } from 'antd';
+import { Button, Tag, App as AntdApp, Modal, Input, Select, Radio, Badge, Pagination, Checkbox } from 'antd';
 import { 
   SearchOutlined, 
   PlusOutlined, 
@@ -26,11 +26,133 @@ import MoneyTransferForm from '../components/MoneyTransferForm';
 import SearchableDropdown from '../components/SearchableDropdown';
 import { adminCategoriesConfig } from '../config/adminConfig';
 
+const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFallback, onSelectMobile, onSelectDesktop, onAddTx, onEditFile, onViewFile, onCopyFile }) => {
+  const lastDateObj = file._lastTxDate || (file.ngay_tao ? new Date(file.ngay_tao) : new Date());
+  const diffDays = (new Date().getTime() - lastDateObj.getTime()) / (1000 * 60 * 60 * 24);
+  let dotColorClass = "bg-red-500 shadow-red-500/50";
+  if (diffDays <= 7) dotColorClass = "bg-blue-500 shadow-blue-500/50";
+  else if (diffDays <= 60) dotColorClass = "bg-green-500 shadow-green-500/50";
+  else if (diffDays <= 180) dotColorClass = "bg-orange-500 shadow-orange-500/50";
+  
+  return (
+    <div style={{ paddingBottom: '12px' }}>
+      <div 
+        onClick={() => {
+          if (window.innerWidth < 1280) {
+            onSelectMobile(file);
+          } else {
+            onSelectDesktop(file);
+          }
+        }}
+        className={`h-full px-3.5 py-3 rounded-xl border transition-all cursor-pointer hover:scale-[1.01] overflow-hidden ${isSelected ? 'bg-violet-600/10 border-violet-500/50 shadow-lg shadow-violet-600/5' : 'bg-[#131c33]/40 border-white/5 hover:border-white/10'}`}
+      >
+        {/* Dòng trên cùng: Ngày GD cuối (trái) & Ngày tạo (phải) */}
+        <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-white/5 text-[9px] font-medium">
+          <span className="text-violet-400/80 flex items-center gap-1.5">
+            <span className={`w-2 h-2 rounded-full shadow-sm ${dotColorClass}`}></span>
+            {file._lastTxDate 
+              ? `GD cuối: ${file._lastTxDate.toLocaleDateString('vi-VN')} ${file._lastTxDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
+              : `GD cuối: ${file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}`}
+          </span>
+          <span className="text-gray-500">
+            Ngày tạo: {file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}
+          </span>
+        </div>
+
+        {/* Dòng giữa: Logo + Thông tin chia 2 bên */}
+        <div className="flex items-center gap-3">
+          {/* Logo dịch vụ */}
+          <div className="flex-shrink-0 w-10 h-10 bg-white/5 rounded-xl border border-white/10 p-1 flex items-center justify-center overflow-hidden">
+            {bank?.logo ? (
+              <img src={bank.logo} alt={bank?.ten_viet_tat} className="w-full h-full object-contain" />
+            ) : (
+              <span className="text-lg">{iconFallback}</span>
+            )}
+          </div>
+
+          {/* Thông tin chia 2 cột: Trái & Phải */}
+          <div className="flex flex-1 justify-between items-start min-w-0 gap-2">
+            {/* TRÁI: Mã HĐ (dòng 1) + Chủ HĐ (dòng 2) */}
+            <div className="flex flex-col min-w-0">
+              <h4 className="font-extrabold text-sm text-red-400 leading-tight uppercase tracking-wide truncate">
+                {hd?.ma_hop_dong || 'CHƯA CÓ HĐ'}
+              </h4>
+              <span className="text-[11px] text-gray-300 font-semibold truncate mt-0.5">
+                {hd?.chu_hop_dong || '—'}
+              </span>
+            </div>
+
+            {/* PHẢI: Tên người TT (dòng 1) + SĐT (dòng 2) */}
+            <div className="flex flex-col items-end flex-shrink-0 text-right">
+              <span className="text-[11px] text-gray-200 font-bold truncate max-w-[110px]">
+                {cust?.ho_va_ten || 'Khách lẻ'}
+              </span>
+              {cust?.so_dien_thoai ? (
+                <span className="text-[10px] text-violet-400/80 font-semibold mt-0.5">
+                  {cust.so_dien_thoai}
+                </span>
+              ) : (
+                <span className="text-[10px] text-gray-600 mt-0.5">—</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {file.noi_dung && (
+          <div className="mt-2 flex items-center gap-1.5">
+            <span className="text-[10px] text-gray-400/80 font-medium italic truncate">
+              📝 {file.noi_dung}
+            </span>
+          </div>
+        )}
+
+        {/* ACTION BAR (Chỉ hiện khi Card đang được chọn) */}
+        {isSelected && (
+          <div className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+            <button 
+              onClick={(e) => { e.stopPropagation(); onAddTx(); }}
+              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-violet-400 transition-colors"
+            >
+              <PlusOutlined className="text-sm" />
+              <span className="text-[8px] font-bold uppercase tracking-wider">Thêm GD</span>
+            </button>
+            <div className="w-[1px] h-6 bg-white/10"></div>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onEditFile(); }}
+              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-blue-400 transition-colors"
+            >
+              <EditOutlined className="text-sm" />
+              <span className="text-[8px] font-bold uppercase tracking-wider">Sửa HS</span>
+            </button>
+            <div className="w-[1px] h-6 bg-white/10"></div>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onViewFile(); }}
+              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-green-400 transition-colors"
+            >
+              <InfoCircleOutlined className="text-sm" />
+              <span className="text-[8px] font-bold uppercase tracking-wider">Xem HS</span>
+            </button>
+            <div className="w-[1px] h-6 bg-white/10"></div>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onCopyFile(); }}
+              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-orange-400 transition-colors"
+            >
+              <CopyOutlined className="text-sm" />
+              <span className="text-[8px] font-bold uppercase tracking-wider">Copy</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
+
 const { Option } = Select;
 const { Search } = Input;
 
 export default function Transactions() {
   const store = useAppStore();
+  const { message, modal: modalInstance } = AntdApp.useApp();
   const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,9 +173,7 @@ export default function Transactions() {
   const [showEditDetailModal, setShowEditDetailModal] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Mobile: bottom sheet action picker
-  const [mobileActionFile, setMobileActionFile] = useState(null); // file được tap trên mobile
-  const [showMobileAction, setShowMobileAction] = useState(false);
+  // Mobile state
   const [showMobileDetail, setShowMobileDetail] = useState(false); // Hien thi modal chi tiet tren mobile
   const [showMobileTxDetail, setShowMobileTxDetail] = useState(false); // Modal chi tiet GD
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1280;
@@ -94,7 +214,63 @@ export default function Transactions() {
   // Edit Customer Form State
   const [editCustPayload, setEditCustPayload] = useState({});
 
+  // Copy Modal State
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [copyOptions, setCopyOptions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('aura_copy_options_pref');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      serviceName: false,
+      contractId: true,
+      contractOwner: false
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('aura_copy_options_pref', JSON.stringify(copyOptions));
+  }, [copyOptions]);
+
+  const handleCopyData = () => {
+    const activeFile = store.selectedServiceFile;
+    if (!activeFile) return;
+
+    const currentHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile.id_ma_hop_dong) || activeFile.ma_hop_dong;
+    
+    let copyParts = [];
+    if (copyOptions.serviceName) copyParts.push(store.selectedService?.ten_danh_muc || 'Không xác định');
+    if (copyOptions.contractId) copyParts.push(currentHd?.ma_hop_dong || 'Không xác định');
+    if (copyOptions.contractOwner) copyParts.push(currentHd?.chu_hop_dong || 'Không xác định');
+
+    if (copyParts.length === 0) {
+      message.warning('Vui lòng chọn ít nhất 1 thông tin để copy!');
+      return;
+    }
+
+    const textToCopy = copyParts.join('\n');
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      message.success('Đã copy thông tin thành công!');
+      setShowCopyModal(false);
+    }).catch(() => {
+      message.error('Không thể copy, vui lòng thử lại!');
+    });
+  };
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  
+  const [showCol2Menu, setShowCol2Menu] = useState(false);
+  const [showCol3Menu, setShowCol3Menu] = useState(false);
+  const [showCol3StatusMenu, setShowCol3StatusMenu] = useState(false);
+
   const currentUser = useAuthStore(state => state.user);
+
+  const handleSelectMobile = React.useCallback((file) => {
+    store.selectServiceFile(file);
+  }, [store]);
+
+  const handleSelectDesktop = React.useCallback((file) => {
+    store.selectServiceFile(file);
+  }, [store]);
 
   useEffect(() => {
     store.fetchCustomers();
@@ -172,14 +348,15 @@ export default function Transactions() {
 
   const getStatusTag = (statusId) => {
     const status = store.categories.find(c => c.id_danh_muc === statusId);
-    const colors = {
-      'dm-1': 'success',    // Thành công
-      'dm-2': 'warning',    // Chờ duyệt
-      'dm-3': 'error',      // Thất bại
-      'dm-4': 'processing'  // Đang xử lý
-    };
+    const statusName = (status?.ten_danh_muc || '').toLowerCase();
+    
+    let color = 'default';
+    if (statusName.includes('hoàn thành') || statusName.includes('thành công')) color = 'success';
+    else if (statusName.includes('xử lý') || statusName.includes('chờ')) color = 'warning';
+    else if (statusName.includes('hủy') || statusName.includes('thất bại')) color = 'error';
+
     return (
-      <Tag color={colors[statusId] || 'default'} className="font-extrabold uppercase px-2.5 py-0.5 rounded border-none">
+      <Tag color={color} className="font-extrabold uppercase px-2.5 py-0.5 rounded border-none">
         {status?.ten_danh_muc || 'Không rõ'}
       </Tag>
     );
@@ -502,14 +679,24 @@ export default function Transactions() {
   const canCancelTransaction = () => {
     if (isSuperAdminOrOwner) return true;
     if (!activeDetail) return false;
-    // b0000001-0000-0000-0000-000000000001 = Thành công, 003 = Thất bại/Hủy
-    const isCompletedOrCanceled = activeDetail.id_trang_thai === 'b0000001-0000-0000-0000-000000000001' || activeDetail.id_trang_thai === 'b0000001-0000-0000-0000-000000000003';
+    
+    const status = store.categories.find(c => c.id_danh_muc === activeDetail.id_trang_thai);
+    const statusName = (status?.ten_danh_muc || '').toLowerCase();
+    const isCompletedOrCanceled = statusName.includes('hoàn thành') || statusName.includes('thành công') || statusName.includes('hủy') || statusName.includes('thất bại');
+    
     return activeDetail.id_tai_khoan_tao === currentUser?.id_tai_khoan && !isCompletedOrCanceled;
   };
 
   const handleCancelTransaction = async () => {
     if (!activeDetail) return;
-    Modal.confirm({
+    
+    const huyId = store.categories.find(c => (c.ten_danh_muc || '').toLowerCase().includes('hủy'))?.id_danh_muc;
+    if (!huyId) {
+      message.error('Hệ thống chưa thiết lập trạng thái Hủy.');
+      return;
+    }
+
+    modalInstance.confirm({
       title: 'Xác nhận Hủy Giao Dịch?',
       content: 'Bạn có chắc chắn muốn chuyển trạng thái giao dịch này thành THẤT BẠI/HỦY?',
       okText: 'Hủy Giao Dịch',
@@ -519,7 +706,7 @@ export default function Transactions() {
         try {
           const { error } = await supabase
             .from('chi_tiet_giao_dich')
-            .update({ id_trang_thai: 'b0000001-0000-0000-0000-000000000003' }) // ID Thất bại/Hủy
+            .update({ id_trang_thai: huyId }) // Dynamic ID
             .eq('id_chi_tiet_giao_dich', activeDetail.id_chi_tiet_giao_dich);
           
           if (error) throw error;
@@ -532,9 +719,39 @@ export default function Transactions() {
     });
   };
 
+  const handleChangeStatus = async (statusId, statusName) => {
+    if (!activeDetail) return;
+    if (activeDetail.id_trang_thai === statusId) {
+      message.info(`Giao dịch đã ở trạng thái ${statusName}`);
+      return;
+    }
+    
+    modalInstance.confirm({
+      title: 'Xác nhận Đổi Trạng Thái?',
+      content: `Chuyển giao dịch thành "${statusName}"?`,
+      okText: 'Xác nhận',
+      cancelText: 'Đóng',
+      onOk: async () => {
+        try {
+          const { error } = await supabase
+            .from('chi_tiet_giao_dich')
+            .update({ id_trang_thai: statusId })
+            .eq('id_chi_tiet_giao_dich', activeDetail.id_chi_tiet_giao_dich);
+          
+          if (error) throw error;
+          message.success(`Đã đổi trạng thái thành ${statusName}!`);
+          await store.fetchTransactionDetails(activeFile.id_ho_so_dich_vu);
+          setShowCol3StatusMenu(false);
+        } catch (err) {
+          message.error('Lỗi khi đổi trạng thái: ' + err.message);
+        }
+      }
+    });
+  };
+
   // Link VietQR động cho dòng tiền đang chọn
   const binCode = activeBank?.ma_bin || '970422'; // fallback về MBBank
-  const activeQrUrl = activeDetail && activeHd
+  const activeQrUrl = activeDetail && activeHd && binCode !== '000000'
     ? `https://api.vietqr.io/image/${binCode}-${activeHd.ma_hop_dong}-compact.png?amount=${activeDetail.so_tien_di}&addInfo=${encodeURIComponent(activeDetail.noi_dung)}&accountName=${encodeURIComponent(activeCust?.ho_va_ten || 'AURA CUSTOMER')}`
     : '';
 
@@ -544,7 +761,7 @@ export default function Transactions() {
       {/* ============================================================
          CỘT 1 (BÊN TRÁI): DANH SÁCH HỒ SƠ DỊCH VỤ (CASE MANAGEMENT)
          ============================================================ */}
-      <div className="w-full xl:w-[32%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md h-full">
+      <div className="relative w-full xl:w-[32%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md h-full">
         <div className="flex justify-between items-center border-b border-white/5 pb-3 flex-shrink-0">
           <div className="flex items-center gap-2">
             {store.selectedService?.icon?.startsWith('http') 
@@ -555,7 +772,6 @@ export default function Transactions() {
           </div>
           <div className="flex gap-1.5">
             <Button size="small" icon={<ReloadOutlined />} onClick={() => store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null)} className="bg-white/5 text-gray-300 border-none hover:text-violet-400" />
-            <Button size="small" type="primary" icon={<PlusOutlined />} onClick={() => setShowNewFileModal(true)} className="bg-violet-600 border-none font-bold rounded" />
           </div>
         </div>
 
@@ -637,89 +853,22 @@ export default function Transactions() {
                 const bank = store.banks.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
                 const isSelected = store.selectedServiceFile?.id_ho_so_dich_vu === file.id_ho_so_dich_vu;
                 
-                const lastDateObj = file._lastTxDate || (file.ngay_tao ? new Date(file.ngay_tao) : new Date());
-                const diffDays = (new Date().getTime() - lastDateObj.getTime()) / (1000 * 60 * 60 * 24);
-                let dotColorClass = "bg-red-500 shadow-red-500/50";
-                if (diffDays <= 7) dotColorClass = "bg-blue-500 shadow-blue-500/50";
-                else if (diffDays <= 60) dotColorClass = "bg-green-500 shadow-green-500/50";
-                else if (diffDays <= 180) dotColorClass = "bg-orange-500 shadow-orange-500/50";
-                
                 return (
-                  <div key={file.id_ho_so_dich_vu} style={{ paddingBottom: '12px' }}>
-                    <div 
-                      onClick={() => {
-                        if (window.innerWidth < 1280) {
-                          // Mobile: hien bottom sheet
-                          setMobileActionFile(file);
-                          setShowMobileAction(true);
-                        } else {
-                          // Desktop: chon file binh thuong
-                          store.selectServiceFile(file);
-                        }
-                      }}
-                      className={`h-full px-3.5 py-3 rounded-xl border transition-all cursor-pointer hover:scale-[1.01] overflow-hidden ${isSelected ? 'bg-violet-600/10 border-violet-500/50 shadow-lg shadow-violet-600/5' : 'bg-[#131c33]/40 border-white/5 hover:border-white/10'}`}
-                    >
-                      {/* Dòng trên cùng: Ngày GD cuối (trái) & Ngày tạo (phải) */}
-                      <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-white/5 text-[9px] font-medium">
-                        <span className="text-violet-400/80 flex items-center gap-1.5">
-                          <span className={`w-2 h-2 rounded-full shadow-sm ${dotColorClass}`}></span>
-                          {file._lastTxDate 
-                            ? `GD cuối: ${file._lastTxDate.toLocaleDateString('vi-VN')} ${file._lastTxDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
-                            : `GD cuối: ${file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}`}
-                        </span>
-                        <span className="text-gray-500">
-                          Ngày tạo: {file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}
-                        </span>
-                      </div>
-
-                      {/* Dòng giữa: Logo + Thông tin chia 2 bên */}
-                      <div className="flex items-center gap-3">
-                        {/* Logo dịch vụ */}
-                        <div className="flex-shrink-0 w-10 h-10 bg-white/5 rounded-xl border border-white/10 p-1 flex items-center justify-center overflow-hidden">
-                          {bank?.logo ? (
-                            <img src={bank.logo} alt={bank.ten_viet_tat} className="w-full h-full object-contain" />
-                          ) : (
-                            <span className="text-lg">{store.selectedService?.icon || '📁'}</span>
-                          )}
-                        </div>
-
-                        {/* Thông tin chia 2 cột: Trái & Phải */}
-                        <div className="flex flex-1 justify-between items-start min-w-0 gap-2">
-                          {/* TRÁI: Mã HĐ (dòng 1) + Chủ HĐ (dòng 2) */}
-                          <div className="flex flex-col min-w-0">
-                            <h4 className="font-extrabold text-sm text-red-400 leading-tight uppercase tracking-wide truncate">
-                              {hd?.ma_hop_dong || 'CHƯA CÓ HĐ'}
-                            </h4>
-                            <span className="text-[11px] text-gray-300 font-semibold truncate mt-0.5">
-                              {hd?.chu_hop_dong || '—'}
-                            </span>
-                          </div>
-
-                          {/* PHẢI: Tên người TT (dòng 1) + SĐT (dòng 2) */}
-                          <div className="flex flex-col items-end flex-shrink-0 text-right">
-                            <span className="text-[11px] text-gray-200 font-bold truncate max-w-[110px]">
-                              {cust?.ho_va_ten || 'Khách lẻ'}
-                            </span>
-                            {cust?.so_dien_thoai ? (
-                              <span className="text-[10px] text-violet-400/80 font-semibold mt-0.5">
-                                {cust.so_dien_thoai}
-                              </span>
-                            ) : (
-                              <span className="text-[10px] text-gray-600 mt-0.5">—</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {file.noi_dung && (
-                        <div className="mt-2 flex items-center gap-1.5">
-                          <span className="text-[10px] text-gray-400/80 font-medium italic truncate">
-                            📝 {file.noi_dung}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <MemoizedFileCard
+                    key={file.id_ho_so_dich_vu}
+                    file={file}
+                    cust={cust}
+                    hd={hd}
+                    bank={bank}
+                    isSelected={isSelected}
+                    iconFallback={store.selectedService?.icon || '📁'}
+                    onSelectMobile={handleSelectMobile}
+                    onSelectDesktop={handleSelectDesktop}
+                    onAddTx={() => setDrawerOpen(true)}
+                    onEditFile={() => { setShowCol2Menu(false); setShowEditFileModal(true); }}
+                    onViewFile={() => setShowMobileDetail(true)}
+                    onCopyFile={() => setShowCopyModal(true)}
+                  />
                 );
               })}
               <div ref={observerTarget} className="h-10 mt-4 pb-20 md:pb-0 flex justify-center items-center">
@@ -733,12 +882,23 @@ export default function Transactions() {
             </div>
             </>
           )}
+
+          {/* FAB CỘT 1: Tạo hồ sơ */}
+          <div className="absolute bottom-4 right-4 z-20">
+            <button
+              onClick={() => setShowNewFileModal(true)}
+              className="w-14 h-14 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center shadow-[0_8px_30px_rgb(124,58,237,0.5)] transition-all hover:scale-105 active:scale-95"
+            >
+              <PlusOutlined className="text-2xl font-bold" />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* ============================================================
          CỘT 2 + 3: Chi TIET - an tren mobile, hien tren desktop
          ============================================================ */}
+      {React.useMemo(() => (
       <div className={`${showMobileDetail ? 'fixed inset-0 z-[100] bg-[#0d1426] flex flex-col gap-4 p-4 animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
         
         {/* Nút đóng trên Mobile cho Cột 2 */}
@@ -752,31 +912,61 @@ export default function Transactions() {
           </button>
         </div>
 
-      <div className="w-full xl:w-[40%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 overflow-y-auto scrollbar-thin xl:h-full">
-        <div className="space-y-4">
+      <div className="relative w-full xl:w-[40%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 xl:h-full">
+        <div className="flex-1 flex flex-col min-h-0 space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">THÔNG TIN HỒ SƠ</span>
-            {activeFile && (
-              <Button 
-                type="primary" 
-                size="small"
-                icon={<PlusOutlined />} 
-                onClick={() => setDrawerOpen(true)} 
-                className="bg-violet-600 border-none font-bold rounded"
-              >
-                Tạo giao dịch
-              </Button>
-            )}
+            <button 
+              onClick={() => setShowCopyModal(true)}
+              className="text-gray-400 hover:text-white transition-colors"
+              title="Copy thông tin"
+            >
+              <CopyOutlined />
+            </button>
           </div>
 
           {activeFile ? (
-            <div className="space-y-4">
+            <div className="flex-1 flex flex-col min-h-0 space-y-4">
+              {/* KHU VỰC KHÁCH HÀNG (ROW MỚI) */}
+              <div 
+                className="flex items-center justify-between p-3 rounded-xl bg-violet-900/10 border border-violet-500/20 cursor-pointer hover:bg-violet-900/20 hover:border-violet-500/40 transition-all group"
+                onClick={() => setShowCustomerModal(true)}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 p-[2px] flex-shrink-0 shadow-lg">
+                    <div className="w-full h-full rounded-full bg-[#0d1426] flex items-center justify-center overflow-hidden">
+                      {activeCust?.anh_khach_hang ? (
+                        <img src={activeCust.anh_khach_hang} alt="avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-white font-bold text-sm">{activeCust?.ho_va_ten?.[0] || 'K'}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-gray-100 font-bold text-sm truncate">
+                      {activeCust?.ho_va_ten || 'Khách lẻ'}
+                    </span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-violet-400 font-semibold truncate">
+                        {activeCust?.so_dien_thoai || 'Không có SĐT'}
+                      </span>
+                      <Tag color="purple" className="border-none font-bold text-[9px] px-1.5 py-0 rounded m-0">
+                        {activeCust?.id_level === 'dm-lvl-vip' ? 'VIP Vàng' : 'Thành viên'}
+                      </Tag>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-gray-500 group-hover:text-violet-400 transition-colors pl-2">
+                  <InfoCircleOutlined />
+                </div>
+              </div>
+
               {/* Card thông tin khách hàng & Hợp đồng (Chia 2/3 và 1/3) */}
               <div className="p-4 rounded-xl bg-[#131c33]/50 border border-white/5 relative overflow-hidden flex flex-col gap-3">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-violet-600/5 rounded-full blur-xl pointer-events-none" />
                 
                 <div className="flex justify-between items-stretch gap-4">
-                  {/* Phần ưu tiên (2/3): Logo, Mã HĐ, Tên Chủ HĐ */}
+                  {/* Phần ưu tiên: Logo, Mã HĐ, Tên Chủ HĐ */}
                   <div className="flex flex-1 items-center gap-3.5 min-w-0">
                     <div className="w-14 h-14 bg-white/5 rounded-xl border border-white/10 p-1 flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {activeBank?.logo ? (
@@ -799,73 +989,14 @@ export default function Transactions() {
                       </span>
                     </div>
                   </div>
-
-                  {/* Phần 1/3: Khách hàng (Người thanh toán) */}
-                  <div className="w-1/3 flex flex-col items-end text-right border-l border-white/5 pl-4 justify-center">
-                    <div className="flex items-center gap-2.5 mb-1.5">
-                      <div className="flex flex-col items-end min-w-0">
-                        <span className="text-gray-200 font-bold text-xs truncate max-w-[120px]">
-                          {activeCust?.ho_va_ten || 'Khách lẻ'}
-                        </span>
-                        <span className="text-[10px] text-gray-400 font-semibold flex items-center gap-1 mt-0.5">
-                          {activeCust?.so_dien_thoai || 'Chưa cung cấp SĐT'}
-                        </span>
-                      </div>
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 border border-violet-500/20 p-0.5 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg">
-                        {activeCust?.ho_va_ten?.[0] || 'K'}
-                      </div>
-                    </div>
-                    <Tag color="purple" className="border-none font-extrabold text-[9px] px-1.5 py-0.5 rounded m-0 mt-0.5">
-                      {activeCust?.id_level === 'dm-lvl-vip' ? 'VIP Vàng' : 'Thành viên'}
-                    </Tag>
-                  </div>
-                </div>
-
-                <div className="border-t border-white/5 pt-3 flex gap-2 justify-end mt-1">
-                  <Button 
-                    size="small" 
-                    icon={<EditOutlined />} 
-                    onClick={openEditFileModal}
-                    disabled={!canEditFile()}
-                    title={!canEditFile() ? 'Bạn chỉ có thể sửa hồ sơ do mình tạo' : ''}
-                    className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400 disabled:opacity-30 disabled:hover:text-gray-300"
-                  >
-                    Sửa hồ sơ
-                  </Button>
-                  <Button 
-                    size="small" 
-                    icon={<EditOutlined />} 
-                    onClick={() => openEditCustModal(activeCust)}
-                    disabled={!canEditFile()}
-                    className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400 disabled:opacity-30"
-                  >
-                    Sửa khách
-                  </Button>
-                  <Button 
-                    size="small" 
-                    icon={<EditOutlined />} 
-                    onClick={openEditContractModal}
-                    disabled={!canEditFile()}
-                    className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400 disabled:opacity-30"
-                  >
-                    Sửa HĐ
-                  </Button>
-                  <Button 
-                    size="small" 
-                    icon={<HistoryOutlined />} 
-                    onClick={() => setShowCustHistoryModal(true)}
-                    className="bg-white/5 border-none text-gray-300 text-[10px] h-7 px-3 rounded-lg hover:text-violet-400"
-                  >
-                    Lịch sử khách
-                  </Button>
                 </div>
               </div>
 
               {/* Danh sách Dòng tiền chi tiết */}
-              <div className="space-y-2">
+              <div className="flex-1 flex flex-col min-h-0 space-y-2">
                 <span className="font-extrabold text-gray-400 text-[10px] tracking-wider uppercase block">Các dòng tiền chi tiết phát sinh</span>
                 
-                <div className="space-y-2.5 overflow-y-auto max-h-[290px] pr-1 scrollbar-thin">
+                <div className="flex-1 space-y-2.5 overflow-y-auto pr-1 scrollbar-thin min-h-0 overscroll-none">
                   {store.transactionDetails.length === 0 ? (
                     <div className="p-8 text-center text-gray-500 border border-dashed border-white/5 rounded-xl text-xs">
                       Hồ sơ này chưa phát sinh dòng tiền nào. Vui lòng bấm "Lập phiếu POS" ở trên để tạo giao dịch đầu tiên!
@@ -919,13 +1050,47 @@ export default function Transactions() {
               <p className="text-xs">Vui lòng chọn một Hồ sơ dịch vụ ở cột bên trái hoặc bấm nút "Lập hồ sơ mới" để bắt đầu thao tác.</p>
             </div>
           )}
+
+          {/* CỘT 2 - SPEED DIAL (Nút Nổi Menu) */}
+          {activeFile && (
+            <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-2">
+              {showCol2Menu && (
+                <div className="flex flex-col gap-2 mb-2 animate-in slide-in-from-bottom-2 fade-in zoom-in-95 origin-bottom">
+                  <button onClick={() => { setShowCol2Menu(false); setDrawerOpen(true); }} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-violet-500/50 px-4 py-2 rounded-full text-violet-400 hover:text-white hover:bg-violet-600 transition-all shadow-xl font-bold text-xs justify-end w-[160px]">
+                    <span className="flex-1 text-right">Tạo giao dịch</span> <div className="w-6 flex justify-center"><PlusOutlined /></div>
+                  </button>
+                  <button onClick={() => { setShowCol2Menu(false); openEditFileModal(); }} disabled={!canEditFile()} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-gray-300 hover:text-white hover:bg-white/20 transition-all shadow-xl font-bold text-xs justify-end disabled:opacity-50 w-[160px]">
+                    <span className="flex-1 text-right">Sửa hồ sơ</span> <div className="w-6 flex justify-center"><EditOutlined /></div>
+                  </button>
+                  <button onClick={() => { setShowCol2Menu(false); openEditCustModal(activeCust); }} disabled={!canEditFile()} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-gray-300 hover:text-white hover:bg-white/20 transition-all shadow-xl font-bold text-xs justify-end disabled:opacity-50 w-[160px]">
+                    <span className="flex-1 text-right">Sửa khách</span> <div className="w-6 flex justify-center"><UserOutlined /></div>
+                  </button>
+                  <button onClick={() => { setShowCol2Menu(false); openEditContractModal(); }} disabled={!canEditFile()} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-gray-300 hover:text-white hover:bg-white/20 transition-all shadow-xl font-bold text-xs justify-end disabled:opacity-50 w-[160px]">
+                    <span className="flex-1 text-right">Sửa HĐ</span> <div className="w-6 flex justify-center"><EditOutlined /></div>
+                  </button>
+                  <button onClick={() => { setShowCol2Menu(false); setShowCustHistoryModal(true); }} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-gray-300 hover:text-white hover:bg-white/20 transition-all shadow-xl font-bold text-xs justify-end w-[160px]">
+                    <span className="flex-1 text-right">Lịch sử khách</span> <div className="w-6 flex justify-center"><HistoryOutlined /></div>
+                  </button>
+                </div>
+              )}
+              {/* Nút chính */}
+              <button
+                onClick={() => setShowCol2Menu(!showCol2Menu)}
+                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(124,58,237,0.5)] transition-all hover:scale-105 active:scale-95 ${showCol2Menu ? 'bg-[#131c33] text-white border border-white/20' : 'bg-gradient-to-tr from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500'}`}
+              >
+                {showCol2Menu ? <span className="text-xl font-bold rotate-45 transition-transform">✕</span> : <PlusOutlined className="text-2xl font-bold transition-transform" />}
+              </button>
+            </div>
+          )}
         </div>
       </div>
       </div>
+      ), [showMobileDetail, activeFile, activeCust, activeHd, activeBank, store.transactionDetails, showCol2Menu, activeDetail])}
 
       {/* ============================================================
          CỘT 3 (BÊN PHẢI): BẢNG TỔNG CỘNG, VIETQR & IN ẤN NHANH
          ============================================================ */}
+      {React.useMemo(() => (
       <div className={`${showMobileTxDetail ? 'fixed inset-0 z-[110] bg-[#0d1426] flex flex-col gap-4 p-4 animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
         
         {/* Nút đóng trên Mobile cho Cột 3 */}
@@ -943,47 +1108,17 @@ export default function Transactions() {
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">CHI TIẾT GIAO DỊCH</span>
+            <button 
+              onClick={() => setShowCopyModal(true)}
+              className="text-gray-400 hover:text-white transition-colors"
+              title="Copy thông tin"
+            >
+              <CopyOutlined />
+            </button>
           </div>
 
           {activeDetail ? (
             <div className="space-y-4">
-              {/* Thao tác In & QR & Hủy */}
-              <div className="grid grid-cols-4 gap-2 text-center">
-                <button 
-                  onClick={() => setShowQrModal(true)}
-                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-violet-500/40 hover:bg-[#131b33]/40 transition-all group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-violet-600/10 text-violet-400 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-all"><QrcodeOutlined /></div>
-                  <span className="text-[9px] text-gray-400 font-extrabold leading-tight uppercase">TẠO QR</span>
-                </button>
-                <button 
-                  onClick={handlePrintInvoice}
-                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-violet-500/40 hover:bg-[#131b33]/40 transition-all group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-violet-600/10 text-violet-400 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-all"><PrinterOutlined /></div>
-                  <span className="text-[9px] text-gray-400 font-extrabold leading-tight uppercase">IN HÓA ĐƠN</span>
-                </button>
-                <button 
-                  onClick={() => {
-                    setEditDetailPayload(activeDetail);
-                    setShowEditDetailModal(true);
-                  }}
-                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-blue-500/40 hover:bg-blue-500/10 transition-all group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-blue-600/10 text-blue-400 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-all"><EditOutlined /></div>
-                  <span className="text-[9px] text-gray-400 font-extrabold leading-tight uppercase">SỬA GD</span>
-                </button>
-                <button 
-                  onClick={handleCancelTransaction}
-                  disabled={!canCancelTransaction()}
-                  title={!canCancelTransaction() ? 'Bạn không thể hủy GD này' : ''}
-                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-red-500/40 hover:bg-red-500/10 transition-all group disabled:opacity-30 disabled:hover:bg-white/[0.02] disabled:hover:border-white/5"
-                >
-                  <div className="w-8 h-8 rounded-full bg-red-600/10 text-red-400 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-all">✖</div>
-                  <span className="text-[9px] text-gray-400 font-extrabold leading-tight uppercase">HỦY GD</span>
-                </button>
-              </div>
-
               {/* Bảng tính toán tiền chi tiết */}
               <div className="p-4 rounded-xl bg-gray-950/80 border border-white/5 space-y-2.5">
                 <div className="flex justify-between text-xs text-gray-400 font-bold">
@@ -1042,87 +1177,98 @@ export default function Transactions() {
               Vui lòng chọn dòng giao dịch chi tiết ở cột giữa để xem QR, in hóa đơn.
             </div>
           )}
+
+          {/* CỘT 3 - SPEED DIAL (Tính năng & Trạng thái) */}
+          {activeDetail && (
+            <div className="absolute bottom-4 right-4 z-20 flex gap-3">
+              
+              {/* FAB Trạng Thái */}
+              <div className="relative flex flex-col items-center">
+                {showCol3StatusMenu && (() => {
+                  const hoanThanhId = store.categories.find(c => (c.ten_danh_muc || '').toLowerCase().includes('hoàn thành'))?.id_danh_muc || 'dm-1';
+                  const dangXuLyId = store.categories.find(c => (c.ten_danh_muc || '').toLowerCase().includes('đang xử lý'))?.id_danh_muc || 'dm-4';
+                  const huyId = store.categories.find(c => (c.ten_danh_muc || '').toLowerCase().includes('hủy'))?.id_danh_muc || 'dm-3';
+                  
+                  return (
+                    <div className="absolute bottom-[110%] flex flex-col gap-2 mb-2 animate-in slide-in-from-bottom-2 fade-in zoom-in-95 origin-bottom">
+                      <button onClick={() => handleChangeStatus(hoanThanhId, 'Hoàn thành')} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-green-500/50 px-4 py-2 rounded-full text-green-400 hover:text-white hover:bg-green-600 transition-all shadow-xl font-bold text-xs whitespace-nowrap">
+                        Hoàn thành <CheckCircleOutlined />
+                      </button>
+                      <button onClick={() => handleChangeStatus(dangXuLyId, 'Đang xử lý')} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-yellow-500/50 px-4 py-2 rounded-full text-yellow-400 hover:text-white hover:bg-yellow-600 transition-all shadow-xl font-bold text-xs whitespace-nowrap">
+                        Đang xử lý <SyncOutlined />
+                      </button>
+                      <button onClick={handleCancelTransaction} disabled={!canCancelTransaction()} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-red-500/50 px-4 py-2 rounded-full text-red-400 hover:text-white hover:bg-red-600 transition-all shadow-xl font-bold text-xs whitespace-nowrap disabled:opacity-50">
+                        Hủy GD <span className="font-bold text-base">✕</span>
+                      </button>
+                    </div>
+                  );
+                })()}
+                {(() => {
+                  const statusObj = store.categories.find(c => c.id_danh_muc === activeDetail.id_trang_thai);
+                  const statusName = (statusObj?.ten_danh_muc || '').toLowerCase();
+
+                  let statusText = "ĐANG XỬ LÝ";
+                  let statusColorClass = "from-yellow-600 to-orange-500 shadow-[0_8px_30px_rgb(234,179,8,0.4)] hover:from-yellow-500 hover:to-orange-400";
+                  let StatusIcon = SyncOutlined;
+                  
+                  if (statusName.includes('hoàn thành') || statusName.includes('thành công')) {
+                    statusText = "HOÀN THÀNH";
+                    statusColorClass = "from-green-600 to-emerald-500 shadow-[0_8px_30px_rgb(34,197,94,0.4)] hover:from-green-500 hover:to-emerald-400";
+                    StatusIcon = CheckCircleOutlined;
+                  } else if (statusName.includes('hủy') || statusName.includes('thất bại')) {
+                    statusText = "ĐÃ HỦY";
+                    statusColorClass = "from-red-600 to-rose-500 shadow-[0_8px_30px_rgb(239,68,68,0.4)] hover:from-red-500 hover:to-rose-400";
+                    StatusIcon = () => <span className="font-bold text-base">✕</span>;
+                  }
+
+                  return (
+                    <button
+                      onClick={() => { setShowCol3StatusMenu(!showCol3StatusMenu); setShowCol3Menu(false); }}
+                      className={`h-14 px-5 rounded-full flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 ${showCol3StatusMenu ? 'bg-[#131c33] text-white border border-white/20' : `bg-gradient-to-tr ${statusColorClass} text-white`}`}
+                    >
+                      {showCol3StatusMenu ? <span className="text-xl font-bold rotate-45 transition-transform w-[90px] text-center">✕</span> : (
+                        <>
+                          <span className="font-black text-xs tracking-wider whitespace-nowrap">{statusText}</span>
+                          <StatusIcon className="text-lg font-bold" />
+                        </>
+                      )}
+                    </button>
+                  );
+                })()}
+              </div>
+
+              {/* FAB Tiện Ích */}
+              <div className="relative flex flex-col items-center">
+                {showCol3Menu && (
+                  <div className="absolute bottom-[110%] flex flex-col gap-2 mb-2 animate-in slide-in-from-bottom-2 fade-in zoom-in-95 origin-bottom">
+                    <button onClick={() => { setShowCol3Menu(false); setShowQrModal(true); }} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-blue-500/50 px-4 py-2 rounded-full text-blue-400 hover:text-white hover:bg-blue-600 transition-all shadow-xl font-bold text-xs whitespace-nowrap">
+                      Tạo QR <QrcodeOutlined />
+                    </button>
+                    <button onClick={() => { setShowCol3Menu(false); handlePrintInvoice(); }} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-violet-500/50 px-4 py-2 rounded-full text-violet-400 hover:text-white hover:bg-violet-600 transition-all shadow-xl font-bold text-xs whitespace-nowrap">
+                      In hóa đơn <PrinterOutlined />
+                    </button>
+                    <button onClick={() => { setShowCol3Menu(false); setEditDetailPayload(activeDetail); setShowEditDetailModal(true); }} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-gray-300 hover:text-white hover:bg-white/20 transition-all shadow-xl font-bold text-xs whitespace-nowrap">
+                      Sửa GD <EditOutlined />
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => { setShowCol3Menu(!showCol3Menu); setShowCol3StatusMenu(false); }}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(59,130,246,0.5)] transition-all hover:scale-105 active:scale-95 ${showCol3Menu ? 'bg-[#131c33] text-white border border-white/20' : 'bg-gradient-to-tr from-blue-600 to-indigo-500 text-white hover:from-blue-500 hover:to-indigo-400'}`}
+                >
+                  {showCol3Menu ? <span className="text-xl font-bold rotate-45 transition-transform">✕</span> : <span className="text-2xl font-bold transition-transform">⚙️</span>}
+                </button>
+              </div>
+
+            </div>
+          )}
         </div>
       </div>
       {/* Dong wrapper cot 3 cho desktop */}
       </div>
+      ), [showMobileTxDetail, activeDetail, activeFile, activeHd, activeBank, activeCust, store.selectedService, showCol3Menu, showCol3StatusMenu, globalCalculatedTotal, activeQrUrl, currentUser, isSuperAdminOrOwner])}
 
-      {/* ============================================================
-         MOBILE BOTTOM SHEET: Chon hanh dong
-         ============================================================ */}
-      {showMobileAction && mobileActionFile && (() => {
-        const mFile = mobileActionFile;
-        const mHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === mFile.id_ma_hop_dong) || mFile.ma_hop_dong;
-        const mCust = store.customers.find(c => c.id_khach_hang === mFile.id_khach_hang);
-        const mBank = store.banks.find(b => b.id_danh_muc_dich_vu === mHd?.id_danh_muc_dich_vu);
-        return (
-          <div
-            className="fixed inset-0 z-50 xl:hidden"
-            onClick={() => setShowMobileAction(false)}
-          >
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-            {/* Sheet */}
-            <div
-              className="absolute bottom-0 left-0 right-0 bg-[#0d1426] border-t border-white/10 rounded-t-3xl p-5 animate-in slide-in-from-bottom duration-300"
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Handle bar */}
-              <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-5" />
 
-              {/* Thong tin hop dong */}
-              <div className="flex items-center gap-3 mb-6 p-3 rounded-2xl bg-white/5 border border-white/5">
-                <div className="w-11 h-11 bg-white/5 rounded-xl border border-white/10 p-1 flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {mBank?.logo
-                    ? <img src={mBank.logo} alt={mBank.ten_viet_tat} className="w-full h-full object-contain" />
-                    : <span className="text-xl">{store.selectedService?.icon || '📁'}</span>
-                  }
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-extrabold text-sm text-red-400 uppercase truncate">{mHd?.ma_hop_dong || 'CHUA CO HD'}</h4>
-                  <p className="text-xs text-gray-400 truncate">{mCust?.ho_va_ten || 'Khach le'} {mCust?.so_dien_thoai ? `- ${mCust.so_dien_thoai}` : ''}</p>
-                </div>
-              </div>
-
-              {/* 2 nut hanh dong */}
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => {
-                    store.selectServiceFile(mFile);
-                    setShowMobileAction(false);
-                    setDrawerOpen(true);
-                  }}
-                  className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-violet-600/10 border border-violet-500/30 active:scale-95 transition-all"
-                >
-                  <div className="w-12 h-12 rounded-full bg-violet-600/20 flex items-center justify-center text-2xl">💳</div>
-                  <span className="text-xs font-bold text-violet-300">Them giao dich</span>
-                  <span className="text-[10px] text-gray-500 text-center">Lap phieu POS moi</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    store.selectServiceFile(mFile);
-                    setShowMobileAction(false);
-                    setShowMobileDetail(true);
-                  }}
-                  className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all"
-                >
-                  <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-2xl">📋</div>
-                  <span className="text-xs font-bold text-gray-200">Xem hồ sơ</span>
-                  <span className="text-[10px] text-gray-500 text-center">Ho so & dong tien</span>
-                </button>
-              </div>
-
-              <button
-                onClick={() => setShowMobileAction(false)}
-                className="mt-4 w-full py-3 rounded-2xl bg-white/5 text-gray-400 text-sm font-semibold active:scale-95 transition-all"
-              >
-                Dong
-              </button>
-            </div>
-          </div>
-        );
-      })()}
 
       {/* Mobile detail section removed because it's now a full screen modal */}
 
@@ -1709,6 +1855,115 @@ export default function Transactions() {
       </Modal>
 
       <TransactionDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+
+      {/* Modal Chi tiết Khách hàng */}
+      <Modal
+        title={
+          <span className="font-black text-violet-400 uppercase tracking-wider text-sm flex items-center gap-2">
+            <UserOutlined /> THÔNG TIN KHÁCH HÀNG
+          </span>
+        }
+        open={showCustomerModal}
+        onCancel={() => setShowCustomerModal(false)}
+        footer={null}
+        centered
+        wrapClassName="dark-modal"
+        width={400}
+      >
+        <div className="flex flex-col items-center pt-4 pb-2">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 p-1 mb-4 shadow-xl border border-violet-500/20">
+            <div className="w-full h-full rounded-full bg-[#0d1426] flex items-center justify-center overflow-hidden">
+              {activeCust?.anh_khach_hang ? (
+                <img src={activeCust.anh_khach_hang} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-4xl text-white font-bold">{activeCust?.ho_va_ten?.[0] || 'K'}</span>
+              )}
+            </div>
+          </div>
+          
+          <h3 className="text-lg font-black text-white text-center mb-1">{activeCust?.ho_va_ten || 'Khách lẻ'}</h3>
+          <p className="text-violet-400 font-bold text-sm tracking-wide mb-3">{activeCust?.so_dien_thoai || 'Không có SĐT'}</p>
+          
+          <Tag color="purple" className="px-3 py-1 text-xs font-bold border-none rounded mb-6">
+            {activeCust?.id_level === 'dm-lvl-vip' ? 'Hạng: VIP VÀNG' : 'Hạng: THÀNH VIÊN'}
+          </Tag>
+
+          <div className="w-full bg-white/5 rounded-xl p-4 border border-white/5 space-y-3">
+            <div className="flex justify-between items-center border-b border-white/5 pb-2">
+              <span className="text-gray-400 text-xs">Mã KH:</span>
+              <span className="text-gray-200 text-xs font-mono">{activeCust?.id_khach_hang?.split('-')?.pop() || 'N/A'}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-white/5 pb-2">
+              <span className="text-gray-400 text-xs">CCCD/CMND:</span>
+              <span className="text-gray-200 text-xs font-semibold">{activeCust?.so_cccd || '--'}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-white/5 pb-2">
+              <span className="text-gray-400 text-xs">Email:</span>
+              <span className="text-gray-200 text-xs font-semibold">{activeCust?.email || '--'}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-400 text-xs">Địa chỉ:</span>
+              <span className="text-gray-200 text-xs font-semibold text-right max-w-[200px] truncate">{activeCust?.dia_chi || '--'}</span>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal Copy Thông Tin */}
+      <Modal
+        title={
+          <span className="font-black text-violet-400 uppercase tracking-wider text-sm flex items-center gap-2">
+            <CopyOutlined /> COPY THÔNG TIN
+          </span>
+        }
+        open={showCopyModal}
+        onCancel={() => setShowCopyModal(false)}
+        footer={null}
+        centered
+        wrapClassName="dark-modal"
+        width={400}
+      >
+        <div className="flex flex-col space-y-4 pt-4 pb-2">
+          {(() => {
+            const activeFile = store.selectedServiceFile;
+            const currentHd = activeFile ? (store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile.id_ma_hop_dong) || activeFile.ma_hop_dong) : null;
+            return (
+              <>
+                <Checkbox 
+                  checked={copyOptions.serviceName} 
+                  onChange={(e) => setCopyOptions(prev => ({ ...prev, serviceName: e.target.checked }))}
+                  className="text-white font-semibold"
+                >
+                  1. Tên danh mục dịch vụ <span className="text-gray-400 font-normal ml-1">({store.selectedService?.ten_danh_muc || 'N/A'})</span>
+                </Checkbox>
+                <Checkbox 
+                  checked={copyOptions.contractId} 
+                  onChange={(e) => setCopyOptions(prev => ({ ...prev, contractId: e.target.checked }))}
+                  className="text-white font-semibold"
+                >
+                  2. Mã hợp đồng <span className="text-gray-400 font-normal ml-1">({currentHd?.ma_hop_dong || 'N/A'})</span>
+                </Checkbox>
+                <Checkbox 
+                  checked={copyOptions.contractOwner} 
+                  onChange={(e) => setCopyOptions(prev => ({ ...prev, contractOwner: e.target.checked }))}
+                  className="text-white font-semibold"
+                >
+                  3. Chủ hợp đồng <span className="text-gray-400 font-normal ml-1">({currentHd?.chu_hop_dong || 'N/A'})</span>
+                </Checkbox>
+              </>
+            );
+          })()}
+
+          <Button 
+            type="primary" 
+            onClick={handleCopyData}
+            className="w-full bg-violet-600 border-none font-bold mt-4 h-10 hover:bg-violet-500 transition-colors"
+            icon={<CopyOutlined />}
+          >
+            Copy dữ liệu đã chọn
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

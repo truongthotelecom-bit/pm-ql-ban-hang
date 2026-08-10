@@ -93,7 +93,7 @@ export default function IndexPage() {
             <AppstoreOutlined style={{ fontSize: '16px' }} /> Danh mục Dịch vụ
           </NavLink>
           <NavLink to="/giao-dich" className={navLinkClass}>
-            <ShoppingCartOutlined style={{ fontSize: '16px' }} /> Live Feed Giao dịch
+            <ShoppingCartOutlined style={{ fontSize: '16px' }} /> <span className="truncate max-w-[150px] uppercase">{store.selectedService?.ten_danh_muc || 'Live Feed Giao dịch'}</span>
           </NavLink>
           <NavLink to="/lich-su" className={navLinkClass}>
             <CalendarOutlined style={{ fontSize: '16px' }} /> Lịch sử Giao dịch
@@ -160,7 +160,7 @@ export default function IndexPage() {
         </NavLink>
         <NavLink to="/giao-dich" className={mobileNavLinkClass}>
           <ShoppingCartOutlined style={{ fontSize: '18px' }} />
-          <span className="text-[9px] font-semibold">Feed</span>
+          <span className="text-[9px] font-semibold truncate w-14 text-center uppercase">{store.selectedService?.ten_danh_muc || 'Feed'}</span>
         </NavLink>
         <button 
           onClick={() => setDrawerOpen(true)}
