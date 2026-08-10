@@ -70,15 +70,12 @@ export default function ContractsPage() {
       key: 'chu_hop_dong',
     },
     {
-      title: 'Nhóm dịch vụ',
-      key: 'nhom_dich_vu',
-      render: (_, record) => {
-        const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === record.id_danh_muc_dich_vu);
-        if (!bank) return '-';
-        const svc = store.services?.find(s => s.id_loai_dich_vu === bank.id_loai_dich_vu);
-        if (!svc) return '-';
-        const group = store.menuGroups?.find(g => g.id_nhom === svc.id_nhom || g.id_nhom === svc.id_nhom_dich_vu);
-        return group ? group.ten_nhom : '-';
+      title: 'Danh mục dịch vụ',
+      dataIndex: 'id_danh_muc_dich_vu',
+      key: 'danh_muc_dich_vu',
+      render: (val) => {
+        const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === val);
+        return bank ? (bank.ten_viet_tat || bank.ten_dich_vu) : '-';
       }
     },
     {
@@ -92,12 +89,15 @@ export default function ContractsPage() {
       }
     },
     {
-      title: 'Danh mục dịch vụ',
-      dataIndex: 'id_danh_muc_dich_vu',
-      key: 'danh_muc_dich_vu',
-      render: (val) => {
-        const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === val);
-        return bank ? (bank.ten_viet_tat || bank.ten_dich_vu) : '-';
+      title: 'Nhóm dịch vụ',
+      key: 'nhom_dich_vu',
+      render: (_, record) => {
+        const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === record.id_danh_muc_dich_vu);
+        if (!bank) return '-';
+        const svc = store.services?.find(s => s.id_loai_dich_vu === bank.id_loai_dich_vu);
+        if (!svc) return '-';
+        const group = store.menuGroups?.find(g => g.id_nhom === svc.id_nhom || g.id_nhom === svc.id_nhom_dich_vu);
+        return group ? group.ten_nhom : '-';
       }
     },
     {
