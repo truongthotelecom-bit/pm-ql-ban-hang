@@ -362,6 +362,15 @@ export default function Transactions() {
     );
   };
 
+  const getAmountColorClass = (statusId) => {
+    const status = store.categories.find(c => c.id_danh_muc === statusId);
+    const statusName = (status?.ten_danh_muc || '').toLowerCase();
+    
+    if (statusName.includes('hoàn thành') || statusName.includes('thành công')) return 'text-green-400';
+    if (statusName.includes('hủy') || statusName.includes('thất bại')) return 'text-red-400';
+    return 'text-orange-400';
+  };
+
   // Tạo nhanh Mã hợp đồng inline
   const handleCreateContractInline = async () => {
     if (!newContractPayload.ma_hop_dong) {
@@ -1042,11 +1051,7 @@ export default function Transactions() {
                           </div>
                           
                           <div className="text-right flex flex-col items-end">
-                            <span className={`text-[13px] font-extrabold block ${
-                              detail.id_trang_thai === 'dm-1' ? 'text-green-400' :
-                              detail.id_trang_thai === 'dm-3' ? 'text-red-400' :
-                              'text-orange-400'
-                            }`}>
+                            <span className={`text-[13px] font-extrabold block ${getAmountColorClass(detail.id_trang_thai)}`}>
                               {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.so_tien_di)}
                             </span>
                             <span className="text-[9px] text-gray-400 font-semibold mt-1.5 bg-white/5 px-1.5 py-0.5 rounded border border-white/5 uppercase tracking-wide">
