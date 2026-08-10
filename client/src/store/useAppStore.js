@@ -498,6 +498,8 @@ const useAppStore = create((set, get) => ({
       if (!error) {
         await get().fetchTransactionDetails(activeFile.id_ho_so_dich_vu);
         await get().fetchCustomers();
+        // Load lại danh sách hồ sơ để cập nhật vị trí ưu tiên lên đầu
+        await get().fetchServiceFiles(get().selectedService?.id_loai_dich_vu);
         return data;
       } else {
         console.error('Lỗi Supabase khi thêm giao dịch:', error);
