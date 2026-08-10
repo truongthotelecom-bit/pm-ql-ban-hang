@@ -97,7 +97,7 @@ export default function ContractsPage() {
       key: 'danh_muc_dich_vu',
       render: (val) => {
         const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === val);
-        return bank ? bank.ten_danh_muc : '-';
+        return bank ? (bank.ten_viet_tat || bank.ten_dich_vu) : '-';
       }
     },
     {
@@ -208,7 +208,7 @@ export default function ContractsPage() {
                 const loaiName = svc ? (svc.ten_danh_muc || svc.ten_dich_vu) : 'Khác';
                 return (
                   <Select.Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>
-                    {b.ten_danh_muc} ({loaiName})
+                    {b.ten_viet_tat || b.ten_dich_vu} ({loaiName})
                   </Select.Option>
                 );
               })}
