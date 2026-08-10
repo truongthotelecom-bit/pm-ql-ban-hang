@@ -186,6 +186,12 @@ export const adminCategoriesConfig = [
         lookup: { table: 'sys_danh_sach_bang', labelField: 'ten_bang', valueField: 'id_bang' }
       },
       { 
+        key: 'id_loai_dich_vu', 
+        label: 'Loại dịch vụ (nếu áp dụng riêng)', 
+        type: 'lookup', 
+        lookup: { table: 'sys_loai_dich_vu', labelField: 'ten_danh_muc', valueField: 'id_loai_dich_vu' }
+      },
+      { 
         key: 'id_ten_cot', 
         label: 'Trường dữ liệu (Mã Cột)', 
         type: 'lookup', 
