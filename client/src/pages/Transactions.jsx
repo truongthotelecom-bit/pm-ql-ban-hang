@@ -109,7 +109,7 @@ export default function Transactions() {
     if (store.isBootstrapped) {
       store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, searchTerm, currentPage, pageSize);
     }
-  }, [store.selectedService, currentPage, pageSize]);
+  }, [store.selectedService, currentPage, pageSize, store.refetchTrigger]);
 
   const handleSearch = (value) => {
     setSearchTerm(value);
