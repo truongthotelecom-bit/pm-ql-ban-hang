@@ -179,6 +179,27 @@
   background: rgba(255, 255, 255, 0.08) !important;
 }
 
+.search-btn-red .ant-input-search-button {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  border: none !important;
+  border-radius: 0 8px 8px 0 !important;
+  box-shadow: 0 4px 15px -3px rgba(239, 68, 68, 0.4) !important;
+  transition: all 0.2s ease !important;
+}
+.search-btn-red .ant-input-search-button:hover {
+  background: linear-gradient(135deg, #f87171, #ef4444) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -3px rgba(239, 68, 68, 0.6) !important;
+}
+.search-btn-red .ant-input {
+  border-radius: 8px 0 0 8px !important;
+  padding: 8px 14px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+.search-btn-red .ant-input:hover, .search-btn-red .ant-input:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
 /* Appsheet style very thin scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
