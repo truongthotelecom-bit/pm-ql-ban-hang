@@ -70,12 +70,34 @@ export default function ContractsPage() {
       key: 'chu_hop_dong',
     },
     {
-      title: 'Dịch vụ liên kết',
+      title: 'Nhóm dịch vụ',
+      key: 'nhom_dich_vu',
+      render: (_, record) => {
+        const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === record.id_danh_muc_dich_vu);
+        if (!bank) return '-';
+        const svc = store.services?.find(s => s.id_loai_dich_vu === bank.id_loai_dich_vu);
+        if (!svc) return '-';
+        const group = store.menuGroups?.find(g => g.id_nhom === svc.id_nhom || g.id_nhom === svc.id_nhom_dich_vu);
+        return group ? group.ten_nhom : '-';
+      }
+    },
+    {
+      title: 'Loại dịch vụ',
+      key: 'loai_dich_vu',
+      render: (_, record) => {
+        const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === record.id_danh_muc_dich_vu);
+        if (!bank) return '-';
+        const svc = store.services?.find(s => s.id_loai_dich_vu === bank.id_loai_dich_vu);
+        return svc ? (svc.ten_danh_muc || svc.ten_dich_vu || '-') : '-';
+      }
+    },
+    {
+      title: 'Danh mục dịch vụ',
       dataIndex: 'id_danh_muc_dich_vu',
-      key: 'id_danh_muc_dich_vu',
+      key: 'danh_muc_dich_vu',
       render: (val) => {
-        const svc = store.services?.find(s => s.id_loai_dich_vu === val);
-        return svc ? svc.ten_dich_vu : '-';
+        const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === val);
+        return bank ? bank.ten_danh_muc : '-';
       }
     },
     {
@@ -170,19 +192,26 @@ export default function ContractsPage() {
 
           <Form.Item
             name="id_danh_muc_dich_vu"
-            label={<span className="text-gray-300">Dịch vụ liên kết</span>}
+            label={<span className="text-gray-300">Danh mục dịch vụ</span>}
+            rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
           >
             <Select 
-              placeholder="Chọn dịch vụ" 
+              placeholder="Chọn danh mục dịch vụ" 
               className="dark-select"
               popupClassName="dark-dropdown"
               allowClear
+              showSearch
+              optionFilterProp="children"
             >
-              {store.services?.map(s => (
-                <Select.Option key={s.id_loai_dich_vu} value={s.id_loai_dich_vu}>
-                  {s.ten_dich_vu}
-                </Select.Option>
-              ))}
+              {store.banks?.map(b => {
+                const svc = store.services?.find(s => s.id_loai_dich_vu === b.id_loai_dich_vu);
+                const loaiName = svc ? (svc.ten_danh_muc || svc.ten_dich_vu) : 'Khác';
+                return (
+                  <Select.Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>
+                    {b.ten_danh_muc} ({loaiName})
+                  </Select.Option>
+                );
+              })}
             </Select>
           </Form.Item>
 
