@@ -623,7 +623,7 @@ export default function Transactions() {
         </div>
 
         {/* Danh sách Hồ sơ (Virtual Scrolling) */}
-        <div className="w-full">
+        <div className="w-full flex-1 flex flex-col min-h-0">
           {sortedFiles.length === 0 ? (
             <div className="p-8 text-center text-gray-500 border border-dashed border-white/5 rounded-xl text-xs">
               Chưa có hồ sơ dịch vụ nào được lập cho phân hệ này.
