@@ -771,7 +771,7 @@ export default function Transactions() {
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">{store.selectedService?.ten_danh_muc || 'TẤT CẢ DỊCH VỤ'} - DANH SÁCH HỒ SƠ</span>
           </div>
           <div className="flex gap-1.5">
-            <Button size="small" icon={<ReloadOutlined />} onClick={() => store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null)} className="bg-white/5 text-gray-300 border-none hover:text-violet-400" />
+            {/* Removed top reload button */}
           </div>
         </div>
 
@@ -795,8 +795,8 @@ export default function Transactions() {
                       }
                     }}
                     enterButton={
-                      <span className="font-semibold tracking-wide px-1 flex items-center gap-1">
-                        {isResetMode ? <><ReloadOutlined /> RESET</> : 'TÌM'}
+                      <span className="font-semibold tracking-wide px-1 flex items-center justify-center">
+                        {isResetMode ? <ReloadOutlined spin={false} /> : 'TÌM'}
                       </span>
                     }
                     className={`bg-[#0d1426]/50 border-white/10 text-white flex-1 custom-search-input shadow-inner h-[40px] ${isResetMode ? 'search-btn-light-violet' : 'search-btn-violet'}`}
