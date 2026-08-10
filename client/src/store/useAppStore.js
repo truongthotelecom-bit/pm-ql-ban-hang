@@ -356,12 +356,22 @@ const useAppStore = create((set, get) => ({
       
       const { data: allTxData } = await txQuery;
 
-      set((state) => ({ 
-        serviceFiles: isAppend ? [...state.serviceFiles, ...filesData] : filesData, 
-        totalServiceFiles: count,
-        hasMoreServiceFiles: (offset + pageSize) < count,
-        allTransactions: allTxData || [] 
-      }));
+      set((state) => {
+        const newFiles = isAppend 
+          ? filesData.filter(newItem => !state.serviceFiles.some(oldItem => oldItem.id_ho_so_dich_vu === newItem.id_ho_so_dich_vu))
+          : filesData;
+        
+        const newTxs = isAppend
+          ? (allTxData || []).filter(newTx => !state.allTransactions.some(oldTx => oldTx.id_chi_tiet_giao_dich === newTx.id_chi_tiet_giao_dich))
+          : (allTxData || []);
+
+        return { 
+          serviceFiles: isAppend ? [...state.serviceFiles, ...newFiles] : newFiles, 
+          totalServiceFiles: count,
+          hasMoreServiceFiles: (offset + pageSize) < count,
+          allTransactions: isAppend ? [...state.allTransactions, ...newTxs] : newTxs
+        };
+      });
 
       if (filesData.length > 0) {
         const firstFile = filesData[0];
