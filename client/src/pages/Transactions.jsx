@@ -1405,10 +1405,6 @@ export default function Transactions() {
               </div>
 
             </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center opacity-60">
-              <span className="text-[11px] text-gray-400 font-medium tracking-wide">Chưa có thông tin giao dịch</span>
-            </div>
           )}
         </div>
       </div>

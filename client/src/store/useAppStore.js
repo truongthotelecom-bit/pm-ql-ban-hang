@@ -391,11 +391,11 @@ const useAppStore = create((set, get) => ({
           await get().fetchTransactionDetails(firstFile.id_ho_so_dich_vu);
         }
       } else if (!isAppend) {
-        set({ selectedServiceFile: null, selectedDetail: null, transactionDetails: [] });
+        set({ selectedServiceFile: null, selectedDetail: null, transactionDetails: [], isLoadingDetails: false });
       }
     } catch (err) {
       console.error('Lỗi lấy hồ sơ dịch vụ:', err);
-      set({ hasMoreServiceFiles: false, isLoadingFiles: false });
+      set({ hasMoreServiceFiles: false, isLoadingFiles: false, isLoadingDetails: false });
     }
   },
 
