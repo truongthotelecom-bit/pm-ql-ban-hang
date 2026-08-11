@@ -291,7 +291,7 @@ export default function MoneyTransferForm({ value, onChange }) {
   const f_pttt_phi = getFieldConfig('id_pttt_phi', 'Hình thức KHÁCH TRẢ PHÍ');
 
   return (
-    <div className="bg-[#0f172a] border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
+    <div className="bg-[#0f172a] border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-visible">
       {/* CỤM 1: NGUỒN TIỀN & ĐÍCH ĐẾN */}
       <div className="mb-6 space-y-4">
         {!f_tien.hidden && (
@@ -442,30 +442,6 @@ export default function MoneyTransferForm({ value, onChange }) {
           />
         </div>
         )}
-        {!f_trangthai.hidden && (
-        <div className="space-y-1">
-          <label className="text-gray-400 text-xs font-bold block mb-2 uppercase">{f_trangthai.label}</label>
-          <div className="grid grid-cols-3 gap-2">
-            {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => {
-              const isActive = (form.id_trang_thai || '11111111-1111-1111-1111-111111111111') === s.id_trang_thai;
-              return (
-                <button
-                  key={s.id_trang_thai}
-                  onClick={() => handleValueChange('id_trang_thai', s.id_trang_thai)}
-                  className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl text-[10px] font-bold border transition-all active:scale-95 ${
-                    isActive
-                      ? 'bg-violet-600/20 border-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.3)] text-violet-300'
-                      : 'bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
-                  }`}
-                >
-                  <span className="text-sm mb-1">{s.icon}</span>
-                  <span className="truncate w-full text-center">{s.ten_trang_thai}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        )}
       </div>
 
       {/* CỤM 4: TỔNG KẾT BILL */}
@@ -544,6 +520,35 @@ export default function MoneyTransferForm({ value, onChange }) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* TRẠNG THÁI GIAO DỊCH (STICKY BOTTOM) */}
+      <div className="sticky bottom-0 -mx-5 -mb-5 px-5 pb-5 pt-4 bg-[#0f172a] z-10 border-t border-white/10 mt-6 shadow-[0_-15px_25px_-5px_rgba(0,0,0,0.6)] rounded-b-2xl">
+        {!f_trangthai.hidden && (
+        <div className="space-y-1">
+          <label className="text-gray-400 text-xs font-bold block mb-2 uppercase">{f_trangthai.label}</label>
+          <div className="grid grid-cols-3 gap-2">
+            {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => {
+              const isActive = (form.id_trang_thai || '11111111-1111-1111-1111-111111111111') === s.id_trang_thai;
+              return (
+                <button
+                  key={s.id_trang_thai}
+                  type="button"
+                  onClick={() => handleValueChange('id_trang_thai', s.id_trang_thai)}
+                  className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl text-[10px] font-bold border transition-all active:scale-95 ${
+                    isActive
+                      ? 'bg-violet-600/20 border-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.3)] text-violet-300'
+                      : 'bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <span className="text-sm mb-1">{s.icon}</span>
+                  <span className="truncate w-full text-center">{s.ten_trang_thai}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        )}
       </div>
 
       {/* POS KEYBOARD MODAL */}
