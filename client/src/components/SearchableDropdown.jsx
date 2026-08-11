@@ -91,7 +91,7 @@ export default function SearchableDropdown({
           </div>
 
           {/* Danh sách cuộn */}
-          <div className="max-h-[65vh] overflow-y-auto overscroll-contain p-2 space-y-1.5 bg-[#0d1426]/50">
+          <div className="max-h-[65vh] overflow-y-auto scrollbar-thin overscroll-contain p-2 space-y-1.5 bg-[#0d1426]/50">
             {onAddNew && (
               <Button
                 type="text"
