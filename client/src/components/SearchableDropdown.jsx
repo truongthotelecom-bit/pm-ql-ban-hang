@@ -45,10 +45,17 @@ export default function SearchableDropdown({
         className={`flex items-center justify-between w-full px-3 py-1.5 bg-white/5 border border-white/5 rounded-lg cursor-pointer transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-violet-500/50 hover:bg-white/10'} ${className}`}
         style={{ minHeight: '34px' }}
       >
-        <span className={displayLabel ? 'text-gray-200 text-sm truncate' : 'text-gray-400 text-sm truncate'}>
-          {displayLabel || placeholder || 'Chọn...'}
-        </span>
-        <DownOutlined className="text-gray-500 text-[10px]" />
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          {selectedOption && iconKey && selectedOption[iconKey] && (
+            <div className="w-5 h-5 rounded-[4px] bg-white/10 flex items-center justify-center overflow-hidden shrink-0 border border-white/10">
+              <img src={selectedOption[iconKey]} className="w-full h-full object-contain p-[1px]" />
+            </div>
+          )}
+          <span className={displayLabel ? 'text-gray-200 text-sm truncate' : 'text-gray-400 text-sm truncate'}>
+            {displayLabel || placeholder || 'Chọn...'}
+          </span>
+        </div>
+        <DownOutlined className="text-gray-500 text-[10px] ml-2 shrink-0" />
       </div>
 
       {/* Modal Tìm Kiếm */}

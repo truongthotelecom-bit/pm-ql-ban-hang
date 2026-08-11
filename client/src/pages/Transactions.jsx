@@ -1450,6 +1450,7 @@ export default function Transactions() {
               labelKey="ho_va_ten"
               valueKey="id_khach_hang"
               subLabelKey="so_dien_thoai"
+              iconKey="anh_khach_hang"
               onAddNew={() => setAddNewCustInline(true)}
               addNewText="+ Tạo mới khách hàng"
             />
@@ -1664,6 +1665,7 @@ export default function Transactions() {
               labelKey="ho_va_ten"
               valueKey="id_khach_hang"
               subLabelKey="so_dien_thoai"
+              iconKey="anh_khach_hang"
               onAddNew={() => setEditAddNewCustInline(true)}
               addNewText="Tạo Khách Hàng Mới"
             />
