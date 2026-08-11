@@ -771,21 +771,21 @@ export default function TransactionHistory() {
       </div>
 
       {/* 4. VÙNG TỔNG CỘNG DƯỚI CÙNG (MOBILE ONLY) */}
-      <div className="md:hidden fixed bottom-[75px] left-3 right-3 z-40 flex flex-col gap-1 pointer-events-none bg-[#0d1426]/70 backdrop-blur-md rounded-xl p-2 border border-white/5 shadow-lg">
+      <div className="md:hidden fixed bottom-[75px] left-3 right-3 z-40 flex flex-col gap-1.5 pointer-events-none">
         {/* Row 1: Tổng tiền */}
-        <div className="flex justify-between items-center bg-transparent px-2 py-0.5">
-          <span className="text-violet-400 text-xs font-bold uppercase tracking-wider">Tổng tiền GD</span>
-          <span className="text-white font-black text-lg">{formatCurrency(totalAmount)}</span>
+        <div className="flex justify-between items-center">
+          <span className="text-violet-400 text-[11px] font-bold uppercase tracking-wider bg-[#0d1426]/70 backdrop-blur-md px-2 py-1 rounded-lg">Tổng tiền GD</span>
+          <span className="text-white font-black text-lg bg-[#0d1426]/70 backdrop-blur-md px-2 py-0.5 rounded-lg">{formatCurrency(totalAmount)}</span>
         </div>
         {/* Row 2: Phí */}
-        <div className="flex justify-between items-center bg-transparent px-2 py-0.5">
-          <span className="text-orange-400 text-xs font-bold uppercase tracking-wider">Tổng phí DV</span>
-          <span className="text-white font-black text-lg">{formatCurrency(totalFee)}</span>
+        <div className="flex justify-between items-center">
+          <span className="text-orange-400 text-[11px] font-bold uppercase tracking-wider bg-[#0d1426]/70 backdrop-blur-md px-2 py-1 rounded-lg">Tổng phí DV</span>
+          <span className="text-white font-black text-lg bg-[#0d1426]/70 backdrop-blur-md px-2 py-0.5 rounded-lg">{formatCurrency(totalFee)}</span>
         </div>
         {/* Row 3: Số lượng */}
-        <div className="flex justify-between items-center bg-transparent px-2 py-0.5">
-          <span className="text-green-400 text-xs font-bold uppercase tracking-wider">Số lượng GD</span>
-          <span className="text-white font-black text-lg">{validTransactions.length}</span>
+        <div className="flex justify-between items-center">
+          <span className="text-green-400 text-[11px] font-bold uppercase tracking-wider bg-[#0d1426]/70 backdrop-blur-md px-2 py-1 rounded-lg">Số lượng GD</span>
+          <span className="text-white font-black text-lg bg-[#0d1426]/70 backdrop-blur-md px-2 py-0.5 rounded-lg">{validTransactions.length}</span>
         </div>
       </div>
       </div> {/* Kết thúc Vùng Cuộn Nội Bộ */}
