@@ -219,26 +219,18 @@ export default function ServiceMenu() {
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* Search & Banner */}
-      <div className="p-4 md:p-6 rounded-2xl glass-panel border border-white/10 flex flex-col gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-white tracking-wide">💼 DANH MỤC DỊCH VỤ DỰ ÁN</h1>
-          <p className="text-gray-400 text-sm mt-1">Chọn một phân hệ dịch vụ bất kỳ bên dưới để quản lý hồ sơ và thanh toán tự động.</p>
+      {/* Search Bar */}
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <Search size={20} className="text-gray-400" />
         </div>
-        
-        {/* Search Input */}
-        <div className="relative mt-2">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search size={18} className="text-gray-400" />
-          </div>
-          <input
-            type="text"
-            className="block w-full pl-10 pr-3 py-3 border border-gray-700 rounded-xl leading-5 bg-[#0d1426]/80 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 sm:text-sm transition-all shadow-inner"
-            placeholder="Tìm kiếm dịch vụ..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+        <input
+          type="text"
+          className="block w-full pl-12 pr-4 py-3.5 border border-white/10 rounded-2xl leading-5 bg-[#0d1426]/80 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 sm:text-sm transition-all shadow-lg backdrop-blur-md"
+          placeholder="Tìm kiếm dịch vụ..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       {/* Hiển thị Lưới dựa vào State */}

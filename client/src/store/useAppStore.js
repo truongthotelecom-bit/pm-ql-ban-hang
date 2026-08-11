@@ -170,7 +170,7 @@ const useAppStore = create((set, get) => ({
       if (fileIds.length === 0) return;
       
       const { data: files } = await supabase
-        .from('ho_so_dich_vu')
+        .from('vw_ho_so_dich_vu_v2')
         .select('id_ho_so_dich_vu, id_loai_dich_vu')
         .in('id_ho_so_dich_vu', fileIds);
         
