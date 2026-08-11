@@ -581,42 +581,46 @@ export default function TransactionHistory() {
               key: 'actions',
               align: 'right',
               width: 140,
-              render: (_, record) => (
-                <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
-                  <Tooltip title="Mã QR">
-                    <Button 
-                      type="text" 
-                      icon={<QrcodeOutlined />} 
-                      onClick={() => handleShowQR(record)}
-                      className="text-blue-400 hover:text-blue-300 hover:bg-blue-400/10"
-                    />
-                  </Tooltip>
-                  <Tooltip title="Sửa">
-                    <Button 
-                      type="text" 
-                      icon={<EditOutlined />} 
-                      onClick={() => handleEdit(record)}
-                      className="text-violet-400 hover:text-violet-300 hover:bg-violet-400/10"
-                    />
-                  </Tooltip>
-                  <Tooltip title="Hủy GD">
-                    <Button 
-                      type="text" 
-                      icon={<StopOutlined />} 
-                      onClick={() => handleCancel(record)}
-                      className="text-orange-400 hover:text-orange-300 hover:bg-orange-400/10"
-                    />
-                  </Tooltip>
-                  <Tooltip title="Xóa">
-                    <Button 
-                      type="text" 
-                      icon={<DeleteOutlined />} 
-                      onClick={() => handleDelete(record)}
-                      className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
-                    />
-                  </Tooltip>
-                </div>
-              )
+              render: (_, record) => {
+                const hasContract = !!(record.contract?.ma_hop_dong);
+                return (
+                  <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
+                    <Tooltip title={hasContract ? "Mã QR" : "Không có hợp đồng để tạo QR"}>
+                      <Button 
+                        type="text" 
+                        icon={<QrcodeOutlined />} 
+                        onClick={() => handleShowQR(record)}
+                        disabled={!hasContract}
+                        className={hasContract ? "text-blue-400 hover:text-blue-300 hover:bg-blue-400/10" : "opacity-30 cursor-not-allowed"}
+                      />
+                    </Tooltip>
+                    <Tooltip title="Sửa">
+                      <Button 
+                        type="text" 
+                        icon={<EditOutlined />} 
+                        onClick={() => handleEdit(record)}
+                        className="text-violet-400 hover:text-violet-300 hover:bg-violet-400/10"
+                      />
+                    </Tooltip>
+                    <Tooltip title="Hủy GD">
+                      <Button 
+                        type="text" 
+                        icon={<StopOutlined />} 
+                        onClick={() => handleCancel(record)}
+                        className="text-orange-400 hover:text-orange-300 hover:bg-orange-400/10"
+                      />
+                    </Tooltip>
+                    <Tooltip title="Xóa">
+                      <Button 
+                        type="text" 
+                        icon={<DeleteOutlined />} 
+                        onClick={() => handleDelete(record)}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                      />
+                    </Tooltip>
+                  </div>
+                );
+              }
             },
             {
               title: 'Nội dung',
@@ -706,7 +710,14 @@ export default function TransactionHistory() {
                   
                   {/* MOBILE ACTIONS */}
                   <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-white/5" onClick={e => e.stopPropagation()}>
-                    <Button size="small" type="primary" ghost icon={<QrcodeOutlined />} onClick={() => handleShowQR(item)}>QR</Button>
+                    <Button 
+                      size="small" 
+                      type="primary" 
+                      ghost 
+                      icon={<QrcodeOutlined />} 
+                      onClick={() => handleShowQR(item)}
+                      disabled={!item.contract?.ma_hop_dong}
+                    >QR</Button>
                     <Button size="small" type="default" ghost icon={<EditOutlined />} onClick={() => handleEdit(item)}>Sửa</Button>
                     <Button size="small" danger ghost icon={<StopOutlined />} onClick={() => handleCancel(item)}>Hủy</Button>
                     <Button size="small" danger icon={<DeleteOutlined />} onClick={() => handleDelete(item)} />
