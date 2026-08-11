@@ -1157,16 +1157,18 @@ export default function Transactions() {
                   <span className="text-gray-200 uppercase">{store.selectedService?.ten_danh_muc || 'KHÁC'}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold text-gray-300">
-                  <span>SỐ TIỀN:</span>
-                  <span className="text-white font-extrabold text-sm">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien)}</span>
+                  <span>SỐ TIỀN GỐC:</span>
+                  <span className="text-white font-extrabold text-sm">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien_yeu_cau || activeDetail.so_tien)}</span>
                 </div>
-                <div className="flex justify-between text-xs text-gray-400">
-                  <span>PHÍ DỊCH VỤ:</span>
-                  <span className="text-orange-400 font-semibold">+{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.phi_dich_vu)}</span>
-                </div>
-                {parseFloat(activeDetail.chiet_khau) > 0 && (
+                {parseFloat(activeDetail.phi_dich_vu) > 0 && (
                   <div className="flex justify-between text-xs text-gray-400">
-                    <span>CHIẾT KHẤU ({activeDetail.chiet_khau}%):</span>
+                    <span>{activeDetail.is_cuoc_trong ? 'TRONG ĐÓ PHÍ DV (ĐÃ BAO GỒM):' : 'PHÍ DỊCH VỤ (THU THÊM):'}</span>
+                    <span className="text-orange-400 font-semibold">{activeDetail.is_cuoc_trong ? '' : '+'}{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.phi_dich_vu)}</span>
+                  </div>
+                )}
+                {parseFloat(activeDetail.so_tien_giam) > 0 && (
+                  <div className="flex justify-between text-xs text-gray-400">
+                    <span>GIẢM TRỪ CHO KHÁCH:</span>
                     <span className="text-green-400 font-semibold">-{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien_giam)}</span>
                   </div>
                 )}
