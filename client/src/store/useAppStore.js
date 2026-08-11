@@ -307,7 +307,8 @@ const useAppStore = create((set, get) => ({
 
   // Lấy hồ sơ dịch vụ
   fetchServiceFiles: async (serviceId = null, searchTerm = '', page = 1, pageSize = 40, isAppend = false) => {
-    if (!isAppend) set({ isLoadingFiles: true });
+    // Khi tải trang mới (không phải cuộn thêm): bật cả 3 cột loading cùng lúc
+    if (!isAppend) set({ isLoadingFiles: true, isLoadingDetails: true });
     try {
       const user = useAuthStore.getState().user;
       
