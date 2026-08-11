@@ -121,7 +121,7 @@ export default function TransactionHistory() {
 
   // Modal bộ lọc nâng cao
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const [mobileFilterType, setMobileFilterType] = useState(null); // 'time' | 'status' | 'advanced' | null
 
   // Khóa cuộn body toàn trang để dùng cuộn nội bộ
   useEffect(() => {
@@ -429,20 +429,20 @@ export default function TransactionHistory() {
           <div className="flex md:hidden items-center gap-2">
             <Button 
               className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10" 
-              onClick={() => setShowMobileFilter(true)}
+              onClick={() => setMobileFilterType('time')}
             >
               {filters.dateRangeType === DATE_RANGES.CUSTOM ? 'Tùy chỉnh...' : 'Thời gian...'}
             </Button>
             <Button 
               className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10"
-              onClick={() => setShowMobileFilter(true)}
+              onClick={() => setMobileFilterType('status')}
             >
               {filters.trangThaiId ? 'Trạng thái...' : 'Tất cả trạng thái'}
             </Button>
             <Button 
               type="primary" 
               icon={<FilterOutlined />} 
-              onClick={() => setShowMobileFilter(true)}
+              onClick={() => setMobileFilterType('advanced')}
               className="bg-violet-600 border-none font-bold shadow-md rounded-xl h-10"
             />
           </div>
@@ -451,94 +451,104 @@ export default function TransactionHistory() {
 
       {/* DRAWER BỘ LỌC MOBILE */}
       <Drawer
-        title={<span className="font-extrabold text-white">BỘ LỌC TÌM KIẾM</span>}
+        title={<span className="font-extrabold text-white">
+          {mobileFilterType === 'time' ? 'CHỌN THỜI GIAN' : mobileFilterType === 'status' ? 'CHỌN TRẠNG THÁI' : 'BỘ LỌC NÂNG CAO'}
+        </span>}
         placement="bottom"
-        open={showMobileFilter}
-        onClose={() => setShowMobileFilter(false)}
+        open={!!mobileFilterType}
+        onClose={() => setMobileFilterType(null)}
         height="auto"
         className="dark-drawer"
         styles={{ header: { borderBottom: '1px solid rgba(255,255,255,0.1)', background: '#0d1426' }, body: { padding: '24px 16px', background: '#0d1426' } }}
       >
         <div className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] text-gray-400 font-bold uppercase block">Khoảng thời gian</label>
-            <Select
-              value={filters.dateRangeType}
-              onChange={v => setFilters({ ...filters, dateRangeType: v, customDateRange: null })}
-              className="w-full h-10"
-            >
-              <Option value={DATE_RANGES.ALL}>Tất cả</Option>
-              <Option value={DATE_RANGES.TODAY}>Hôm nay</Option>
-              <Option value={DATE_RANGES.YESTERDAY}>Hôm qua</Option>
-              <Option value={DATE_RANGES.THIS_WEEK}>Tuần này</Option>
-              <Option value={DATE_RANGES.LAST_WEEK}>Tuần trước</Option>
-              <Option value={DATE_RANGES.THIS_MONTH}>Tháng này</Option>
-              <Option value={DATE_RANGES.LAST_MONTH}>Tháng trước</Option>
-              <Option value={DATE_RANGES.THIS_YEAR}>Năm nay</Option>
-              <Option value={DATE_RANGES.LAST_YEAR}>Năm trước</Option>
-              <Option value={DATE_RANGES.CUSTOM}>Tùy chỉnh khoảng ngày...</Option>
-            </Select>
-            {filters.dateRangeType === DATE_RANGES.CUSTOM && (
-              <RangePicker
-                className="w-full h-12 rounded-xl mt-3"
-                placeholder={['Từ ngày', 'Đến ngày']}
-                format="DD/MM/YYYY"
-                value={filters.customDateRange}
-                onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
-              />
-            )}
-          </div>
+          {mobileFilterType === 'time' && (
+            <div className="space-y-2">
+              <label className="text-[10px] text-gray-400 font-bold uppercase block">Khoảng thời gian</label>
+              <Select
+                value={filters.dateRangeType}
+                onChange={v => setFilters({ ...filters, dateRangeType: v, customDateRange: null })}
+                className="w-full h-10"
+              >
+                <Option value={DATE_RANGES.ALL}>Tất cả</Option>
+                <Option value={DATE_RANGES.TODAY}>Hôm nay</Option>
+                <Option value={DATE_RANGES.YESTERDAY}>Hôm qua</Option>
+                <Option value={DATE_RANGES.THIS_WEEK}>Tuần này</Option>
+                <Option value={DATE_RANGES.LAST_WEEK}>Tuần trước</Option>
+                <Option value={DATE_RANGES.THIS_MONTH}>Tháng này</Option>
+                <Option value={DATE_RANGES.LAST_MONTH}>Tháng trước</Option>
+                <Option value={DATE_RANGES.THIS_YEAR}>Năm nay</Option>
+                <Option value={DATE_RANGES.LAST_YEAR}>Năm trước</Option>
+                <Option value={DATE_RANGES.CUSTOM}>Tùy chỉnh khoảng ngày...</Option>
+              </Select>
+              {filters.dateRangeType === DATE_RANGES.CUSTOM && (
+                <RangePicker
+                  className="w-full h-12 rounded-xl mt-3"
+                  placeholder={['Từ ngày', 'Đến ngày']}
+                  format="DD/MM/YYYY"
+                  value={filters.customDateRange}
+                  onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
+                />
+              )}
+            </div>
+          )}
 
-          <div className="space-y-2">
-            <label className="text-[10px] text-gray-400 font-bold uppercase block">Trạng thái giao dịch</label>
-            <Select
-              allowClear
-              placeholder="Tất cả trạng thái"
-              className="w-full h-10"
-              value={filters.trangThaiId}
-              onChange={v => setFilters({ ...filters, trangThaiId: v })}
-            >
-              {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
-                <Option key={s.id_danh_muc} value={s.id_danh_muc}>{s.icon} {s.ten_danh_muc}</Option>
-              ))}
-            </Select>
-          </div>
+          {mobileFilterType === 'status' && (
+            <div className="space-y-2">
+              <label className="text-[10px] text-gray-400 font-bold uppercase block">Trạng thái giao dịch</label>
+              <Select
+                allowClear
+                placeholder="Tất cả trạng thái"
+                className="w-full h-10"
+                value={filters.trangThaiId}
+                onChange={v => setFilters({ ...filters, trangThaiId: v })}
+              >
+                {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
+                  <Option key={s.id_danh_muc} value={s.id_danh_muc}>{s.icon} {s.ten_danh_muc}</Option>
+                ))}
+              </Select>
+            </div>
+          )}
           
-          {/* Thêm các bộ lọc nâng cao vào Drawer Mobile để tiện dụng hơn */}
-          <div className="space-y-2">
-            <label className="text-[10px] text-gray-400 font-bold uppercase block">Người thanh toán</label>
-            <Select
-              allowClear showSearch
-              placeholder="Tất cả khách hàng"
-              className="w-full h-10"
-              value={filters.khachHangId}
-              onChange={v => setFilters({ ...filters, khachHangId: v })}
-              filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
-            >
-              {(store.customers || []).map(c => (
-                <Option key={c.id_khach_hang} value={c.id_khach_hang}>{c.ho_va_ten} ({c.so_dien_thoai})</Option>
-              ))}
-            </Select>
-          </div>
+          {mobileFilterType === 'advanced' && (
+            <>
+              {/* Thêm các bộ lọc nâng cao vào Drawer Mobile để tiện dụng hơn */}
+              <div className="space-y-2">
+                <label className="text-[10px] text-gray-400 font-bold uppercase block">Người thanh toán</label>
+                <Select
+                  allowClear showSearch
+                  placeholder="Tất cả khách hàng"
+                  className="w-full h-10"
+                  value={filters.khachHangId}
+                  onChange={v => setFilters({ ...filters, khachHangId: v })}
+                  filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
+                >
+                  {(store.customers || []).map(c => (
+                    <Option key={c.id_khach_hang} value={c.id_khach_hang}>{c.ho_va_ten} ({c.so_dien_thoai})</Option>
+                  ))}
+                </Select>
+              </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] text-gray-400 font-bold uppercase block">Dịch vụ (Tất cả nhóm)</label>
-            <Select
-              allowClear showSearch
-              placeholder="Tất cả dịch vụ"
-              className="w-full h-10"
-              value={filters.loaiDichVuId}
-              onChange={v => setFilters({ ...filters, loaiDichVuId: v })}
-              filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
-            >
-              {(store.services || []).map(s => (
-                <Option key={s.id_loai_dich_vu} value={s.id_loai_dich_vu}>{s.ten_danh_muc}</Option>
-              ))}
-            </Select>
-          </div>
+              <div className="space-y-2">
+                <label className="text-[10px] text-gray-400 font-bold uppercase block">Dịch vụ (Tất cả nhóm)</label>
+                <Select
+                  allowClear showSearch
+                  placeholder="Tất cả dịch vụ"
+                  className="w-full h-10"
+                  value={filters.loaiDichVuId}
+                  onChange={v => setFilters({ ...filters, loaiDichVuId: v })}
+                  filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
+                >
+                  {(store.services || []).map(s => (
+                    <Option key={s.id_loai_dich_vu} value={s.id_loai_dich_vu}>{s.ten_danh_muc}</Option>
+                  ))}
+                </Select>
+              </div>
+            </>
+          )}
 
-          <Button type="primary" onClick={() => setShowMobileFilter(false)} className="w-full h-12 bg-violet-600 font-bold text-lg mt-4 shadow-lg rounded-xl">
-            Áp dụng bộ lọc
+          <Button type="primary" onClick={() => setMobileFilterType(null)} className="w-full h-12 bg-violet-600 font-bold text-lg mt-4 shadow-lg rounded-xl">
+            Áp dụng
           </Button>
         </div>
       </Drawer>
