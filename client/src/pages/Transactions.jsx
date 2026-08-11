@@ -212,7 +212,7 @@ export default function Transactions() {
     ho_va_ten: '',
     so_dien_thoai: '',
     dia_chi: '',
-    cccd: '',
+    so_cccd: '',
     email: '',
     id_gioi_tinh: 'b0000004-0000-0000-0000-000000000001',
     id_level: 'b0000003-0000-0000-0000-000000000002'
@@ -404,7 +404,7 @@ export default function Transactions() {
       message.success('🎉 Đã khởi tạo hồ sơ khách hàng mới!');
       setNewFilePayload({ ...newFilePayload, id_khach_hang: data.id_khach_hang });
       setAddNewCustInline(false);
-      setNewCustPayload({ ho_va_ten: '', so_dien_thoai: '', dia_chi: '', cccd: '', email: '', id_gioi_tinh: 'b0000004-0000-0000-0000-000000000001', id_level: 'b0000003-0000-0000-0000-000000000002' });
+      setNewCustPayload({ ho_va_ten: '', so_dien_thoai: '', dia_chi: '', so_cccd: '', email: '', id_gioi_tinh: 'b0000004-0000-0000-0000-000000000001', id_level: 'b0000003-0000-0000-0000-000000000002' });
     } else {
       message.error('Không thể lưu khách! Kiểm tra Console (F12) để xem lỗi chi tiết.');
     }
@@ -420,7 +420,7 @@ export default function Transactions() {
       message.success('🎉 Đã khởi tạo hồ sơ khách hàng mới!');
       setEditFilePayload({ ...editFilePayload, id_khach_hang: data.id_khach_hang });
       setEditAddNewCustInline(false);
-      setNewCustPayload({ ho_va_ten: '', so_dien_thoai: '', dia_chi: '', cccd: '', email: '', id_gioi_tinh: 'b0000004-0000-0000-0000-000000000001', id_level: 'b0000003-0000-0000-0000-000000000002' });
+      setNewCustPayload({ ho_va_ten: '', so_dien_thoai: '', dia_chi: '', so_cccd: '', email: '', id_gioi_tinh: 'b0000004-0000-0000-0000-000000000001', id_level: 'b0000003-0000-0000-0000-000000000002' });
     } else {
       message.error('Không thể lưu khách! Kiểm tra Console (F12) để xem lỗi chi tiết.');
     }
@@ -1453,8 +1453,8 @@ export default function Transactions() {
                 />
                 <Input 
                   placeholder="Số căn cước công dân (CCCD)" 
-                  value={newCustPayload.cccd} 
-                  onChange={e => setNewCustPayload({ ...newCustPayload, cccd: e.target.value })}
+                  value={newCustPayload.so_cccd} 
+                  onChange={e => setNewCustPayload({ ...newCustPayload, so_cccd: e.target.value })}
                   className="bg-white/5 border-white/5 text-gray-300"
                 />
                 <Input 
@@ -1527,9 +1527,9 @@ export default function Transactions() {
             <label className="text-xs font-bold text-gray-400">Anh dai dien</label>
             <div className="flex items-center gap-3">
               <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 border-2 border-violet-500/30 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
-                {editCustPayload.avatar_url ? (
+                {editCustPayload.anh_khach_hang ? (
                   <img
-                    src={editCustPayload.avatar_url}
+                    src={editCustPayload.anh_khach_hang}
                     alt="avatar"
                     className="w-full h-full object-cover"
                     onError={e => { e.target.style.display = 'none'; }}
@@ -1543,8 +1543,8 @@ export default function Transactions() {
               <div className="flex-1 flex flex-col gap-2">
                 <Input
                   placeholder="Dan link anh URL..."
-                  value={editCustPayload.avatar_url || ''}
-                  onChange={e => setEditCustPayload({ ...editCustPayload, avatar_url: e.target.value })}
+                  value={editCustPayload.anh_khach_hang || ''}
+                  onChange={e => setEditCustPayload({ ...editCustPayload, anh_khach_hang: e.target.value })}
                   className="bg-white/5 border-white/5 text-gray-300 text-xs"
                   prefix={<span className="text-gray-500 text-xs">🔗</span>}
                 />
@@ -1557,7 +1557,7 @@ export default function Transactions() {
                       const f = e.target.files?.[0];
                       if (!f) return;
                       const reader = new FileReader();
-                      reader.onloadend = () => setEditCustPayload({ ...editCustPayload, avatar_url: reader.result });
+                      reader.onloadend = () => setEditCustPayload({ ...editCustPayload, anh_khach_hang: reader.result });
                       reader.readAsDataURL(f);
                     }}
                   />
@@ -1579,7 +1579,7 @@ export default function Transactions() {
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-bold text-gray-400">So CCCD</label>
-            <Input value={editCustPayload.cccd || ''} onChange={e => setEditCustPayload({ ...editCustPayload, cccd: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
+            <Input value={editCustPayload.so_cccd || ''} onChange={e => setEditCustPayload({ ...editCustPayload, so_cccd: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-bold text-gray-400">Email</label>
@@ -1640,7 +1640,7 @@ export default function Transactions() {
                   <p><strong>Ngày tham gia:</strong> {new Date(activeCust.ngay_tao).toLocaleDateString('vi-VN')}</p>
                   <p><strong>Lần giao dịch cuối:</strong> {activeCust.lan_giao_dich_cuoi ? new Date(activeCust.lan_giao_dich_cuoi).toLocaleString('vi-VN') : 'Chưa giao dịch'}</p>
                   <p><strong>Địa chỉ:</strong> {activeCust.dia_chi || 'Chưa cập nhật'}</p>
-                  <p><strong>Số CCCD:</strong> {activeCust.cccd || 'Chưa cập nhật'}</p>
+                  <p><strong>Số CCCD:</strong> {activeCust.so_cccd || 'Chưa cập nhật'}</p>
                 </div>
               </div>
             </div>
@@ -1672,7 +1672,7 @@ export default function Transactions() {
               <div className="space-y-3 pt-4 text-gray-200">
                 <Input placeholder="Họ & Tên khách hàng *" value={newCustPayload.ho_va_ten} onChange={e => setNewCustPayload({ ...newCustPayload, ho_va_ten: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
                 <Input placeholder="Số điện thoại di động (Tuỳ chọn)" value={newCustPayload.so_dien_thoai} onChange={e => setNewCustPayload({ ...newCustPayload, so_dien_thoai: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
-                <Input placeholder="Số căn cước công dân (CCCD)" value={newCustPayload.cccd} onChange={e => setNewCustPayload({ ...newCustPayload, cccd: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
+                <Input placeholder="Số căn cước công dân (CCCD)" value={newCustPayload.so_cccd} onChange={e => setNewCustPayload({ ...newCustPayload, so_cccd: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
                 <Input placeholder="Địa chỉ cư trú" value={newCustPayload.dia_chi} onChange={e => setNewCustPayload({ ...newCustPayload, dia_chi: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
               </div>
             </Modal>
