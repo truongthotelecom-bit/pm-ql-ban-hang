@@ -63,11 +63,11 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFal
         {/* Dòng giữa: Logo + Thông tin chia 2 bên */}
         <div className="flex items-center gap-3">
           {/* Logo dịch vụ */}
-          <div className="flex-shrink-0 w-10 h-10 bg-white/5 rounded-xl border border-white/10 p-1 flex items-center justify-center overflow-hidden">
+          <div className="flex-shrink-0 w-10 h-10 bg-white rounded-xl border border-white/20 p-1 flex items-center justify-center overflow-hidden shadow-sm">
             {bank?.logo ? (
               <img src={bank.logo} alt={bank?.ten_viet_tat} className="w-full h-full object-contain" />
             ) : (
-              <span className="text-lg">{iconFallback}</span>
+              <span className="text-lg text-violet-600 font-bold">{iconFallback}</span>
             )}
           </div>
 
@@ -1007,11 +1007,11 @@ export default function Transactions() {
                 <div className="flex justify-between items-stretch gap-4">
                   {/* Phần ưu tiên: Logo, Mã HĐ, Tên Chủ HĐ */}
                   <div className="flex flex-1 items-center gap-3.5 min-w-0">
-                    <div className="w-14 h-14 bg-white/5 rounded-xl border border-white/10 p-1 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <div className="w-14 h-14 bg-white rounded-xl border border-white/20 p-1 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm">
                       {activeBank?.logo ? (
                         <img src={activeBank.logo} alt="logo" className="w-full h-full object-contain" />
                       ) : (
-                        <span className="text-2xl">{store.selectedService?.icon || '📁'}</span>
+                        <span className="text-2xl text-violet-600 font-bold">{store.selectedService?.icon || '📁'}</span>
                       )}
                     </div>
                     <div className="flex flex-col min-w-0">
