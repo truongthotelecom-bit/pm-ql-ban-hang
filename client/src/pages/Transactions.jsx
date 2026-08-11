@@ -406,8 +406,11 @@ export default function Transactions() {
           setSearchInput(existing.ma_hop_dong);
           handleSearch(existing.ma_hop_dong);
           setAddNewContractInline(false);
-          setShowNewFileModal(false);
           setNewContractPayload({ ma_hop_dong: '', chu_hop_dong: '', ghi_chu: '', id_danh_muc_dich_vu: undefined });
+          // Delay đóng modal cha để tránh lỗi kẹt DOM của Ant Design khi đóng nhiều modal cùng lúc
+          setTimeout(() => {
+            setShowNewFileModal(false);
+          }, 100);
         }
       });
       return;
@@ -477,6 +480,9 @@ export default function Transactions() {
           setEditFilePayload({ ...editFilePayload, id_ma_hop_dong: existing.id_ma_hop_dong });
           setEditAddNewContractInline(false);
           setNewContractPayload({ ma_hop_dong: '', chu_hop_dong: '', ghi_chu: '', id_danh_muc_dich_vu: undefined });
+          setTimeout(() => {
+            setShowEditFileModal(false);
+          }, 100);
         }
       });
       return;
