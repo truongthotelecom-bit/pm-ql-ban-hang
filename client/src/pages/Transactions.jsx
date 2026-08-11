@@ -921,7 +921,11 @@ export default function Transactions() {
           {/* FAB CỘT 1: Tạo hồ sơ */}
           <div className="absolute bottom-4 right-4 z-20">
             <button
-              onClick={() => setShowNewFileModal(true)}
+              onClick={() => {
+                const stdType = store.loaiHopDongs?.find(l => l.ten_loai?.toLowerCase().includes('tiêu chuẩn'))?.id_loai_hop_dong;
+                setNewFilePayload(prev => ({ ...prev, id_loai_hop_dong: stdType || '' }));
+                setShowNewFileModal(true);
+              }}
               className="w-14 h-14 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center shadow-[0_8px_30px_rgb(124,58,237,0.5)] transition-all hover:scale-105 active:scale-95"
             >
               <PlusOutlined className="text-2xl font-bold" />
@@ -1459,16 +1463,15 @@ export default function Transactions() {
           {/* PHẦN 2.5: LOẠI HỢP ĐỒNG */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-gray-400">CHỌN LOẠI HỢP ĐỒNG *</label>
-            <Select
+            <SearchableDropdown
               placeholder="Chọn phân loại hợp đồng (VIP, Tiêu chuẩn...)"
               className="w-full"
               value={newFilePayload.id_loai_hop_dong || undefined}
               onChange={v => setNewFilePayload({ ...newFilePayload, id_loai_hop_dong: v })}
-            >
-              {store.loaiHopDongs?.map(l => (
-                <Option key={l.id_loai_hop_dong} value={l.id_loai_hop_dong}>{l.ten_loai}</Option>
-              ))}
-            </Select>
+              options={store.loaiHopDongs || []}
+              labelKey="ten_loai"
+              valueKey="id_loai_hop_dong"
+            />
           </div>
 
           {/* PHAN 3: NOI DUNG MO TA */}
@@ -1725,16 +1728,15 @@ export default function Transactions() {
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-gray-400">Loại Hợp Đồng</label>
-            <Select
+            <SearchableDropdown
               className="w-full"
               value={editFilePayload.id_loai_hop_dong || undefined}
               onChange={v => setEditFilePayload({...editFilePayload, id_loai_hop_dong: v})}
               placeholder="Chọn phân loại hợp đồng"
-            >
-              {store.loaiHopDongs?.map(l => (
-                <Option key={l.id_loai_hop_dong} value={l.id_loai_hop_dong}>{l.ten_loai}</Option>
-              ))}
-            </Select>
+              options={store.loaiHopDongs || []}
+              labelKey="ten_loai"
+              valueKey="id_loai_hop_dong"
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-gray-400">Ghi chú</label>
