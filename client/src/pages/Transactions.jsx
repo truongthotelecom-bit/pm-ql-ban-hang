@@ -384,6 +384,28 @@ export default function Transactions() {
       message.error('Vui lòng nhập mã số hợp đồng!');
       return;
     }
+    
+    // Kiểm tra trùng mã hợp đồng và danh mục dịch vụ
+    const existing = store.ma_hop_dong?.find(h => 
+      h.ma_hop_dong.toLowerCase().trim() === newContractPayload.ma_hop_dong.toLowerCase().trim() && 
+      h.id_danh_muc_dich_vu === newContractPayload.id_danh_muc_dich_vu
+    );
+
+    if (existing) {
+      modalInstance.confirm({
+        title: 'Hợp đồng đã tồn tại',
+        content: 'Mã hợp đồng này đã tồn tại với cùng Ngân hàng / Nhà mạng. Bạn có muốn sử dụng hợp đồng đã có thay vì tạo mới không?',
+        okText: 'Có, sử dụng',
+        cancelText: 'Không, hủy',
+        onOk: () => {
+          setNewFilePayload({ ...newFilePayload, id_ma_hop_dong: existing.id_ma_hop_dong });
+          setAddNewContractInline(false);
+          setNewContractPayload({ ma_hop_dong: '', chu_hop_dong: '', ghi_chu: '', id_danh_muc_dich_vu: undefined });
+        }
+      });
+      return;
+    }
+
     const data = await store.addContract(newContractPayload);
     if (data) {
       message.success('🎉 Đã thêm mã hợp đồng mới vào danh mục!');
@@ -431,6 +453,28 @@ export default function Transactions() {
       message.error('Vui lòng nhập mã số hợp đồng!');
       return;
     }
+    
+    // Kiểm tra trùng mã hợp đồng và danh mục dịch vụ
+    const existing = store.ma_hop_dong?.find(h => 
+      h.ma_hop_dong.toLowerCase().trim() === newContractPayload.ma_hop_dong.toLowerCase().trim() && 
+      h.id_danh_muc_dich_vu === newContractPayload.id_danh_muc_dich_vu
+    );
+
+    if (existing) {
+      modalInstance.confirm({
+        title: 'Hợp đồng đã tồn tại',
+        content: 'Mã hợp đồng này đã tồn tại với cùng Ngân hàng / Nhà mạng. Bạn có muốn sử dụng hợp đồng đã có thay vì tạo mới không?',
+        okText: 'Có, sử dụng',
+        cancelText: 'Không, hủy',
+        onOk: () => {
+          setEditFilePayload({ ...editFilePayload, id_ma_hop_dong: existing.id_ma_hop_dong });
+          setEditAddNewContractInline(false);
+          setNewContractPayload({ ma_hop_dong: '', chu_hop_dong: '', ghi_chu: '', id_danh_muc_dich_vu: undefined });
+        }
+      });
+      return;
+    }
+
     const data = await store.addContract(newContractPayload);
     if (data) {
       message.success('🎉 Đã thêm mã hợp đồng mới vào danh mục!');
