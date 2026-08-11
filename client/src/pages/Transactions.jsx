@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useAppStore from '../store/useAppStore';
 import useAuthStore from '../store/useAuthStore';
 import { supabase } from '../lib/supabaseClient';
-import { Button, Tag, App as AntdApp, Modal, Input, Select, Radio, Badge, Pagination, Checkbox, Dropdown } from 'antd';
+import { Button, Tag, App as AntdApp, Modal, Input, Select, Radio, Badge, Pagination, Checkbox, Dropdown, Popover } from 'antd';
 import { 
   SearchOutlined, 
   PlusOutlined, 
@@ -71,29 +71,29 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFal
             )}
           </div>
 
-          {/* Thông tin chia 2 cột: Trái & Phải */}
-          <div className="flex flex-1 justify-between items-start min-w-0 gap-2">
-            {/* TRÁI: Mã HĐ (dòng 1) + Chủ HĐ (dòng 2) */}
+          {/* Thông tin */}
+          <div className={`flex flex-1 ${isSelected ? 'flex-col gap-2' : 'justify-between items-start gap-2'} min-w-0`}>
+            {/* TRÁI (hoặc dòng trên): Mã HĐ + Chủ HĐ */}
             <div className="flex flex-col min-w-0">
-              <h4 className="font-extrabold text-sm text-red-400 leading-tight uppercase tracking-wide truncate">
+              <h4 className={`font-extrabold leading-tight uppercase tracking-wide truncate text-red-400 ${isSelected ? 'text-base' : 'text-sm'}`}>
                 {hd?.ma_hop_dong || 'CHƯA CÓ HĐ'}
               </h4>
-              <span className="text-[11px] text-gray-300 font-semibold truncate mt-0.5">
+              <span className={`font-semibold truncate mt-0.5 text-gray-300 ${isSelected ? 'text-xs' : 'text-[11px]'}`}>
                 {hd?.chu_hop_dong || '—'}
               </span>
             </div>
 
-            {/* PHẢI: Tên người TT (dòng 1) + SĐT (dòng 2) */}
-            <div className="flex flex-col items-end flex-shrink-0 text-right">
-              <span className="text-[11px] text-gray-200 font-bold truncate max-w-[110px]">
+            {/* PHẢI (hoặc dòng dưới): Tên người TT + SĐT */}
+            <div className={`flex ${isSelected ? 'flex-row items-center justify-between gap-2 bg-white/[0.03] p-2 rounded-lg border border-white/5 mt-1' : 'flex-col items-end text-right flex-shrink-0'}`}>
+              <span className={`font-bold truncate text-gray-200 ${isSelected ? 'text-[13px] flex-1' : 'text-[11px] max-w-[110px]'}`}>
                 {cust?.ho_va_ten || 'Khách lẻ'}
               </span>
               {cust?.so_dien_thoai ? (
-                <span className="text-[10px] text-violet-400/80 font-semibold mt-0.5">
+                <span className={`font-semibold text-violet-400/90 ${isSelected ? 'text-xs' : 'text-[10px] mt-0.5'}`}>
                   {cust.so_dien_thoai}
                 </span>
               ) : (
-                <span className="text-[10px] text-gray-600 mt-0.5">—</span>
+                <span className={`text-gray-600 ${isSelected ? 'text-xs' : 'text-[10px] mt-0.5'}`}>—</span>
               )}
             </div>
           </div>
@@ -1106,19 +1106,22 @@ export default function Transactions() {
               >
                 <PlusOutlined /> <span className="hidden sm:inline">THÊM</span>
               </Button>
-              <Dropdown 
-                menu={{ items: [
-                  { key: '1', label: 'Sửa hồ sơ', icon: <EditOutlined />, disabled: !canEditFile(), onClick: () => openEditFileModal() },
-                  { key: '2', label: 'Sửa khách', icon: <UserOutlined />, disabled: !canEditFile(), onClick: () => openEditCustModal(activeCust) },
-                  { key: '3', label: 'Sửa HĐ', icon: <EditOutlined />, disabled: !canEditFile(), onClick: () => openEditContractModal() },
-                ]}} 
-                trigger={['click']} 
+              <Popover 
+                content={
+                  <div className="flex flex-col gap-2 w-[220px] p-1">
+                    <Button onClick={() => openEditFileModal()} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><EditOutlined className="text-lg" /> Sửa hồ sơ</Button>
+                    <Button onClick={() => openEditCustModal(activeCust)} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><UserOutlined className="text-lg" /> Sửa khách</Button>
+                    <Button onClick={() => openEditContractModal()} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><EditOutlined className="text-lg" /> Sửa HĐ</Button>
+                  </div>
+                }
+                trigger="click" 
                 placement="top"
+                overlayInnerStyle={{ backgroundColor: '#0d1426', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
               >
                 <Button className="flex-1 h-12 bg-[#131c33] border border-white/10 text-white font-bold hover:border-violet-500 hover:text-violet-400 shadow-lg flex items-center justify-center gap-2">
                   <EditOutlined /> <span className="hidden sm:inline">SỬA</span>
                 </Button>
-              </Dropdown>
+              </Popover>
               <Button 
                 onClick={() => setShowCustHistoryModal(true)}
                 className="flex-1 h-12 bg-[#131c33] border border-white/10 text-white font-bold hover:border-violet-500 hover:text-violet-400 shadow-lg flex items-center justify-center gap-2"

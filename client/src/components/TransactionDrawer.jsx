@@ -158,6 +158,18 @@ export default function TransactionDrawer({ open, onClose }) {
         items={[
           {
             key: '1',
+            label: <span><DollarOutlined /> Tạo giao dịch</span>,
+            children: (
+              <div className="pt-3 space-y-4">
+                <MoneyTransferForm
+                  value={gdPayload}
+                  onChange={setGdPayload}
+                />
+              </div>
+            )
+          },
+          {
+            key: '2',
             label: <span><UserOutlined /> Thông tin giao dịch</span>,
             children: (
               <div className="space-y-4 pt-3">
@@ -192,18 +204,6 @@ export default function TransactionDrawer({ open, onClose }) {
                 ) : (
                   <p className="text-xs text-gray-500 italic">Vui lòng chọn hồ sơ dịch vụ trước.</p>
                 )}
-              </div>
-            )
-          },
-          {
-            key: '2',
-            label: <span><DollarOutlined /> Tạo giao dịch</span>,
-            children: (
-              <div className="pt-3 space-y-4">
-                <MoneyTransferForm
-                  value={gdPayload}
-                  onChange={setGdPayload}
-                />
               </div>
             )
           }
