@@ -440,12 +440,17 @@ export default function Transactions() {
     const activeFile = store.selectedServiceFile;
     if (!activeFile) return;
     
-    const data = await store.updateServiceFile(activeFile.id_ho_so_dich_vu, editFilePayload);
+    // Chỉ gửi các trường có thể cập nhật, bỏ qua id, ngày tạo, timestamps
+    const { id_khach_hang, id_ma_hop_dong, noi_dung, id_loai_hop_dong, ghi_chu } = editFilePayload;
+    const safePayload = { id_khach_hang, id_ma_hop_dong, noi_dung, id_loai_hop_dong, ghi_chu };
+    
+    const data = await store.updateServiceFile(activeFile.id_ho_so_dich_vu, safePayload);
     if (data) {
       message.success('Đã cập nhật chi tiết hồ sơ dịch vụ thành công!');
       setShowEditFileModal(false);
     }
   };
+
 
   const openEditFileModal = () => {
     const activeFile = store.selectedServiceFile;
