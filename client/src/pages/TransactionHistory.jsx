@@ -1,7 +1,7 @@
 // Force HMR
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, App as AntdApp } from 'antd';
+import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, Drawer, App as AntdApp } from 'antd';
 import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
 import { supabase } from '../lib/supabaseClient';
@@ -121,6 +121,7 @@ export default function TransactionHistory() {
 
   // Modal bộ lọc nâng cao
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
 
   // Khóa cuộn body toàn trang để dùng cuộn nội bộ
   useEffect(() => {
@@ -367,7 +368,8 @@ export default function TransactionHistory() {
 
         {/* 2. BỘ LỌC TÌM KIẾM CƠ BẢN */}
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
+          {/* DESKTOP FILTERS */}
+          <div className="hidden md:flex items-center gap-2">
             {/* Vị trí 3: Giai đoạn (Select) */}
             <Select
               value={filters.dateRangeType}
@@ -410,18 +412,136 @@ export default function TransactionHistory() {
             </Button>
           </div>
 
-          {/* Vị trí 5: Từ ngày đến ngày */}
+          {/* Vị trí 5: Từ ngày đến ngày (Desktop) */}
           {filters.dateRangeType === DATE_RANGES.CUSTOM && (
-            <RangePicker
-              className="w-full h-10 rounded-xl"
-              placeholder={['Từ ngày', 'Đến ngày']}
-              format="DD/MM/YYYY"
-              value={filters.customDateRange}
-              onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
-            />
+            <div className="hidden md:block">
+              <RangePicker
+                className="w-full h-10 rounded-xl"
+                placeholder={['Từ ngày', 'Đến ngày']}
+                format="DD/MM/YYYY"
+                value={filters.customDateRange}
+                onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
+              />
+            </div>
           )}
+
+          {/* MOBILE FILTERS (Buttons to open Drawer) */}
+          <div className="flex md:hidden items-center gap-2">
+            <Button 
+              className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10" 
+              onClick={() => setShowMobileFilter(true)}
+            >
+              {filters.dateRangeType === DATE_RANGES.CUSTOM ? 'Tùy chỉnh...' : 'Thời gian...'}
+            </Button>
+            <Button 
+              className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10"
+              onClick={() => setShowMobileFilter(true)}
+            >
+              {filters.trangThaiId ? 'Trạng thái...' : 'Tất cả trạng thái'}
+            </Button>
+            <Button 
+              type="primary" 
+              icon={<FilterOutlined />} 
+              onClick={() => setShowMobileFilter(true)}
+              className="bg-violet-600 border-none font-bold shadow-md rounded-xl h-10"
+            />
+          </div>
         </div>
       </div> {/* Kết thúc Vùng Header */}
+
+      {/* DRAWER BỘ LỌC MOBILE */}
+      <Drawer
+        title={<span className="font-extrabold text-white">BỘ LỌC TÌM KIẾM</span>}
+        placement="bottom"
+        open={showMobileFilter}
+        onClose={() => setShowMobileFilter(false)}
+        height="auto"
+        className="dark-drawer"
+        styles={{ header: { borderBottom: '1px solid rgba(255,255,255,0.1)', background: '#0d1426' }, body: { padding: '24px 16px', background: '#0d1426' } }}
+      >
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] text-gray-400 font-bold uppercase block">Khoảng thời gian</label>
+            <Select
+              value={filters.dateRangeType}
+              onChange={v => setFilters({ ...filters, dateRangeType: v, customDateRange: null })}
+              className="w-full h-10"
+            >
+              <Option value={DATE_RANGES.ALL}>Tất cả</Option>
+              <Option value={DATE_RANGES.TODAY}>Hôm nay</Option>
+              <Option value={DATE_RANGES.YESTERDAY}>Hôm qua</Option>
+              <Option value={DATE_RANGES.THIS_WEEK}>Tuần này</Option>
+              <Option value={DATE_RANGES.LAST_WEEK}>Tuần trước</Option>
+              <Option value={DATE_RANGES.THIS_MONTH}>Tháng này</Option>
+              <Option value={DATE_RANGES.LAST_MONTH}>Tháng trước</Option>
+              <Option value={DATE_RANGES.THIS_YEAR}>Năm nay</Option>
+              <Option value={DATE_RANGES.LAST_YEAR}>Năm trước</Option>
+              <Option value={DATE_RANGES.CUSTOM}>Tùy chỉnh khoảng ngày...</Option>
+            </Select>
+            {filters.dateRangeType === DATE_RANGES.CUSTOM && (
+              <RangePicker
+                className="w-full h-12 rounded-xl mt-3"
+                placeholder={['Từ ngày', 'Đến ngày']}
+                format="DD/MM/YYYY"
+                value={filters.customDateRange}
+                onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
+              />
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] text-gray-400 font-bold uppercase block">Trạng thái giao dịch</label>
+            <Select
+              allowClear
+              placeholder="Tất cả trạng thái"
+              className="w-full h-10"
+              value={filters.trangThaiId}
+              onChange={v => setFilters({ ...filters, trangThaiId: v })}
+            >
+              {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
+                <Option key={s.id_danh_muc} value={s.id_danh_muc}>{s.icon} {s.ten_danh_muc}</Option>
+              ))}
+            </Select>
+          </div>
+          
+          {/* Thêm các bộ lọc nâng cao vào Drawer Mobile để tiện dụng hơn */}
+          <div className="space-y-2">
+            <label className="text-[10px] text-gray-400 font-bold uppercase block">Người thanh toán</label>
+            <Select
+              allowClear showSearch
+              placeholder="Tất cả khách hàng"
+              className="w-full h-10"
+              value={filters.khachHangId}
+              onChange={v => setFilters({ ...filters, khachHangId: v })}
+              filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
+            >
+              {(store.customers || []).map(c => (
+                <Option key={c.id_khach_hang} value={c.id_khach_hang}>{c.ho_va_ten} ({c.so_dien_thoai})</Option>
+              ))}
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] text-gray-400 font-bold uppercase block">Dịch vụ (Tất cả nhóm)</label>
+            <Select
+              allowClear showSearch
+              placeholder="Tất cả dịch vụ"
+              className="w-full h-10"
+              value={filters.loaiDichVuId}
+              onChange={v => setFilters({ ...filters, loaiDichVuId: v })}
+              filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
+            >
+              {(store.services || []).map(s => (
+                <Option key={s.id_loai_dich_vu} value={s.id_loai_dich_vu}>{s.ten_danh_muc}</Option>
+              ))}
+            </Select>
+          </div>
+
+          <Button type="primary" onClick={() => setShowMobileFilter(false)} className="w-full h-12 bg-violet-600 font-bold text-lg mt-4 shadow-lg rounded-xl">
+            Áp dụng bộ lọc
+          </Button>
+        </div>
+      </Drawer>
 
       {/* MODAL BỘ LỌC NÂNG CAO */}
       <Modal
