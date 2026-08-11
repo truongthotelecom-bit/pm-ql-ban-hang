@@ -398,8 +398,10 @@ export default function Transactions() {
         okText: 'Có, sử dụng',
         cancelText: 'Không, hủy',
         onOk: () => {
-          setNewFilePayload({ ...newFilePayload, id_ma_hop_dong: existing.id_ma_hop_dong });
+          setSearchInput(existing.ma_hop_dong);
+          handleSearch(existing.ma_hop_dong);
           setAddNewContractInline(false);
+          setShowNewFileModal(false);
           setNewContractPayload({ ma_hop_dong: '', chu_hop_dong: '', ghi_chu: '', id_danh_muc_dich_vu: undefined });
         }
       });
