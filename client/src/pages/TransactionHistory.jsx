@@ -213,6 +213,16 @@ export default function TransactionHistory() {
     setShowEditDetailModal(true);
   };
 
+  const handleOpenFile = (record) => {
+    const file = store.allServiceFiles?.find(f => f.id_ho_so_dich_vu === record.tx.id_ho_so_dich_vu);
+    if (file) {
+      store.selectServiceFile(file);
+      navigate('/');
+    } else {
+      message.error('Không tìm thấy thông tin hồ sơ gốc!');
+    }
+  };
+
   const handleCancel = (record) => {
     const huyId = store.categories.find(c => (c.ten_danh_muc || '').toLowerCase().includes('hủy'))?.id_danh_muc || 'dm-3';
     Modal.confirm({
@@ -739,17 +749,10 @@ export default function TransactionHistory() {
                   </div>
                   
                   {/* MOBILE ACTIONS */}
-                  <div className="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-white/5" onClick={e => e.stopPropagation()}>
-                    <Button 
-                      block
-                      size="small" 
-                      type="primary" 
-                      ghost 
-                      icon={<QrcodeOutlined />} 
-                      onClick={() => handleShowQR(item)}
-                      disabled={!item.contract?.ma_hop_dong}
-                    >QR</Button>
-                    <Button block size="small" type="default" ghost icon={<EditOutlined />} onClick={() => handleEdit(item)}>Sửa</Button>
+                  <div className="grid grid-cols-5 gap-1.5 mt-2 pt-2 border-t border-white/5" onClick={e => e.stopPropagation()}>
+                    <Button block size="small" type="primary" ghost icon={<QrcodeOutlined />} onClick={() => handleShowQR(item)} disabled={!item.contract?.ma_hop_dong}>QR</Button>
+                    <Button block size="small" className="bg-transparent border border-blue-500/30 text-blue-400 hover:text-white hover:bg-blue-500 hover:border-blue-500" icon={<EditOutlined />} onClick={() => handleEdit(item)}>Sửa</Button>
+                    <Button block size="small" className="bg-transparent border border-green-500/30 text-green-400 hover:text-white hover:bg-green-500 hover:border-green-500" icon={<FolderOpenOutlined />} onClick={() => handleOpenFile(item)}>Mở</Button>
                     <Button block size="small" danger ghost icon={<StopOutlined />} onClick={() => handleCancel(item)}>Hủy</Button>
                     <Button block size="small" danger icon={<DeleteOutlined />} onClick={() => handleDelete(item)} />
                   </div>
