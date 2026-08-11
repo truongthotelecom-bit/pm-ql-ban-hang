@@ -83,9 +83,21 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFal
               </span>
             </div>
 
+          {/* Thông tin */}
+          <div className={`flex flex-1 ${isSelected ? 'flex-col gap-2' : 'justify-between items-start gap-2'} min-w-0`}>
+            {/* TRÁI (hoặc dòng trên): Mã HĐ + Chủ HĐ */}
+            <div className="flex flex-col min-w-0">
+              <h4 className={`font-extrabold leading-tight uppercase tracking-wide truncate text-red-400 ${isSelected ? 'text-base' : 'text-sm'}`}>
+                {hd?.ma_hop_dong || 'CHƯA CÓ HĐ'}
+              </h4>
+              <span className={`font-semibold truncate mt-0.5 text-gray-300 ${isSelected ? 'text-xs' : 'text-[11px]'}`}>
+                {hd?.chu_hop_dong || '—'}
+              </span>
+            </div>
+
             {/* PHẢI (hoặc dòng dưới): Tên người TT + SĐT */}
-            <div className={`flex ${isSelected ? 'flex-row items-center justify-between gap-2 bg-white/[0.03] p-2 rounded-lg border border-white/5 mt-1' : 'flex-col items-end text-right flex-shrink-0'}`}>
-              <span className={`font-bold truncate text-gray-200 ${isSelected ? 'text-[13px] flex-1' : 'text-[11px] max-w-[110px]'}`}>
+            <div className={`flex ${isSelected ? 'flex-col items-start gap-1 bg-white/[0.03] p-2 rounded-lg border border-white/5 mt-1' : 'flex-col items-end text-right flex-shrink-0'}`}>
+              <span className={`font-bold truncate text-gray-200 ${isSelected ? 'text-[13px] w-full' : 'text-[11px] max-w-[110px]'}`}>
                 {cust?.ho_va_ten || 'Khách lẻ'}
               </span>
               {cust?.so_dien_thoai ? (

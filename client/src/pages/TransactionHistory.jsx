@@ -1,8 +1,8 @@
 // Force HMR
 import React, { useState, useMemo, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, App as AntdApp } from 'antd';
-import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined } from '@ant-design/icons';
+import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
 import { supabase } from '../lib/supabaseClient';
 import MoneyTransferForm from '../components/MoneyTransferForm';
@@ -87,6 +87,18 @@ function formatCurrency(val) {
 export default function TransactionHistory() {
   const store = useAppStore();
   const location = useLocation();
+  const navigate = useNavigate();
+  
+  const handleGoToWorkspace = (record) => {
+    const hoSo = store.allServiceFiles?.find(f => f.id_ho_so_dich_vu === record.tx.id_ho_so_dich_vu);
+    if (hoSo) {
+      store.setSelectedServiceFile(hoSo);
+      navigate('/');
+    } else {
+      message.error('Không tìm thấy thông tin hồ sơ gốc!');
+    }
+  };
+
   const [filters, setFilters] = useState({
     nhomMenuId: null,
     loaiDichVuId: null,
@@ -603,6 +615,14 @@ export default function TransactionHistory() {
                         onClick={() => handleShowQR(record)}
                         disabled={!hasContract}
                         className={hasContract ? "text-blue-400 hover:text-blue-300 hover:bg-blue-400/10" : "opacity-30 cursor-not-allowed"}
+                      />
+                    </Tooltip>
+                    <Tooltip title="Chỉnh sửa Hồ sơ">
+                      <Button 
+                        type="text" 
+                        icon={<FolderOpenOutlined />} 
+                        onClick={() => handleGoToWorkspace(record)}
+                        className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10"
                       />
                     </Tooltip>
                     <Tooltip title="Sửa">
