@@ -11,7 +11,7 @@ export default function ServiceMenu() {
 
   const handleSelectService = async (service) => {
     await store.selectService(service);
-    navigate('/giao-dich');
+    navigate('/');
   };
 
   // Định nghĩa màu gradient cho các nhóm dịch vụ (Ánh xạ theo UUID)

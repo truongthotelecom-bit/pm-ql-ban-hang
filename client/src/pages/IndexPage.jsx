@@ -3,9 +3,11 @@ import { useNavigate, useLocation, Outlet, NavLink } from 'react-router-dom';
 import useAppStore from '../store/useAppStore';
 import useAuthStore from '../store/useAuthStore';
 import { Dropdown } from 'antd';
-import { HomeOutlined, ShoppingCartOutlined, SettingOutlined, UserOutlined, LogoutOutlined, ControlOutlined, AppstoreOutlined, CalendarOutlined, TeamOutlined, FileProtectOutlined } from '@ant-design/icons';
-import { Sparkles } from 'lucide-react';
+import { AppstoreOutlined, CalendarOutlined, TeamOutlined, FileProtectOutlined, UserOutlined, SettingOutlined, LogoutOutlined, ControlOutlined, HomeOutlined } from '@ant-design/icons';
+import { Sparkles, ChevronRight, ChevronDown } from 'lucide-react';
 import TransactionDrawer from '../components/TransactionDrawer';
+import ServiceMenu from './ServiceMenu';
+import Transactions from './Transactions';
 
 export default function IndexPage() {
   const store = useAppStore();
@@ -13,6 +15,7 @@ export default function IndexPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [expandedGroup, setExpandedGroup] = useState(null);
 
   useEffect(() => {
     store.fetchSystemConfig();
@@ -49,9 +52,7 @@ export default function IndexPage() {
   ];
 
   const getPageTitle = () => {
-    if (location.pathname === '/') return 'Dashboard';
-    if (location.pathname.startsWith('/dich-vu')) return 'Dịch vụ';
-    if (location.pathname.startsWith('/giao-dich')) return 'Giao dịch';
+    if (location.pathname === '/') return store.selectedService ? store.selectedService.ten_danh_muc : 'Danh mục dịch vụ';
     if (location.pathname.startsWith('/lich-su')) return 'Lịch sử';
     if (location.pathname.startsWith('/khach-hang')) return 'Khách hàng';
     if (location.pathname.startsWith('/hop-dong')) return 'Hợp đồng';
@@ -70,13 +71,20 @@ export default function IndexPage() {
   const mobileNavLinkClass = ({ isActive }) =>
     `flex flex-col items-center justify-center gap-1 ${isActive ? 'text-violet-400' : 'text-gray-500'}`;
 
+  // Automatically expand group if a service is selected
+  useEffect(() => {
+    if (store.selectedService && !expandedGroup) {
+      setExpandedGroup(store.selectedService.id_nhom);
+    }
+  }, [store.selectedService]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#080c14] text-gray-100">
       
       {/* SIDEBAR NAVIGATION (Desktop) */}
-      <aside className="w-64 bg-[#0d1426]/95 backdrop-blur-md border-r border-white/5 p-6 hidden md:flex flex-col gap-8 fixed top-0 bottom-0 left-0 z-50">
+      <aside className="w-64 bg-[#0d1426]/95 backdrop-blur-md border-r border-white/5 p-6 hidden md:flex flex-col gap-6 fixed top-0 bottom-0 left-0 z-50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-violet-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-violet-600/35">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-violet-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-violet-600/35 flex-shrink-0">
             <Sparkles size={20} className="text-white" />
           </div>
           <div>
@@ -85,16 +93,55 @@ export default function IndexPage() {
           </div>
         </div>
 
-        <nav className="flex flex-col gap-1.5 flex-grow">
-          <NavLink to="/" end className={navLinkClass}>
-            <HomeOutlined style={{ fontSize: '16px' }} /> Dashboard báo cáo
-          </NavLink>
-          <NavLink to="/dich-vu" className={navLinkClass}>
-            <AppstoreOutlined style={{ fontSize: '16px' }} /> Danh mục Dịch vụ
-          </NavLink>
-          <NavLink to="/giao-dich" className={navLinkClass}>
-            <ShoppingCartOutlined style={{ fontSize: '16px' }} /> <span className="truncate max-w-[150px] uppercase">{store.selectedService?.ten_danh_muc || 'Live Feed Giao dịch'}</span>
-          </NavLink>
+        <nav className="flex flex-col gap-1.5 flex-grow overflow-y-auto scrollbar-thin pr-2 -mr-2">
+          
+          <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2 px-2 mt-2">Hệ sinh thái dịch vụ</div>
+          
+          {store.menuGroups.map(group => {
+            const groupServices = store.services.filter(s => s.id_nhom === group.id_nhom || s.id_nhom_dich_vu === group.id_nhom);
+            if (groupServices.length === 0) return null;
+            const isExpanded = expandedGroup === group.id_nhom;
+            
+            return (
+              <div key={group.id_nhom} className="flex flex-col">
+                <div 
+                  onClick={() => setExpandedGroup(isExpanded ? null : group.id_nhom)}
+                  className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-gray-300 hover:bg-white/5 cursor-pointer select-none"
+                >
+                  <div className="flex items-center gap-3">
+                    <AppstoreOutlined className={isExpanded ? "text-violet-400" : "text-gray-500"} />
+                    <span className={`font-bold uppercase text-xs tracking-wide ${isExpanded ? 'text-violet-300' : ''}`}>{group.ten_nhom}</span>
+                  </div>
+                  {isExpanded ? <ChevronDown size={14} className="text-violet-400" /> : <ChevronRight size={14} className="text-gray-600" />}
+                </div>
+                
+                {isExpanded && (
+                  <div className="flex flex-col gap-1 py-1 mt-1 border-l-2 border-white/5 ml-4 pl-3">
+                    {groupServices.map(svc => {
+                      const isSelected = store.selectedService?.id_loai_dich_vu === svc.id_loai_dich_vu && location.pathname === '/';
+                      return (
+                        <div 
+                          key={svc.id_loai_dich_vu}
+                          onClick={() => { store.selectService(svc); navigate('/'); }}
+                          className={`px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all truncate ${
+                            isSelected 
+                              ? 'bg-violet-600/20 text-violet-300 border border-violet-500/30 shadow-sm' 
+                              : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
+                          }`}
+                        >
+                          {svc.ten_danh_muc}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          <div className="my-3 border-t border-white/5"></div>
+          <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2 px-2">Quản trị hệ thống</div>
+
           <NavLink to="/lich-su" className={navLinkClass}>
             <CalendarOutlined style={{ fontSize: '16px' }} /> Lịch sử Giao dịch
           </NavLink>
@@ -127,7 +174,7 @@ export default function IndexPage() {
       <main className="flex-1 md:ml-64 p-4 sm:p-8 pb-24 md:pb-8 flex flex-col gap-6">
         
         {/* HEADER */}
-        <header className="hidden md:flex justify-between items-center bg-[#0d1426]/40 backdrop-blur border border-white/5 rounded-2xl p-4 sm:px-6">
+        <header className="hidden md:flex justify-between items-center bg-[#0d1426]/40 backdrop-blur border border-white/5 rounded-2xl p-4 sm:px-6 shadow-sm">
           <div>
             <h2 className="text-xl font-bold text-gray-100 capitalize">Phân hệ {getPageTitle()}</h2>
             <p className="text-xs text-gray-400 mt-0.5">Hệ thống chuyển khoản chi tiết & định dạng in hóa đơn nhanh</p>
@@ -142,32 +189,45 @@ export default function IndexPage() {
           </div>
         </header>
 
-        {/* TAB CONTENTS (RENDER VIA REACT ROUTER OUTLET) */}
+        {/* TAB CONTENTS */}
         <div className="flex-grow">
-          <Outlet context={{ setDrawerOpen }} />
+          {location.pathname === '/' ? (
+            store.selectedService ? <Transactions /> : <ServiceMenu />
+          ) : (
+            <Outlet context={{ setDrawerOpen }} />
+          )}
         </div>
       </main>
 
       {/* MOBILE BOTTOM NAVIGATION */}
       <nav className="fixed bottom-0 left-0 right-0 h-16 bg-[#0d1426]/95 backdrop-blur-lg border-t border-white/5 flex md:hidden justify-around items-center z-50 px-2 sm:px-4">
-        <NavLink to="/" end className={mobileNavLinkClass}>
-          <HomeOutlined style={{ fontSize: '18px' }} />
-          <span className="text-[9px] font-semibold">Home</span>
+        <NavLink 
+          to="/" 
+          end 
+          onClick={(e) => {
+            if (location.pathname === '/' && store.selectedService) {
+              e.preventDefault();
+              store.selectService(null);
+            }
+          }}
+          className={mobileNavLinkClass}
+        >
+          <HomeOutlined style={{ fontSize: '20px' }} />
+          <span className="text-[10px] font-semibold">Trang chủ</span>
         </NavLink>
-        <NavLink to="/dich-vu" className={mobileNavLinkClass}>
-          <AppstoreOutlined style={{ fontSize: '18px' }} />
-          <span className="text-[9px] font-semibold">Dịch Vụ</span>
+        
+        <NavLink to="/lich-su" className={mobileNavLinkClass}>
+          <CalendarOutlined style={{ fontSize: '20px' }} />
+          <span className="text-[10px] font-semibold">Lịch sử</span>
         </NavLink>
-        <NavLink to="/giao-dich" className={mobileNavLinkClass}>
-          <ShoppingCartOutlined style={{ fontSize: '18px' }} />
-          <span className="text-[9px] font-semibold truncate w-14 text-center uppercase">{store.selectedService?.ten_danh_muc || 'Feed'}</span>
-        </NavLink>
+
         <button 
           onClick={() => setDrawerOpen(true)}
           className="w-12 h-12 -mt-6 rounded-full bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white flex items-center justify-center shadow-lg shadow-violet-600/40"
         >
           <span className="text-2xl font-bold">+</span>
         </button>
+        
         <NavLink to="/khach-hang" className={mobileNavLinkClass}>
           <UserOutlined style={{ fontSize: '20px' }} />
           <span className="text-[10px] font-semibold">Khách</span>
@@ -175,10 +235,6 @@ export default function IndexPage() {
         <NavLink to="/hop-dong" className={mobileNavLinkClass}>
           <FileProtectOutlined style={{ fontSize: '20px' }} />
           <span className="text-[10px] font-semibold">Hợp đồng</span>
-        </NavLink>
-        <NavLink to="/cai-dat" className={mobileNavLinkClass}>
-          <SettingOutlined style={{ fontSize: '20px' }} />
-          <span className="text-[10px] font-semibold">Cài đặt</span>
         </NavLink>
       </nav>
 

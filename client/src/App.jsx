@@ -13,9 +13,7 @@ const AdminStores = lazy(() => import('./pages/admin/AdminStores'));
 const AdminAccounts = lazy(() => import('./pages/admin/AdminAccounts'));
 
 // Main pages (lazy)
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const ServiceMenu = lazy(() => import('./pages/ServiceMenu'));
-const Transactions = lazy(() => import('./pages/Transactions'));
+
 const TransactionHistory = lazy(() => import('./pages/TransactionHistory'));
 const CustomersPage = lazy(() => import('./pages/CustomersPage'));
 const ContractsPage = lazy(() => import('./pages/ContractsPage'));
@@ -55,9 +53,7 @@ export default function App() {
               </AuthGuard>
             } 
           >
-            <Route index element={<Suspense fallback={<PageLoader />}><Dashboard /></Suspense>} />
-            <Route path="dich-vu" element={<Suspense fallback={<PageLoader />}><ServiceMenu /></Suspense>} />
-            <Route path="giao-dich" element={<Suspense fallback={<PageLoader />}><Transactions /></Suspense>} />
+            {/* Lịch sử, Khách hàng, Hợp đồng, Cài đặt, Nhân viên vẫn giữ nguyên */}
             <Route path="lich-su" element={<Suspense fallback={<PageLoader />}><TransactionHistory /></Suspense>} />
             <Route path="khach-hang" element={<Suspense fallback={<PageLoader />}><CustomersPage /></Suspense>} />
             <Route path="hop-dong" element={<Suspense fallback={<PageLoader />}><ContractsPage /></Suspense>} />
