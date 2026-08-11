@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Select, Button, Divider, Modal, Input } from 'antd';
 import { PlusOutlined, SearchOutlined, DownOutlined } from '@ant-design/icons';
 
@@ -30,6 +30,22 @@ export default function SearchableDropdown({
       return mainText.includes(lowerSearch) || subText.includes(lowerSearch);
     });
   }, [options, searchText, labelKey, subLabelKey]);
+
+  const [displayCount, setDisplayCount] = useState(20);
+
+  // Reset số lượng hiển thị khi nội dung tìm kiếm hoặc danh sách gốc thay đổi
+  useEffect(() => {
+    setDisplayCount(20);
+  }, [searchText, options]);
+
+  const visibleOptions = filteredOptions.slice(0, displayCount);
+
+  const handleScroll = (e) => {
+    const bottom = e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 100;
+    if (bottom && displayCount < filteredOptions.length) {
+      setDisplayCount(prev => prev + 20);
+    }
+  };
 
   // Tim label dang duoc chon de hien thi tren nut (mobile)
   const selectedOption = options.find(opt => opt[valueKey] === value);
@@ -91,7 +107,10 @@ export default function SearchableDropdown({
           </div>
 
           {/* Danh sách cuộn */}
-          <div className="max-h-[65vh] overflow-y-auto scrollbar-thin overscroll-contain p-2 space-y-1.5 bg-[#0d1426]/50">
+          <div 
+            className="max-h-[65vh] overflow-y-auto scrollbar-thin overscroll-contain p-2 space-y-1.5 bg-[#0d1426]/50"
+            onScroll={handleScroll}
+          >
             {onAddNew && (
               <Button
                 type="text"
@@ -113,8 +132,9 @@ export default function SearchableDropdown({
                 Không tìm thấy kết quả phù hợp.
               </div>
             ) : (
-              filteredOptions.map((opt, index) => {
-                const isSelected = opt[valueKey] === value;
+              <>
+                {visibleOptions.map((opt, index) => {
+                  const isSelected = opt[valueKey] === value;
                 return (
                   <div
                     key={`${opt[valueKey]}-${index}`}
@@ -150,10 +170,16 @@ export default function SearchableDropdown({
                     </div>
                   </div>
                 );
-              })
-            )}
-          </div>
-        </Modal>
+              })}
+              {displayCount < filteredOptions.length && (
+                <div className="text-center p-3 text-violet-400 text-xs animate-pulse">
+                  Đang tải thêm... vuốt lên nữa đi
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </Modal>
     </>
   );
 }
