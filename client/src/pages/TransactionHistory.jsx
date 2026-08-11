@@ -102,6 +102,32 @@ export default function TransactionHistory() {
     }
   }, [location.search]);
 
+  useEffect(() => {
+    let fromDate = null;
+    let toDate = null;
+
+    if (filters.dateRangeType !== DATE_RANGES.ALL) {
+      if (filters.dateRangeType === DATE_RANGES.CUSTOM && filters.customDateRange) {
+        fromDate = filters.customDateRange[0]?.toDate?.() || new Date(filters.customDateRange[0]);
+        toDate = filters.customDateRange[1]?.toDate?.() || new Date(filters.customDateRange[1]);
+        if (fromDate) fromDate.setHours(0, 0, 0, 0);
+        if (toDate) toDate.setHours(23, 59, 59, 999);
+      } else if (filters.dateRangeType !== DATE_RANGES.CUSTOM) {
+        const range = getDateRange(filters.dateRangeType);
+        if (range) {
+          fromDate = range[0];
+          toDate = range[1];
+        }
+      }
+    }
+    
+    // Tự động fetch data mỗi khi khoảng thời gian thay đổi
+    // Tránh fetch liên tục nếu customDateRange chưa chọn đủ 2 ngày
+    if (filters.dateRangeType === DATE_RANGES.CUSTOM && !filters.customDateRange) return;
+    
+    store.fetchHistoryTransactions(fromDate, toDate);
+  }, [filters.dateRangeType, filters.customDateRange]);
+
   // Danh sách Loại Dịch Vụ lọc theo Nhóm Menu đã chọn
   const filteredServices = useMemo(() => {
     if (!filters.nhomMenuId) return store.services || [];
@@ -116,8 +142,8 @@ export default function TransactionHistory() {
 
   // Lọc danh sách giao dịch
   const filteredTransactions = useMemo(() => {
-    const txs = store.allTransactions || [];
-    const files = store.allServiceFiles || [];
+    const txs = store.historyTransactions || [];
+    const files = store.historyFiles || [];
     const contracts = store.ma_hop_dong || [];
     const customers = store.customers || [];
     const banks = store.banks || [];
@@ -168,7 +194,7 @@ export default function TransactionHistory() {
     }
 
     return result;
-  }, [store.allTransactions, store.allServiceFiles, store.ma_hop_dong, store.customers, store.banks, store.services, store.categories, filters]);
+  }, [store.historyTransactions, store.historyFiles, store.ma_hop_dong, store.customers, store.banks, store.services, store.categories, filters]);
 
   const totalAmount = filteredTransactions.reduce((s, i) => s + (i.tx.so_tien_di || 0), 0);
   const totalFee = filteredTransactions.reduce((s, i) => s + (i.tx.phi_dich_vu || 0), 0);
@@ -331,6 +357,7 @@ export default function TransactionHistory() {
       {/* DESKTOP TABLE VIEW */}
       <div className="hidden lg:block glass-panel rounded-2xl border border-white/5 shadow-xl overflow-hidden">
         <Table
+          loading={store.isHistoryLoading}
           dataSource={filteredTransactions}
           rowKey={(record) => record.tx.id_chi_tiet_giao_dich || record.tx.ngay_tao || Math.random().toString()}
           pagination={{ pageSize: 10, position: ['bottomCenter'], showSizeChanger: true }}
@@ -429,7 +456,9 @@ export default function TransactionHistory() {
 
       {/* MOBILE LIST VIEW */}
       <div className="block lg:hidden space-y-3">
-        {filteredTransactions.length === 0 ? (
+        {store.isHistoryLoading ? (
+          <div className="flex justify-center p-10"><span className="text-violet-400">Đang tải...</span></div>
+        ) : filteredTransactions.length === 0 ? (
           <div className="glass-panel p-10 flex flex-col items-center justify-center border border-white/5 rounded-2xl">
             <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<span className="text-gray-400">Không tìm thấy giao dịch nào trong khoảng thời gian này</span>} />
           </div>

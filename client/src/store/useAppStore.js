@@ -31,6 +31,9 @@ const useAppStore = create((set, get) => ({
   selectedDetail: null,
   allTransactions: [],
   allServiceFiles: [],
+  historyTransactions: [],
+  historyFiles: [],
+  isHistoryLoading: false,
 
   // Setters
   setActiveTab: (tab) => set({ activeTab: tab }),
@@ -485,6 +488,54 @@ const useAppStore = create((set, get) => ({
   },
 
   // Thêm giao dịch chi tiết
+  fetchHistoryTransactions: async (fromDate, toDate) => {
+    set({ isHistoryLoading: true });
+    try {
+      const user = useAuthStore.getState().user;
+      
+      let txQuery = supabase.from('chi_tiet_giao_dich').select('*').order('thoi_gian_giao_dich', { ascending: false });
+      
+      if (user?.id_diem_ban) {
+        txQuery = txQuery.or(`id_diem_ban.eq.${user.id_diem_ban},id_diem_ban.is.null`);
+      }
+      
+      if (fromDate && toDate) {
+        txQuery = txQuery.gte('thoi_gian_giao_dich', fromDate.toISOString()).lte('thoi_gian_giao_dich', toDate.toISOString());
+      }
+      
+      const { data: txs, error: txError } = await txQuery;
+      if (txError) throw txError;
+      
+      const fileIds = [...new Set((txs || []).map(t => t.id_ho_so_dich_vu).filter(Boolean))];
+      
+      let files = [];
+      if (fileIds.length > 0) {
+        // Chia nhỏ array nếu quá lớn (thường 1 ngày thì không quá giới hạn IN của Supabase)
+        const { data: filesData, error: filesError } = await supabase.from('vw_ho_so_dich_vu_v2').select('*').in('id_ho_so_dich_vu', fileIds);
+        if (!filesError) {
+          files = (filesData || []).map(row => ({
+            ...row,
+            ma_hop_dong: {
+              id_ma_hop_dong: row.id_ma_hop_dong,
+              ma_hop_dong: row.ma_hop_dong_str,
+              chu_hop_dong: row.chu_hop_dong,
+              id_danh_muc_dich_vu: row.id_danh_muc_dich_vu,
+              sys_danh_muc_dich_vu: {
+                id_loai_dich_vu: row.id_loai_dich_vu
+              }
+            }
+          }));
+        }
+      }
+      
+      set({ historyTransactions: txs || [], historyFiles: files });
+    } catch(err) {
+      console.error('Lỗi fetchHistoryTransactions:', err);
+    } finally {
+      set({ isHistoryLoading: false });
+    }
+  },
+
   addTransactionDetail: async (detailPayload) => {
     try {
       const activeFile = get().selectedServiceFile;
