@@ -85,15 +85,20 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFal
 
             {/* PHẢI (hoặc dòng dưới): Tên người TT + SĐT */}
             <div className={`flex ${isSelected ? 'flex-col items-start gap-1 bg-white/[0.03] p-3 rounded-lg border border-white/5 mt-2' : 'flex-col items-end text-right flex-shrink-0'}`}>
-              <span className={`font-bold truncate text-gray-200 ${isSelected ? 'text-xl w-full' : 'text-[11px] max-w-[110px]'}`}>
-                {cust?.ho_va_ten || 'Khách lẻ'}
+              <span className={`font-bold truncate text-gray-200 flex items-baseline gap-1.5 ${isSelected ? 'text-xl w-full' : 'text-[11px] max-w-[110px]'}`}>
+                {isSelected && <span className="text-gray-500 font-medium text-sm">KH:</span>}
+                <span className="truncate">{cust?.ho_va_ten || 'Khách lẻ'}</span>
               </span>
               {cust?.so_dien_thoai ? (
-                <span className={`font-semibold text-violet-400/90 ${isSelected ? 'text-base' : 'text-[10px] mt-0.5'}`}>
+                <span className={`font-semibold text-violet-400/90 flex items-baseline gap-1.5 ${isSelected ? 'text-base' : 'text-[10px] mt-0.5'}`}>
+                  {isSelected && <span className="text-gray-500 font-medium text-sm">SĐT:</span>}
                   {cust.so_dien_thoai}
                 </span>
               ) : (
-                <span className={`text-gray-600 ${isSelected ? 'text-base' : 'text-[10px] mt-0.5'}`}>—</span>
+                <span className={`text-gray-600 flex items-baseline gap-1.5 ${isSelected ? 'text-base' : 'text-[10px] mt-0.5'}`}>
+                  {isSelected && <span className="text-gray-500 font-medium text-sm">SĐT:</span>}
+                  —
+                </span>
               )}
             </div>
           </div>
