@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useAppStore from '../store/useAppStore';
 import useAuthStore from '../store/useAuthStore';
 import { supabase } from '../lib/supabaseClient';
-import { Button, Tag, App as AntdApp, Modal, Input, Select, Radio, Badge, Pagination, Checkbox } from 'antd';
+import { Button, Tag, App as AntdApp, Modal, Input, Select, Radio, Badge, Pagination, Checkbox, Dropdown } from 'antd';
 import { 
   SearchOutlined, 
   PlusOutlined, 
@@ -936,9 +936,10 @@ export default function Transactions() {
                 setNewFilePayload(prev => ({ ...prev, id_loai_hop_dong: stdType || '' }));
                 setShowNewFileModal(true);
               }}
-              className="w-14 h-14 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center shadow-[0_8px_30px_rgb(124,58,237,0.5)] transition-all hover:scale-105 active:scale-95"
+              className="h-14 px-6 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center gap-2 shadow-[0_8px_30px_rgb(124,58,237,0.5)] transition-all hover:scale-105 active:scale-95"
             >
-              <PlusOutlined className="text-2xl font-bold" />
+              <PlusOutlined className="text-xl font-bold" />
+              <span className="font-extrabold uppercase text-sm">Tạo hồ sơ</span>
             </button>
           </div>
         </div>
@@ -1098,33 +1099,32 @@ export default function Transactions() {
 
           {/* CỘT 2 - SPEED DIAL (Nút Nổi Menu) */}
           {activeFile && (
-            <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-2">
-              {showCol2Menu && (
-                <div className="flex flex-col gap-2 mb-2 animate-in slide-in-from-bottom-2 fade-in zoom-in-95 origin-bottom">
-                  <button onClick={() => { setShowCol2Menu(false); setDrawerOpen(true); }} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-violet-500/50 px-4 py-2 rounded-full text-violet-400 hover:text-white hover:bg-violet-600 transition-all shadow-xl font-bold text-xs justify-end w-[160px]">
-                    <span className="flex-1 text-right">Tạo giao dịch</span> <div className="w-6 flex justify-center"><PlusOutlined /></div>
-                  </button>
-                  <button onClick={() => { setShowCol2Menu(false); openEditFileModal(); }} disabled={!canEditFile()} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-gray-300 hover:text-white hover:bg-white/20 transition-all shadow-xl font-bold text-xs justify-end disabled:opacity-50 w-[160px]">
-                    <span className="flex-1 text-right">Sửa hồ sơ</span> <div className="w-6 flex justify-center"><EditOutlined /></div>
-                  </button>
-                  <button onClick={() => { setShowCol2Menu(false); openEditCustModal(activeCust); }} disabled={!canEditFile()} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-gray-300 hover:text-white hover:bg-white/20 transition-all shadow-xl font-bold text-xs justify-end disabled:opacity-50 w-[160px]">
-                    <span className="flex-1 text-right">Sửa khách</span> <div className="w-6 flex justify-center"><UserOutlined /></div>
-                  </button>
-                  <button onClick={() => { setShowCol2Menu(false); openEditContractModal(); }} disabled={!canEditFile()} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-gray-300 hover:text-white hover:bg-white/20 transition-all shadow-xl font-bold text-xs justify-end disabled:opacity-50 w-[160px]">
-                    <span className="flex-1 text-right">Sửa HĐ</span> <div className="w-6 flex justify-center"><EditOutlined /></div>
-                  </button>
-                  <button onClick={() => { setShowCol2Menu(false); setShowCustHistoryModal(true); }} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-gray-300 hover:text-white hover:bg-white/20 transition-all shadow-xl font-bold text-xs justify-end w-[160px]">
-                    <span className="flex-1 text-right">Lịch sử khách</span> <div className="w-6 flex justify-center"><HistoryOutlined /></div>
-                  </button>
-                </div>
-              )}
-              {/* Nút chính */}
-              <button
-                onClick={() => setShowCol2Menu(!showCol2Menu)}
-                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(124,58,237,0.5)] transition-all hover:scale-105 active:scale-95 ${showCol2Menu ? 'bg-[#131c33] text-white border border-white/20' : 'bg-gradient-to-tr from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500'}`}
+            <div className="mt-4 pt-4 border-t border-white/5 flex gap-2 shrink-0">
+              <Button 
+                onClick={() => setDrawerOpen(true)}
+                className="flex-1 h-12 bg-gradient-to-r from-violet-600 to-indigo-600 border-none text-white font-extrabold shadow-[0_4px_15px_rgb(124,58,237,0.4)] hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
               >
-                {showCol2Menu ? <span className="text-xl font-bold rotate-45 transition-transform">✕</span> : <PlusOutlined className="text-2xl font-bold transition-transform" />}
-              </button>
+                <PlusOutlined /> <span className="hidden sm:inline">THÊM</span>
+              </Button>
+              <Dropdown 
+                menu={{ items: [
+                  { key: '1', label: 'Sửa hồ sơ', icon: <EditOutlined />, disabled: !canEditFile(), onClick: () => openEditFileModal() },
+                  { key: '2', label: 'Sửa khách', icon: <UserOutlined />, disabled: !canEditFile(), onClick: () => openEditCustModal(activeCust) },
+                  { key: '3', label: 'Sửa HĐ', icon: <EditOutlined />, disabled: !canEditFile(), onClick: () => openEditContractModal() },
+                ]}} 
+                trigger={['click']} 
+                placement="top"
+              >
+                <Button className="flex-1 h-12 bg-[#131c33] border border-white/10 text-white font-bold hover:border-violet-500 hover:text-violet-400 shadow-lg flex items-center justify-center gap-2">
+                  <EditOutlined /> <span className="hidden sm:inline">SỬA</span>
+                </Button>
+              </Dropdown>
+              <Button 
+                onClick={() => setShowCustHistoryModal(true)}
+                className="flex-1 h-12 bg-[#131c33] border border-white/10 text-white font-bold hover:border-violet-500 hover:text-violet-400 shadow-lg flex items-center justify-center gap-2"
+              >
+                <HistoryOutlined /> <span className="hidden sm:inline">LỊCH SỬ</span>
+              </Button>
             </div>
           )}
         </div>
