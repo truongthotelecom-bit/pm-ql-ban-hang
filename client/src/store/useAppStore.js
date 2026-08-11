@@ -387,6 +387,7 @@ const useAppStore = create((set, get) => ({
       }
     } catch (err) {
       console.error('Lỗi lấy hồ sơ dịch vụ:', err);
+      set({ hasMoreServiceFiles: false });
     }
   },
 

@@ -308,13 +308,18 @@ export default function Transactions() {
     store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, value, 1, pageSize, false);
   };
 
+  const isFetchingRef = React.useRef(false);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting && store.hasMoreServiceFiles) {
+        if (entries[0].isIntersecting && store.hasMoreServiceFiles && !isFetchingRef.current) {
+          isFetchingRef.current = true;
           const nextPage = currentPage + 1;
           setCurrentPage(nextPage);
-          store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, searchTerm, nextPage, pageSize, true);
+          store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, searchTerm, nextPage, pageSize, true).finally(() => {
+            isFetchingRef.current = false;
+          });
         }
       },
       { threshold: 1.0 }
