@@ -272,10 +272,10 @@ export default function TransactionHistory() {
       const file = files.find(f => f.id_ho_so_dich_vu === tx.id_ho_so_dich_vu);
       if (!file) continue;
 
-      const contract = contracts.find(c => c.id_ma_hop_dong === file.id_ma_hop_dong);
+      const contract = contracts.find(c => c.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
       const customer = customers.find(c => c.id_khach_hang === file.id_khach_hang);
       const bank = banks.find(b => b.id_danh_muc_dich_vu === contract?.id_danh_muc_dich_vu);
-      const service = services.find(s => s.id_loai_dich_vu === bank?.id_loai_dich_vu);
+      const service = services.find(s => s.id_loai_dich_vu === file.id_loai_dich_vu);
 
       // Lọc Nhóm Menu (dùng id_nhom là PK của sys_nhom_menu)
       if (filters.nhomMenuId && service?.id_nhom !== filters.nhomMenuId) continue;
