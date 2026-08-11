@@ -296,9 +296,8 @@ const useAppStore = create((set, get) => ({
 
 
   // Chọn dịch vụ
-  selectService: async (service) => {
+  selectService: (service) => {
     set({ selectedService: service, activeTab: 'transactions' });
-    await get().fetchServiceFiles(service ? service.id_loai_dich_vu : null);
   },
 
   hasMoreServiceFiles: false,
