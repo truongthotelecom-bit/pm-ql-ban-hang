@@ -563,8 +563,7 @@ export default function TransactionHistory() {
           </>
         )}
       </div>
-      </div> {/* Kết thúc wrapper */}
-      </div> {/* Kết thúc vùng cuộn */}
+      </div> {/* Kết thúc Vùng Cuộn Nội Bộ */}
     </div>
   );
 }
