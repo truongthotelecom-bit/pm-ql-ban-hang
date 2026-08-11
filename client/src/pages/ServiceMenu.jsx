@@ -208,7 +208,7 @@ export default function ServiceMenu() {
                   : <span className="text-xl md:text-2xl">{service.icon || '💼'}</span>}
               </div>
               <div className="flex flex-col flex-1 items-center justify-start w-full">
-                <h3 className="font-bold text-[9px] md:text-xs text-gray-200 tracking-wide uppercase line-clamp-2 leading-tight w-full">{service.ma_viet_tat || service.ten_danh_muc}</h3>
+                <h3 className="font-bold text-[9px] md:text-xs text-gray-200 tracking-wide uppercase line-clamp-2 leading-tight w-full">{service.ten_danh_muc}</h3>
               </div>
             </div>
           ))}
