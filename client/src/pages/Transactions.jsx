@@ -1323,8 +1323,16 @@ export default function Transactions() {
               <label className="text-xs font-bold text-gray-400">1. CHỌN MÃ SỐ HỢP ĐỒNG *</label>
             </div>
 
-            {addNewContractInline ? (
-              <div className="p-3 rounded-lg bg-white/5 border border-white/5 space-y-2.5">
+            <Modal
+              title={<span className="font-extrabold text-white text-base">✨ TẠO MÃ SỐ HỢP ĐỒNG MỚI</span>}
+              open={addNewContractInline}
+              onCancel={() => setAddNewContractInline(false)}
+              onOk={handleCreateContractInline}
+              okText="Lưu & Áp dụng"
+              cancelText="Hủy"
+              className="glass-modal z-[200]"
+            >
+              <div className="space-y-3 pt-4 text-gray-200">
                 <Input 
                   placeholder="Mã số hợp đồng (ví dụ: AURA-2026-X)" 
                   value={newContractPayload.ma_hop_dong} 
@@ -1360,40 +1368,34 @@ export default function Transactions() {
                   onChange={e => setNewContractPayload({ ...newContractPayload, ghi_chu: e.target.value })}
                   className="bg-white/5 border-white/5 text-gray-300"
                 />
-                <div className="flex gap-2">
-                  <Button type="default" size="small" onClick={() => setAddNewContractInline(false)} className="bg-white/5 text-gray-300 border-white/10 w-1/3 rounded">
-                    Hủy
-                  </Button>
-                  <Button type="primary" size="small" onClick={handleCreateContractInline} className="bg-violet-600 border-none font-bold flex-1 rounded">
-                    Lưu & Áp dụng
-                  </Button>
-                </div>
               </div>
-            ) : (
-              <SearchableDropdown
-                placeholder="Chọn hợp đồng..."
-                className="w-full"
-                value={newFilePayload.id_ma_hop_dong || undefined}
-                onChange={v => setNewFilePayload({ ...newFilePayload, id_ma_hop_dong: v })}
-                options={store.ma_hop_dong.filter(h => {
-                  if (!store.selectedService) return true;
-                  const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === h.id_danh_muc_dich_vu);
-                  return !bank || bank.id_loai_dich_vu === store.selectedService.id_loai_dich_vu;
-                }).map(h => {
-                  const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === h.id_danh_muc_dich_vu);
-                  const prefix = bank?.ten_viet_tat ? `${bank.ten_viet_tat} - ` : '';
-                  return {
-                    ...h,
-                    displayLabel: `${prefix}${h.ma_hop_dong}`
-                  };
-                })}
-                labelKey="displayLabel"
-                valueKey="id_ma_hop_dong"
-                subLabelKey="chu_hop_dong"
-                onAddNew={() => setAddNewContractInline(true)}
-                addNewText="+ Thêm hợp đồng mới"
-              />
-            )}
+            </Modal>
+
+            <SearchableDropdown
+              placeholder="Chọn hợp đồng..."
+              className="w-full"
+              value={newFilePayload.id_ma_hop_dong || undefined}
+              onChange={v => setNewFilePayload({ ...newFilePayload, id_ma_hop_dong: v })}
+              options={store.ma_hop_dong.filter(h => {
+                if (!store.selectedService) return true;
+                const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === h.id_danh_muc_dich_vu);
+                return !bank || bank.id_loai_dich_vu === store.selectedService.id_loai_dich_vu;
+              }).map(h => {
+                const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === h.id_danh_muc_dich_vu);
+                const prefix = bank?.ten_viet_tat ? `${bank.ten_viet_tat} - ` : '';
+                return {
+                  ...h,
+                  displayLabel: `${prefix}${h.ma_hop_dong}`,
+                  logo: bank?.logo || ''
+                };
+              })}
+              labelKey="displayLabel"
+              valueKey="id_ma_hop_dong"
+              subLabelKey="chu_hop_dong"
+              iconKey="logo"
+              onAddNew={() => setAddNewContractInline(true)}
+              addNewText="+ Thêm hợp đồng mới"
+            />
           </div>
 
           {/* PHẦN 2: KHÁCH HÀNG */}
@@ -1402,8 +1404,16 @@ export default function Transactions() {
               <label className="text-xs font-bold text-gray-400">2. CHỌN KHÁCH HÀNG CRM *</label>
             </div>
 
-            {addNewCustInline ? (
-              <div className="p-3 rounded-lg bg-white/5 border border-white/5 space-y-2.5">
+            <Modal
+              title={<span className="font-extrabold text-white text-base">✨ TẠO MỚI KHÁCH HÀNG CRM</span>}
+              open={addNewCustInline}
+              onCancel={() => setAddNewCustInline(false)}
+              onOk={handleCreateCustInline}
+              okText="Lưu & Áp dụng"
+              cancelText="Hủy"
+              className="glass-modal z-[200]"
+            >
+              <div className="space-y-3 pt-4 text-gray-200">
                 <Input 
                   placeholder="Họ & Tên khách hàng *" 
                   value={newCustPayload.ho_va_ten} 
@@ -1428,29 +1438,21 @@ export default function Transactions() {
                   onChange={e => setNewCustPayload({ ...newCustPayload, dia_chi: e.target.value })}
                   className="bg-white/5 border-white/5 text-gray-300"
                 />
-                <div className="flex gap-2">
-                  <Button type="default" size="small" onClick={() => setAddNewCustInline(false)} className="bg-white/5 text-gray-300 border-white/10 w-1/3 rounded">
-                    Hủy
-                  </Button>
-                  <Button type="primary" size="small" onClick={handleCreateCustInline} className="bg-violet-600 border-none font-bold flex-1 rounded">
-                    Lưu & Áp dụng
-                  </Button>
-                </div>
               </div>
-            ) : (
-              <SearchableDropdown
-                placeholder="Chọn khách hàng từ CRM..."
-                className="w-full"
-                value={newFilePayload.id_khach_hang || undefined}
-                onChange={v => setNewFilePayload({ ...newFilePayload, id_khach_hang: v })}
-                options={store.customers}
-                labelKey="ho_va_ten"
-                valueKey="id_khach_hang"
-                subLabelKey="so_dien_thoai"
-                onAddNew={() => setAddNewCustInline(true)}
-                addNewText="+ Tạo mới khách hàng"
-              />
-            )}
+            </Modal>
+
+            <SearchableDropdown
+              placeholder="Chọn khách hàng từ CRM..."
+              className="w-full"
+              value={newFilePayload.id_khach_hang || undefined}
+              onChange={v => setNewFilePayload({ ...newFilePayload, id_khach_hang: v })}
+              options={store.customers}
+              labelKey="ho_va_ten"
+              valueKey="id_khach_hang"
+              subLabelKey="so_dien_thoai"
+              onAddNew={() => setAddNewCustInline(true)}
+              addNewText="+ Tạo mới khách hàng"
+            />
           </div>
 
           {/* PHẦN 2.5: LOẠI HỢP ĐỒNG */}
@@ -1633,50 +1635,50 @@ export default function Transactions() {
       >
         <div className="p-4 border border-white/5 rounded-xl bg-white/[0.01] space-y-4">
           <div className="flex flex-col gap-1.5">
-            <div className="flex justify-between items-center">
-              <label className="text-xs font-semibold text-gray-400">Khách Hàng</label>
-              {editAddNewCustInline && (
-                <Button type="link" size="small" onClick={() => setEditAddNewCustInline(false)} className="text-violet-400 hover:text-violet-300 font-bold p-0 text-xs">
-                  Chọn khách có sẵn
-                </Button>
-              )}
-            </div>
-            {editAddNewCustInline ? (
-              <div className="p-3 rounded-lg bg-white/5 border border-white/5 space-y-2.5">
+            <Modal
+              title={<span className="font-extrabold text-white text-base">✨ TẠO MỚI KHÁCH HÀNG CRM</span>}
+              open={editAddNewCustInline}
+              onCancel={() => setEditAddNewCustInline(false)}
+              onOk={handleEditCreateCustInline}
+              okText="Lưu & Áp dụng"
+              cancelText="Hủy"
+              className="glass-modal z-[200]"
+            >
+              <div className="space-y-3 pt-4 text-gray-200">
                 <Input placeholder="Họ & Tên khách hàng *" value={newCustPayload.ho_va_ten} onChange={e => setNewCustPayload({ ...newCustPayload, ho_va_ten: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
                 <Input placeholder="Số điện thoại di động (Tuỳ chọn)" value={newCustPayload.so_dien_thoai} onChange={e => setNewCustPayload({ ...newCustPayload, so_dien_thoai: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
                 <Input placeholder="Số căn cước công dân (CCCD)" value={newCustPayload.cccd} onChange={e => setNewCustPayload({ ...newCustPayload, cccd: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
                 <Input placeholder="Địa chỉ cư trú" value={newCustPayload.dia_chi} onChange={e => setNewCustPayload({ ...newCustPayload, dia_chi: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
-                <Button type="primary" size="small" onClick={handleEditCreateCustInline} className="bg-violet-600 border-none font-bold w-full rounded">
-                  Lưu & Áp dụng
-                </Button>
               </div>
-            ) : (
-              <SearchableDropdown
-                className="w-full"
-                options={store.customers || []}
-                value={editFilePayload.id_khach_hang || undefined}
-                onChange={v => setEditFilePayload({...editFilePayload, id_khach_hang: v})}
-                placeholder="Chọn khách hàng"
-                labelKey="ho_va_ten"
-                valueKey="id_khach_hang"
-                subLabelKey="so_dien_thoai"
-                onAddNew={() => setEditAddNewCustInline(true)}
-                addNewText="Tạo Khách Hàng Mới"
-              />
-            )}
+            </Modal>
+
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-semibold text-gray-400">Khách Hàng</label>
+            </div>
+            <SearchableDropdown
+              className="w-full"
+              options={store.customers || []}
+              value={editFilePayload.id_khach_hang || undefined}
+              onChange={v => setEditFilePayload({...editFilePayload, id_khach_hang: v})}
+              placeholder="Chọn khách hàng"
+              labelKey="ho_va_ten"
+              valueKey="id_khach_hang"
+              subLabelKey="so_dien_thoai"
+              onAddNew={() => setEditAddNewCustInline(true)}
+              addNewText="Tạo Khách Hàng Mới"
+            />
           </div>
           <div className="flex flex-col gap-1.5">
-            <div className="flex justify-between items-center">
-              <label className="text-xs font-semibold text-gray-400">Mã Số Hợp Đồng</label>
-              {editAddNewContractInline && (
-                <Button type="link" size="small" onClick={() => setEditAddNewContractInline(false)} className="text-violet-400 hover:text-violet-300 font-bold p-0 text-xs">
-                  Chọn mã có sẵn
-                </Button>
-              )}
-            </div>
-            {editAddNewContractInline ? (
-              <div className="p-3 rounded-lg bg-white/5 border border-white/5 space-y-2.5">
+            <Modal
+              title={<span className="font-extrabold text-white text-base">✨ TẠO MÃ SỐ HỢP ĐỒNG MỚI</span>}
+              open={editAddNewContractInline}
+              onCancel={() => setEditAddNewContractInline(false)}
+              onOk={handleEditCreateContractInline}
+              okText="Lưu & Áp dụng"
+              cancelText="Hủy"
+              className="glass-modal z-[200]"
+            >
+              <div className="space-y-3 pt-4 text-gray-200">
                 <Input placeholder="Mã số hợp đồng (ví dụ: AURA-2026-X)" value={newContractPayload.ma_hop_dong} onChange={e => setNewContractPayload({ ...newContractPayload, ma_hop_dong: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
                 <Input placeholder="Họ tên chủ hợp đồng" value={newContractPayload.chu_hop_dong} onChange={e => setNewContractPayload({ ...newContractPayload, chu_hop_dong: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
                 <Select placeholder="Chọn danh mục dịch vụ..." className="w-full" showSearch optionFilterProp="children" value={newContractPayload.id_danh_muc_dich_vu} onChange={v => setNewContractPayload({ ...newContractPayload, id_danh_muc_dich_vu: v })}>
@@ -1685,24 +1687,31 @@ export default function Transactions() {
                   ))}
                 </Select>
                 <Input placeholder="Ghi chú thêm" value={newContractPayload.ghi_chu} onChange={e => setNewContractPayload({ ...newContractPayload, ghi_chu: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
-                <Button type="primary" size="small" onClick={handleEditCreateContractInline} className="bg-violet-600 border-none font-bold w-full rounded">
-                  Lưu & Áp dụng
-                </Button>
               </div>
-            ) : (
-              <SearchableDropdown
-                className="w-full"
-                options={store.ma_hop_dong || []}
-                value={editFilePayload.id_ma_hop_dong || undefined}
-                onChange={v => setEditFilePayload({...editFilePayload, id_ma_hop_dong: v})}
-                placeholder="Chọn mã số hợp đồng"
-                labelKey="ma_hop_dong"
-                valueKey="id_ma_hop_dong"
-                subLabelKey="chu_hop_dong"
-                onAddNew={() => setEditAddNewContractInline(true)}
-                addNewText="Tạo Hợp Đồng Mới"
-              />
-            )}
+            </Modal>
+
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-semibold text-gray-400">Mã Số Hợp Đồng</label>
+            </div>
+            <SearchableDropdown
+              className="w-full"
+              options={(store.ma_hop_dong || []).map(h => {
+                const bank = store.banks?.find(b => b.id_danh_muc_dich_vu === h.id_danh_muc_dich_vu);
+                return {
+                  ...h,
+                  logo: bank?.logo || ''
+                };
+              })}
+              value={editFilePayload.id_ma_hop_dong || undefined}
+              onChange={v => setEditFilePayload({...editFilePayload, id_ma_hop_dong: v})}
+              placeholder="Chọn mã số hợp đồng"
+              labelKey="ma_hop_dong"
+              valueKey="id_ma_hop_dong"
+              subLabelKey="chu_hop_dong"
+              iconKey="logo"
+              onAddNew={() => setEditAddNewContractInline(true)}
+              addNewText="Tạo Hợp Đồng Mới"
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-gray-400">Nội dung hồ sơ</label>

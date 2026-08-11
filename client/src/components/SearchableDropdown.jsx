@@ -10,16 +10,15 @@ export default function SearchableDropdown({
   labelKey,
   valueKey,
   subLabelKey,
+  iconKey,
   onAddNew,
   addNewText = '+ Tạo mới',
   disabled = false,
   className = '',
   ...rest
 }) {
-  const [mobileModalOpen, setMobileModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
-  
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1280;
 
   // Lọc option theo search text trên mobile
   const filteredOptions = useMemo(() => {
@@ -38,30 +37,29 @@ export default function SearchableDropdown({
     ? `${selectedOption[labelKey]} ${subLabelKey && selectedOption[subLabelKey] ? `(${selectedOption[subLabelKey]})` : ''}`
     : '';
 
-  if (isMobile) {
-    return (
-      <>
-        {/* Hộp text box giả lập Select */}
-        <div 
-          onClick={() => !disabled && setMobileModalOpen(true)}
-          className={`flex items-center justify-between w-full px-3 py-1.5 bg-white/5 border border-white/5 rounded-lg cursor-pointer transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-violet-500/50 hover:bg-white/10'} ${className}`}
-          style={{ minHeight: '34px' }}
-        >
-          <span className={displayLabel ? 'text-gray-200 text-sm truncate' : 'text-gray-400 text-sm truncate'}>
-            {displayLabel || placeholder || 'Chọn...'}
-          </span>
-          <DownOutlined className="text-gray-500 text-[10px]" />
-        </div>
+  return (
+    <>
+      {/* Hộp text box giả lập Select */}
+      <div 
+        onClick={() => !disabled && setModalOpen(true)}
+        className={`flex items-center justify-between w-full px-3 py-1.5 bg-white/5 border border-white/5 rounded-lg cursor-pointer transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-violet-500/50 hover:bg-white/10'} ${className}`}
+        style={{ minHeight: '34px' }}
+      >
+        <span className={displayLabel ? 'text-gray-200 text-sm truncate' : 'text-gray-400 text-sm truncate'}>
+          {displayLabel || placeholder || 'Chọn...'}
+        </span>
+        <DownOutlined className="text-gray-500 text-[10px]" />
+      </div>
 
-        {/* Modal Fullscreen Tìm Kiếm */}
-        <Modal
-          title={<span className="font-extrabold text-white text-base tracking-wide">🔍 {placeholder || 'TÌM KIẾM'}</span>}
-          open={mobileModalOpen}
-          onCancel={() => {
-            setMobileModalOpen(false);
-            setSearchText('');
-          }}
-          footer={null}
+      {/* Modal Tìm Kiếm */}
+      <Modal
+        title={<span className="font-extrabold text-white text-base tracking-wide">🔍 {placeholder || 'TÌM KIẾM'}</span>}
+        open={modalOpen}
+        onCancel={() => {
+          setModalOpen(false);
+          setSearchText('');
+        }}
+        footer={null}
           className="glass-modal"
           style={{ top: 10 }}
           styles={{ body: { padding: 0 } }}
@@ -87,7 +85,7 @@ export default function SearchableDropdown({
                 block
                 icon={<PlusOutlined />}
                 onClick={() => {
-                  setMobileModalOpen(false);
+                  setModalOpen(false);
                   onAddNew();
                 }}
                 className="text-violet-400 font-extrabold hover:text-violet-300 text-left px-4 py-3 h-auto rounded-xl flex items-center mb-2 bg-violet-600/10 border border-violet-500/30 transition-all active:scale-95"
@@ -109,66 +107,34 @@ export default function SearchableDropdown({
                     key={opt[valueKey]}
                     onClick={() => {
                       onChange(opt[valueKey]);
-                      setMobileModalOpen(false);
+                      setModalOpen(false);
                       setSearchText('');
                     }}
                     className={`p-3 px-4 rounded-xl cursor-pointer transition-all active:scale-[0.98] ${isSelected ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-600/20 border border-violet-400/50' : 'bg-white/5 border border-white/5 text-gray-300 hover:bg-white/10'}`}
                   >
-                    <div className={`text-sm truncate ${isSelected ? 'font-black' : 'font-semibold'}`}>
-                      {opt[labelKey]}
-                    </div>
-                    {subLabelKey && opt[subLabelKey] && (
-                      <div className={`text-[11px] mt-0.5 truncate font-medium ${isSelected ? 'text-violet-200' : 'text-gray-500'}`}>
-                        {opt[subLabelKey]}
+                    <div className="flex gap-3 items-center">
+                      {iconKey && opt[iconKey] && (
+                        <div className="w-8 h-8 rounded bg-white/10 flex items-center justify-center overflow-hidden shrink-0 border border-white/10">
+                          <img src={opt[iconKey]} className="w-full h-full object-contain p-1" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className={`text-sm truncate ${isSelected ? 'font-black' : 'font-semibold'}`}>
+                          {opt[labelKey]}
+                        </div>
+                        {subLabelKey && opt[subLabelKey] && (
+                          <div className={`text-[11px] mt-0.5 truncate font-medium ${isSelected ? 'text-violet-200' : 'text-gray-500'}`}>
+                            {opt[subLabelKey]}
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               })
             )}
           </div>
         </Modal>
-      </>
-    );
-  }
-
-  // Desktop Component (Original)
-  return (
-    <Select
-      {...rest}
-      className={className}
-      showSearch
-      disabled={disabled}
-      value={value}
-      placeholder={placeholder}
-      optionFilterProp="children"
-      onChange={onChange}
-      popupRender={(menu) => (
-        <>
-          {onAddNew && (
-            <>
-              <Button
-                type="text"
-                block
-                icon={<PlusOutlined />}
-                onClick={onAddNew}
-                className="text-violet-500 font-bold hover:bg-violet-600/10 text-left px-3 py-1 mt-1"
-                style={{ justifyContent: 'flex-start' }}
-              >
-                {addNewText}
-              </Button>
-              <Divider style={{ margin: '4px 0' }} />
-            </>
-          )}
-          {menu}
-        </>
-      )}
-    >
-      {options.map((opt) => (
-        <Select.Option key={opt[valueKey]} value={opt[valueKey]}>
-          {opt[labelKey]} {subLabelKey && opt[subLabelKey] ? `(${opt[subLabelKey]})` : ''}
-        </Select.Option>
-      ))}
-    </Select>
+    </>
   );
 }
