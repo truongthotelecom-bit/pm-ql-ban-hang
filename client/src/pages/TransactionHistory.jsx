@@ -771,7 +771,7 @@ export default function TransactionHistory() {
       </div>
 
       {/* 4. VÙNG TỔNG CỘNG DƯỚI CÙNG (MOBILE ONLY) */}
-      <div className="md:hidden fixed bottom-[75px] left-3 right-3 z-40 flex flex-col gap-1 pointer-events-none">
+      <div className="md:hidden fixed bottom-[75px] left-3 right-3 z-40 flex flex-col gap-1 pointer-events-none bg-[#0d1426]/70 backdrop-blur-md rounded-xl p-2 border border-white/5 shadow-lg">
         {/* Row 1: Tổng tiền */}
         <div className="flex justify-between items-center bg-transparent px-2 py-0.5">
           <span className="text-violet-400 text-xs font-bold uppercase tracking-wider">Tổng tiền GD</span>
