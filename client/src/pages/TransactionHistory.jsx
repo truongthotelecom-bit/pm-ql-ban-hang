@@ -23,6 +23,19 @@ const DATE_RANGES = {
   CUSTOM: 'custom'
 };
 
+const DATE_RANGE_OPTIONS = [
+  { value: DATE_RANGES.ALL, label: 'Tất cả' },
+  { value: DATE_RANGES.TODAY, label: 'Hôm nay' },
+  { value: DATE_RANGES.YESTERDAY, label: 'Hôm qua' },
+  { value: DATE_RANGES.THIS_WEEK, label: 'Tuần này' },
+  { value: DATE_RANGES.LAST_WEEK, label: 'Tuần trước' },
+  { value: DATE_RANGES.THIS_MONTH, label: 'Tháng này' },
+  { value: DATE_RANGES.LAST_MONTH, label: 'Tháng trước' },
+  { value: DATE_RANGES.THIS_YEAR, label: 'Năm nay' },
+  { value: DATE_RANGES.LAST_YEAR, label: 'Năm trước' },
+  { value: DATE_RANGES.CUSTOM, label: 'Tùy chỉnh khoảng ngày...' },
+];
+
 function getDateRange(type) {
   const now = new Date();
   const startOfDay = (d) => { const r = new Date(d); r.setHours(0, 0, 0, 0); return r; };
@@ -428,16 +441,16 @@ export default function TransactionHistory() {
           {/* MOBILE FILTERS (Buttons to open Drawer) */}
           <div className="flex md:hidden items-center gap-2">
             <Button 
-              className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10" 
+              className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10 truncate px-2" 
               onClick={() => setMobileFilterType('time')}
             >
-              {filters.dateRangeType === DATE_RANGES.CUSTOM ? 'Tùy chỉnh...' : 'Thời gian...'}
+              {filters.dateRangeType === DATE_RANGES.CUSTOM ? 'Tùy chỉnh...' : DATE_RANGE_OPTIONS.find(o => o.value === filters.dateRangeType)?.label || 'Thời gian...'}
             </Button>
             <Button 
-              className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10"
+              className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10 truncate px-2"
               onClick={() => setMobileFilterType('status')}
             >
-              {filters.trangThaiId ? 'Trạng thái...' : 'Tất cả trạng thái'}
+              {filters.trangThaiId ? (store.categories.find(c => c.id_danh_muc === filters.trangThaiId)?.ten_danh_muc || 'Trạng thái...') : 'Tất cả trạng thái'}
             </Button>
             <Button 
               type="primary" 
@@ -466,23 +479,12 @@ export default function TransactionHistory() {
             <div className="space-y-2">
               <label className="text-[10px] text-gray-400 font-bold uppercase block">Khoảng thời gian</label>
               <div className="grid grid-cols-2 gap-2">
-                {[
-                  { value: DATE_RANGES.ALL, label: 'Tất cả' },
-                  { value: DATE_RANGES.TODAY, label: 'Hôm nay' },
-                  { value: DATE_RANGES.YESTERDAY, label: 'Hôm qua' },
-                  { value: DATE_RANGES.THIS_WEEK, label: 'Tuần này' },
-                  { value: DATE_RANGES.LAST_WEEK, label: 'Tuần trước' },
-                  { value: DATE_RANGES.THIS_MONTH, label: 'Tháng này' },
-                  { value: DATE_RANGES.LAST_MONTH, label: 'Tháng trước' },
-                  { value: DATE_RANGES.THIS_YEAR, label: 'Năm nay' },
-                  { value: DATE_RANGES.LAST_YEAR, label: 'Năm trước' },
-                  { value: DATE_RANGES.CUSTOM, label: 'Tùy chỉnh khoảng ngày...' },
-                ].map(opt => (
+                {DATE_RANGE_OPTIONS.map(opt => (
                   <div
                     key={opt.value}
                     onClick={() => {
                       setFilters({ ...filters, dateRangeType: opt.value, customDateRange: null });
-                      if (opt.value === DATE_RANGES.CUSTOM) setMobileFilterType(null); // Đóng Drawer để hiện lịch ở ngoài
+                      setMobileFilterType(null); // Tự động đóng Drawer
                     }}
                     className={`p-3 rounded-xl border text-center text-sm font-semibold transition-colors cursor-pointer select-none ${
                       filters.dateRangeType === opt.value
@@ -502,7 +504,10 @@ export default function TransactionHistory() {
               <label className="text-[10px] text-gray-400 font-bold uppercase block">Trạng thái giao dịch</label>
               <div className="grid grid-cols-2 gap-2">
                 <div
-                  onClick={() => setFilters({ ...filters, trangThaiId: null })}
+                  onClick={() => {
+                    setFilters({ ...filters, trangThaiId: null });
+                    setMobileFilterType(null);
+                  }}
                   className={`p-3 rounded-xl border text-center text-sm font-semibold transition-colors cursor-pointer select-none col-span-2 ${
                     !filters.trangThaiId
                       ? 'bg-violet-600 border-violet-500 text-white shadow-[0_0_10px_rgba(139,92,246,0.3)]'
@@ -514,7 +519,10 @@ export default function TransactionHistory() {
                 {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
                   <div
                     key={s.id_danh_muc}
-                    onClick={() => setFilters({ ...filters, trangThaiId: s.id_danh_muc })}
+                    onClick={() => {
+                      setFilters({ ...filters, trangThaiId: s.id_danh_muc });
+                      setMobileFilterType(null);
+                    }}
                     className={`p-3 rounded-xl border flex items-center justify-center gap-2 text-sm font-semibold transition-colors cursor-pointer select-none ${
                       filters.trangThaiId === s.id_danh_muc
                         ? 'bg-violet-600 border-violet-500 text-white shadow-[0_0_10px_rgba(139,92,246,0.3)]'
