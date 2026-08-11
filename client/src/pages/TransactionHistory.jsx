@@ -1,8 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Select, DatePicker, Empty, Table, Tag } from 'antd';
-import { FilterOutlined, CreditCardOutlined } from '@ant-design/icons';
+import { Select, DatePicker, Empty, Table, Tag, message, Modal, Tooltip, Button } from 'antd';
+import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
+import { supabase } from '../lib/supabaseClient';
+import MoneyTransferForm from '../components/MoneyTransferForm';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -96,6 +98,14 @@ export default function TransactionHistory() {
 
   const [displayCount, setDisplayCount] = useState(20);
 
+  // States cho các chức năng quản lý
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [activeQrUrl, setActiveQrUrl] = useState('');
+  const [activeDetail, setActiveDetail] = useState(null);
+
+  const [showEditDetailModal, setShowEditDetailModal] = useState(false);
+  const [editDetailPayload, setEditDetailPayload] = useState(null);
+
   // Khóa cuộn body toàn trang để dùng cuộn nội bộ
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -117,7 +127,8 @@ export default function TransactionHistory() {
     }
   }, [location.search]);
 
-  useEffect(() => {
+  // Lấy dữ liệu lịch sử
+  const fetchHistory = () => {
     let fromDate = null;
     let toDate = null;
 
@@ -135,13 +146,76 @@ export default function TransactionHistory() {
         }
       }
     }
-    
-    // Tự động fetch data mỗi khi khoảng thời gian thay đổi
-    // Tránh fetch liên tục nếu customDateRange chưa chọn đủ 2 ngày
     if (filters.dateRangeType === DATE_RANGES.CUSTOM && !filters.customDateRange) return;
-    
     store.fetchHistoryTransactions(fromDate, toDate);
+  };
+
+  useEffect(() => {
+    fetchHistory();
   }, [filters.dateRangeType, filters.customDateRange]);
+
+  // Handlers cho chức năng Quản lý
+  const handleStatusChange = async (record, newStatusId) => {
+    try {
+      await store.updateTransactionStatus(record.tx.id_chi_tiet_giao_dich, newStatusId);
+      message.success('Đổi trạng thái thành công!');
+      fetchHistory(); // Tải lại danh sách
+    } catch (err) {
+      message.error('Lỗi khi đổi trạng thái: ' + err.message);
+    }
+  };
+
+  const handleShowQR = (record) => {
+    const bank = record.bank;
+    if (!bank || !bank.bin || !bank.so_tai_khoan) {
+      message.error('Chưa có thông tin ngân hàng để tạo QR');
+      return;
+    }
+    const contract = record.contract;
+    const amount = record.tx.so_tien_di;
+    const desc = `${contract?.ma_hop_dong || ''} ${contract?.chu_hop_dong || ''}`.trim();
+    const url = `https://img.vietqr.io/image/${bank.bin}-${bank.so_tai_khoan}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(desc)}&accountName=${encodeURIComponent(bank.chu_tai_khoan || '')}`;
+    setActiveQrUrl(url);
+    setActiveDetail(record);
+    setShowQrModal(true);
+  };
+
+  const handleEdit = (record) => {
+    setEditDetailPayload({ ...record.tx });
+    setShowEditDetailModal(true);
+  };
+
+  const handleCancel = (record) => {
+    const huyId = store.categories.find(c => (c.ten_danh_muc || '').toLowerCase().includes('hủy'))?.id_danh_muc || 'dm-3';
+    Modal.confirm({
+      title: 'Xác nhận Hủy Giao Dịch?',
+      content: 'Bạn có chắc chắn muốn chuyển trạng thái giao dịch này thành THẤT BẠI/HỦY?',
+      okText: 'Hủy Giao Dịch',
+      okType: 'danger',
+      cancelText: 'Đóng',
+      onOk: () => handleStatusChange(record, huyId)
+    });
+  };
+
+  const handleDelete = (record) => {
+    Modal.confirm({
+      title: 'Xóa giao dịch này?',
+      content: 'Hành động này sẽ xóa vĩnh viễn giao dịch khỏi hệ thống và không thể hoàn tác. Bạn có chắc chắn?',
+      okText: 'Xóa Giao Dịch',
+      okType: 'danger',
+      cancelText: 'Hủy',
+      onOk: async () => {
+        try {
+          const { error } = await supabase.from('chi_tiet_giao_dich').delete().eq('id_chi_tiet_giao_dich', record.tx.id_chi_tiet_giao_dich);
+          if (error) throw error;
+          message.success('Đã xóa giao dịch thành công!');
+          fetchHistory(); // Tải lại danh sách
+        } catch (err) {
+          message.error('Lỗi khi xóa: ' + err.message);
+        }
+      }
+    });
+  };
 
   // Danh sách Loại Dịch Vụ lọc theo Nhóm Menu đã chọn
   const filteredServices = useMemo(() => {
@@ -466,19 +540,70 @@ export default function TransactionHistory() {
               title: 'Trạng thái',
               key: 'trang_thai',
               render: (_, record) => {
-                let color = 'default';
-                const st = record.tx.id_trang_thai;
-                if (st === 'dm-1') color = 'success';
-                else if (st === 'dm-2' || st === 'dm-4') color = 'warning';
-                else if (st === 'dm-3') color = 'error';
                 return (
-                  <Tag color={color} className="font-bold uppercase whitespace-nowrap">
-                    {record.status?.ten_danh_muc || 'CHỜ GD'}
-                  </Tag>
+                  <Select
+                    value={record.tx.id_trang_thai}
+                    onChange={(val) => handleStatusChange(record, val)}
+                    className="w-[120px]"
+                    onClick={(e) => e.stopPropagation()}
+                    bordered={false}
+                    dropdownStyle={{ minWidth: 150 }}
+                  >
+                    {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
+                      <Option key={s.id_danh_muc} value={s.id_danh_muc}>
+                        <div className="flex items-center gap-1.5 font-bold uppercase text-[10px]">
+                          <span>{s.icon}</span>
+                          <span>{s.ten_danh_muc}</span>
+                        </div>
+                      </Option>
+                    ))}
+                  </Select>
                 );
               },
               width: 130,
               align: 'center'
+            },
+            {
+              title: 'Thao tác',
+              key: 'actions',
+              align: 'right',
+              width: 140,
+              render: (_, record) => (
+                <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
+                  <Tooltip title="Mã QR">
+                    <Button 
+                      type="text" 
+                      icon={<QrcodeOutlined />} 
+                      onClick={() => handleShowQR(record)}
+                      className="text-blue-400 hover:text-blue-300 hover:bg-blue-400/10"
+                    />
+                  </Tooltip>
+                  <Tooltip title="Sửa">
+                    <Button 
+                      type="text" 
+                      icon={<EditOutlined />} 
+                      onClick={() => handleEdit(record)}
+                      className="text-violet-400 hover:text-violet-300 hover:bg-violet-400/10"
+                    />
+                  </Tooltip>
+                  <Tooltip title="Hủy GD">
+                    <Button 
+                      type="text" 
+                      icon={<StopOutlined />} 
+                      onClick={() => handleCancel(record)}
+                      className="text-orange-400 hover:text-orange-300 hover:bg-orange-400/10"
+                    />
+                  </Tooltip>
+                  <Tooltip title="Xóa">
+                    <Button 
+                      type="text" 
+                      icon={<DeleteOutlined />} 
+                      onClick={() => handleDelete(record)}
+                      className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                    />
+                  </Tooltip>
+                </div>
+              )
             },
             {
               title: 'Nội dung',
@@ -546,10 +671,32 @@ export default function TransactionHistory() {
                       <span>📝</span>
                       <span className="uppercase truncate" title={item.tx.noi_dung}>{item.tx.noi_dung || '---'}</span>
                     </div>
-                    <div className="shrink-0 px-3 py-1 rounded-lg bg-black/40 border border-white/5 text-[10px] font-bold text-gray-300 flex items-center gap-1.5">
-                      <span>{item.status?.icon || '⏳'}</span>
-                      <span className="uppercase">{item.status?.ten_danh_muc || 'CHỜ GIAO DỊCH'}</span>
+                    <div className="shrink-0 rounded-lg bg-black/40 border border-white/5" onClick={e => e.stopPropagation()}>
+                      <Select
+                        value={item.tx.id_trang_thai}
+                        onChange={(val) => handleStatusChange(item, val)}
+                        className="min-w-[130px]"
+                        bordered={false}
+                        dropdownStyle={{ minWidth: 150 }}
+                      >
+                        {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
+                          <Option key={s.id_danh_muc} value={s.id_danh_muc}>
+                            <div className="flex items-center gap-1.5 font-bold uppercase text-[10px]">
+                              <span>{s.icon}</span>
+                              <span>{s.ten_danh_muc}</span>
+                            </div>
+                          </Option>
+                        ))}
+                      </Select>
                     </div>
+                  </div>
+                  
+                  {/* MOBILE ACTIONS */}
+                  <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-white/5" onClick={e => e.stopPropagation()}>
+                    <Button size="small" type="primary" ghost icon={<QrcodeOutlined />} onClick={() => handleShowQR(item)}>QR</Button>
+                    <Button size="small" type="default" ghost icon={<EditOutlined />} onClick={() => handleEdit(item)}>Sửa</Button>
+                    <Button size="small" danger ghost icon={<StopOutlined />} onClick={() => handleCancel(item)}>Hủy</Button>
+                    <Button size="small" danger icon={<DeleteOutlined />} onClick={() => handleDelete(item)} />
                   </div>
                 </div>
               </div>
@@ -564,6 +711,80 @@ export default function TransactionHistory() {
         )}
       </div>
       </div> {/* Kết thúc Vùng Cuộn Nội Bộ */}
+
+      {/* MODALS QUẢN LÝ GIAO DỊCH */}
+      
+      {/* 1. Modal QR Code */}
+      <Modal
+        title={<span className="font-extrabold text-white text-base">📲 QUÉT MÃ QR VIETQR CHUYỂN TIỀN</span>}
+        open={showQrModal}
+        onCancel={() => setShowQrModal(false)}
+        footer={[<Button key="close" onClick={() => setShowQrModal(false)}>Đóng</Button>]}
+        className="glass-modal"
+      >
+        {activeDetail && activeQrUrl && (
+          <div className="flex flex-col items-center justify-center p-6 text-center">
+            <p className="text-sm font-semibold text-gray-300 mb-4">Sử dụng App Ngân hàng bất kỳ để quét mã thanh toán tự động</p>
+            <div className="p-4 bg-white rounded-2xl shadow-xl border border-gray-100 max-w-[280px]">
+              <img 
+                src={activeQrUrl} 
+                className="w-[240px] h-[240px] object-contain bg-white" 
+                alt="VietQR code large" 
+              />
+            </div>
+            <h3 className="text-2xl font-black text-violet-400 mt-6 tracking-wide">
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.tx.so_tien_di)}
+            </h3>
+            <div className="flex flex-col gap-1.5 mt-4 text-center w-full bg-white/5 p-3 rounded-xl border border-white/5">
+              <p className="text-[13px] text-gray-100 font-bold">{activeDetail.bank?.ten_dich_vu || '—'}</p>
+              <p className="text-[14px] text-violet-300 font-black tracking-wide">{activeDetail.contract?.ma_hop_dong || '—'}</p>
+              <p className="text-[13px] text-gray-100 font-bold">{activeDetail.contract?.chu_hop_dong || '—'}</p>
+              <p className="text-[12px] text-gray-300 font-semibold"><span className="text-[10px] text-gray-500 mr-1">NỘI DUNG:</span>{activeDetail.tx.noi_dung || '—'}</p>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* 2. Modal Chỉnh Sửa Giao Dịch */}
+      <Modal
+        title={<span className="font-extrabold text-white text-base">✏️ CHỈNH SỬA GIAO DỊCH</span>}
+        open={showEditDetailModal}
+        onCancel={() => setShowEditDetailModal(false)}
+        footer={null}
+        width={600}
+        className="glass-modal"
+      >
+        <div className="p-4 border border-white/5 rounded-xl bg-[#0d1426] space-y-4">
+          <MoneyTransferForm value={editDetailPayload} onChange={setEditDetailPayload} />
+          <Button 
+            type="primary" 
+            onClick={async () => {
+              if (!editDetailPayload.so_tien || editDetailPayload.so_tien <= 0) {
+                message.error('Vui lòng nhập số tiền hợp lệ!');
+                return;
+              }
+              try {
+                const dataToSave = { ...editDetailPayload };
+                const { error } = await supabase
+                  .from('chi_tiet_giao_dich')
+                  .update(dataToSave)
+                  .eq('id_chi_tiet_giao_dich', editDetailPayload.id_chi_tiet_giao_dich);
+                
+                if (error) throw error;
+                message.success('Cập nhật giao dịch thành công!');
+                setShowEditDetailModal(false);
+                fetchHistory(); // Tải lại danh sách
+              } catch (err) {
+                message.error('Lỗi khi cập nhật giao dịch: ' + err.message);
+              }
+            }} 
+            className="w-full bg-violet-600 border-none font-bold mt-2 h-10"
+          >
+            Lưu thay đổi
+          </Button>
+        </div>
+      </Modal>
+
     </div>
   );
 }
