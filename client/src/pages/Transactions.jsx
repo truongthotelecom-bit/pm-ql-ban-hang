@@ -784,7 +784,7 @@ export default function Transactions() {
               size="small" 
               type="primary" 
               icon={<HistoryOutlined />} 
-              onClick={() => window.open(`http://localhost:3001/lich-su?dich_vu=${encodeURIComponent(store.selectedService?.ten_danh_muc || '')}`, '_blank')} 
+              onClick={() => window.open(`/lich-su?id_dich_vu=${store.selectedService?.id_loai_dich_vu || ''}`, '_blank')} 
               className="bg-violet-600 border-none shadow-md shadow-violet-900/50 hover:bg-violet-500"
             >
               Lịch sử

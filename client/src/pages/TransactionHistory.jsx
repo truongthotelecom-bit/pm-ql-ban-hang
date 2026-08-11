@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Select, DatePicker, Empty, Table, Tag } from 'antd';
 import { FilterOutlined, CreditCardOutlined } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
@@ -82,6 +83,7 @@ function formatCurrency(val) {
 
 export default function TransactionHistory() {
   const store = useAppStore();
+  const location = useLocation();
   const [filters, setFilters] = useState({
     nhomMenuId: null,
     loaiDichVuId: null,
@@ -91,6 +93,14 @@ export default function TransactionHistory() {
     dateRangeType: DATE_RANGES.TODAY,
     customDateRange: null
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const id_dich_vu = params.get('id_dich_vu');
+    if (id_dich_vu) {
+      setFilters(prev => ({ ...prev, loaiDichVuId: id_dich_vu }));
+    }
+  }, [location.search]);
 
   // Danh sách Loại Dịch Vụ lọc theo Nhóm Menu đã chọn
   const filteredServices = useMemo(() => {
