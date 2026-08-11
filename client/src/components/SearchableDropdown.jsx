@@ -46,9 +46,15 @@ export default function SearchableDropdown({
         style={{ minHeight: '34px' }}
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          {selectedOption && iconKey && selectedOption[iconKey] && (
-            <div className="w-5 h-5 rounded-[4px] bg-white/10 flex items-center justify-center overflow-hidden shrink-0 border border-white/10">
-              <img src={selectedOption[iconKey]} className="w-full h-full object-contain p-[1px]" />
+          {selectedOption && iconKey && (
+            <div className="w-5 h-5 rounded-[4px] bg-violet-500/20 text-violet-300 flex items-center justify-center overflow-hidden shrink-0 border border-violet-500/30">
+              {selectedOption[iconKey] ? (
+                <img src={selectedOption[iconKey]} className="w-full h-full object-contain bg-white/10 p-[1px]" />
+              ) : (
+                <span className="text-[10px] font-bold">
+                  {selectedOption[labelKey] ? String(selectedOption[labelKey]).charAt(0).toUpperCase() : '?'}
+                </span>
+              )}
             </div>
           )}
           <span className={displayLabel ? 'text-gray-200 text-sm truncate' : 'text-gray-400 text-sm truncate'}>
@@ -120,9 +126,15 @@ export default function SearchableDropdown({
                     className={`p-3 px-4 rounded-xl cursor-pointer transition-all active:scale-[0.98] ${isSelected ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-600/20 border border-violet-400/50' : 'bg-white/5 border border-white/5 text-gray-300 hover:bg-white/10'}`}
                   >
                     <div className="flex gap-3 items-center">
-                      {iconKey && opt[iconKey] && (
-                        <div className="w-8 h-8 rounded bg-white/10 flex items-center justify-center overflow-hidden shrink-0 border border-white/10">
-                          <img src={opt[iconKey]} className="w-full h-full object-contain p-1" />
+                      {iconKey && (
+                        <div className="w-8 h-8 rounded bg-violet-500/20 text-violet-300 flex items-center justify-center overflow-hidden shrink-0 border border-violet-500/30">
+                          {opt[iconKey] ? (
+                            <img src={opt[iconKey]} className="w-full h-full object-contain bg-white/10 p-1" />
+                          ) : (
+                            <span className="text-sm font-bold">
+                              {opt[labelKey] ? String(opt[labelKey]).charAt(0).toUpperCase() : '?'}
+                            </span>
+                          )}
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
