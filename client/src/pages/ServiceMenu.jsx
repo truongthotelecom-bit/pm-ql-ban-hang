@@ -77,21 +77,21 @@ export default function ServiceMenu() {
     }
 
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
         {store.menuGroups.map(group => {
           const count = store.services.filter(s => s.id_nhom === group.id_nhom || s.id_nhom_dich_vu === group.id_nhom).length;
           return (
             <div
               key={group.id_nhom}
               onClick={() => setSelectedGroupId(group.id_nhom)}
-              className="p-5 rounded-2xl bg-[#0d1426]/60 backdrop-blur-md border border-white/5 hover:border-violet-500/40 hover:bg-[#131b33]/80 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 text-center group hover:scale-[1.02] active:scale-95 shadow-lg shadow-black/20"
+              className="p-3 md:p-5 rounded-2xl bg-[#0d1426]/60 backdrop-blur-md border border-white/5 hover:border-violet-500/40 hover:bg-[#131b33]/80 transition-all cursor-pointer flex flex-col items-center justify-start gap-2 text-center group hover:scale-[1.02] active:scale-95 shadow-lg shadow-black/20"
             >
-              <div className={`w-14 h-14 rounded-full bg-gradient-to-tr ${getGradient(group.id_nhom)} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                <Layers size={24} />
+              <div className={`w-10 h-10 md:w-14 md:h-14 shrink-0 rounded-full bg-gradient-to-tr ${getGradient(group.id_nhom)} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <Layers className="w-5 h-5 md:w-6 md:h-6" />
               </div>
-              <div>
-                <h3 className="font-bold text-sm text-gray-200 tracking-wide uppercase">{group.ten_nhom}</h3>
-                <span className="text-[10px] text-gray-500 font-semibold bg-white/5 px-2 py-0.5 rounded-full mt-1.5 inline-block">{count} dịch vụ</span>
+              <div className="flex flex-col flex-1 items-center justify-between">
+                <h3 className="font-bold text-[10px] md:text-sm text-gray-200 tracking-wide uppercase line-clamp-2 leading-tight">{group.ten_nhom}</h3>
+                <span className="text-[9px] md:text-[10px] text-gray-500 font-semibold bg-white/5 px-2 py-0.5 rounded-full mt-1.5 inline-block shrink-0">{count} DV</span>
               </div>
             </div>
           );
