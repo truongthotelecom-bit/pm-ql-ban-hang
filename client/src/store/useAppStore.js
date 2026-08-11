@@ -137,8 +137,11 @@ const useAppStore = create((set, get) => ({
       });
 
       if (resLdv?.length > 0 && !get().selectedService) {
-        const defaultSvc = resLdv.find(s => s.ma_viet_tat === 'CK') || resLdv[0];
-        set({ selectedService: defaultSvc });
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        if (!isMobile) {
+          const defaultSvc = resLdv.find(s => (s.ten_danh_muc || '').toLowerCase().includes('chuyển tiền') || s.ma_viet_tat === 'CK') || resLdv[0];
+          set({ selectedService: defaultSvc });
+        }
       }
     } catch (err) {
       console.error('Lỗi khi nạp cấu hình hệ thống:', err);
