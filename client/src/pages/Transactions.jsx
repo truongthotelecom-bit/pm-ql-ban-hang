@@ -1556,9 +1556,28 @@ export default function Transactions() {
                     onChange={e => {
                       const f = e.target.files?.[0];
                       if (!f) return;
-                      const reader = new FileReader();
-                      reader.onloadend = () => setEditCustPayload({ ...editCustPayload, anh_khach_hang: reader.result });
-                      reader.readAsDataURL(f);
+                      const img = new Image();
+                      img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxDim = 800; // Giới hạn kích thước tối đa
+                        if (width > height && width > maxDim) {
+                          height *= maxDim / width;
+                          width = maxDim;
+                        } else if (height > maxDim) {
+                          width *= maxDim / height;
+                          height = maxDim;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // Nén JPEG 70%
+                        setEditCustPayload({ ...editCustPayload, anh_khach_hang: compressedBase64 });
+                        URL.revokeObjectURL(img.src);
+                      };
+                      img.src = URL.createObjectURL(f);
                     }}
                   />
                   <Button size="small" icon={<UserOutlined />} className="w-full bg-white/5 border-white/10 text-gray-400 text-xs">
