@@ -36,8 +36,7 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFal
   else if (diffDays <= 180) dotColorClass = "bg-orange-500 shadow-orange-500/50";
   
   return (
-    <div style={{ paddingBottom: '12px' }}>
-      <div 
+    <div 
         onClick={() => {
           if (window.innerWidth < 1280) {
             onSelectMobile(file);
@@ -148,7 +147,6 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFal
             </button>
           </div>
         )}
-      </div>
     </div>
   );
 });
@@ -961,7 +959,7 @@ export default function Transactions() {
             </div>
           ) : (
             <>
-            <div className="flex-1 space-y-3 pb-4 overflow-y-auto scrollbar-thin pr-1 min-h-0 overscroll-none">
+            <div className="flex-1 space-y-1.5 pb-4 overflow-y-auto scrollbar-thin pr-1 min-h-0 overscroll-none">
               {sortedFiles.map((file, index) => {
                 const cust = store.customers.find(c => c.id_khach_hang === file.id_khach_hang);
                 const hd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
@@ -1410,7 +1408,7 @@ export default function Transactions() {
       </div>
       {/* Dong wrapper cot 3 cho desktop */}
       </div>
-      ), [showMobileTxDetail, activeDetail, activeFile, activeHd, activeBank, activeCust, store.selectedService, showCol3Menu, showCol3StatusMenu, globalCalculatedTotal, activeQrUrl, currentUser, isSuperAdminOrOwner])}
+      ), [showMobileDetail, activeDetail, activeFile, activeHd, activeBank, activeCust, store.selectedService, showCol3Menu, showCol3StatusMenu, globalCalculatedTotal, activeQrUrl, currentUser, isSuperAdminOrOwner, store.isLoadingDetails, store.isLoadingFiles, store.transactionDetails])}
 
 
 
