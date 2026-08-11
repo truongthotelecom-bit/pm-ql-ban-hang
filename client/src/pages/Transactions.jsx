@@ -905,7 +905,7 @@ export default function Transactions() {
                     onSelectMobile={handleSelectMobile}
                     onSelectDesktop={handleSelectDesktop}
                     onAddTx={() => setDrawerOpen(true)}
-                    onEditFile={() => { setShowCol2Menu(false); setShowEditFileModal(true); }}
+                    onEditFile={() => { setShowCol2Menu(false); openEditFileModal(); }}
                     onViewFile={() => setShowMobileDetail(true)}
                     onCopyFile={() => setShowCopyModal(true)}
                   />
