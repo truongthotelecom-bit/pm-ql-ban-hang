@@ -365,59 +365,61 @@ export default function TransactionHistory() {
           </div>
         </div>
 
-        {/* 2. BỘ LỌC TÌM KIẾM CƠ BẢN (1 Dòng) */}
-        <div className="flex items-center gap-2">
-          {/* Vị trí 3: Giai đoạn (Select) */}
-          <Select
-            value={filters.dateRangeType}
-            onChange={v => setFilters({ ...filters, dateRangeType: v, customDateRange: null })}
-            className="w-[140px]"
-          >
-            <Option value={DATE_RANGES.ALL}>Tất cả</Option>
-            <Option value={DATE_RANGES.TODAY}>Hôm nay</Option>
-            <Option value={DATE_RANGES.YESTERDAY}>Hôm qua</Option>
-            <Option value={DATE_RANGES.THIS_WEEK}>Tuần này</Option>
-            <Option value={DATE_RANGES.LAST_WEEK}>Tuần trước</Option>
-            <Option value={DATE_RANGES.THIS_MONTH}>Tháng này</Option>
-            <Option value={DATE_RANGES.LAST_MONTH}>Tháng trước</Option>
-            <Option value={DATE_RANGES.THIS_YEAR}>Năm nay</Option>
-            <Option value={DATE_RANGES.LAST_YEAR}>Năm trước</Option>
-            <Option value={DATE_RANGES.CUSTOM}>Tùy chỉnh...</Option>
-          </Select>
+        {/* 2. BỘ LỌC TÌM KIẾM CƠ BẢN */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            {/* Vị trí 3: Giai đoạn (Select) */}
+            <Select
+              value={filters.dateRangeType}
+              onChange={v => setFilters({ ...filters, dateRangeType: v, customDateRange: null })}
+              className="flex-1 min-w-[110px]"
+            >
+              <Option value={DATE_RANGES.ALL}>Tất cả</Option>
+              <Option value={DATE_RANGES.TODAY}>Hôm nay</Option>
+              <Option value={DATE_RANGES.YESTERDAY}>Hôm qua</Option>
+              <Option value={DATE_RANGES.THIS_WEEK}>Tuần này</Option>
+              <Option value={DATE_RANGES.LAST_WEEK}>Tuần trước</Option>
+              <Option value={DATE_RANGES.THIS_MONTH}>Tháng này</Option>
+              <Option value={DATE_RANGES.LAST_MONTH}>Tháng trước</Option>
+              <Option value={DATE_RANGES.THIS_YEAR}>Năm nay</Option>
+              <Option value={DATE_RANGES.LAST_YEAR}>Năm trước</Option>
+              <Option value={DATE_RANGES.CUSTOM}>Tùy chỉnh...</Option>
+            </Select>
+
+            {/* Vị trí 6: Trạng thái GD */}
+            <Select
+              allowClear
+              placeholder="Trạng thái"
+              className="flex-1 min-w-[110px]"
+              value={filters.trangThaiId}
+              onChange={v => setFilters({ ...filters, trangThaiId: v })}
+            >
+              {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
+                <Option key={s.id_danh_muc} value={s.id_danh_muc}>{s.icon} {s.ten_danh_muc}</Option>
+              ))}
+            </Select>
+
+            {/* Vị trí 4: Nút Bộ lọc nâng cao */}
+            <Button 
+              type="primary" 
+              icon={<FilterOutlined />} 
+              onClick={() => setShowFilterModal(true)}
+              className="bg-violet-600 border-none font-bold shadow-md"
+            >
+              Bộ lọc
+            </Button>
+          </div>
 
           {/* Vị trí 5: Từ ngày đến ngày */}
           {filters.dateRangeType === DATE_RANGES.CUSTOM && (
             <RangePicker
-              className="w-[260px]"
+              className="w-full h-10 rounded-xl"
               placeholder={['Từ ngày', 'Đến ngày']}
               format="DD/MM/YYYY"
               value={filters.customDateRange}
               onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
             />
           )}
-
-          {/* Vị trí 6: Trạng thái GD */}
-          <Select
-            allowClear
-            placeholder="Tất cả trạng thái"
-            className="w-[180px]"
-            value={filters.trangThaiId}
-            onChange={v => setFilters({ ...filters, trangThaiId: v })}
-          >
-            {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
-              <Option key={s.id_danh_muc} value={s.id_danh_muc}>{s.icon} {s.ten_danh_muc}</Option>
-            ))}
-          </Select>
-
-          {/* Vị trí 4: Nút Bộ lọc nâng cao */}
-          <Button 
-            type="primary" 
-            icon={<FilterOutlined />} 
-            onClick={() => setShowFilterModal(true)}
-            className="bg-violet-600 border-none font-bold ml-auto shadow-md"
-          >
-            Bộ lọc
-          </Button>
         </div>
       </div> {/* Kết thúc Vùng Header */}
 
