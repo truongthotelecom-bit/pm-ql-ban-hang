@@ -461,12 +461,17 @@ export default function Transactions() {
     const activeHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile?.id_ma_hop_dong) || activeFile?.ma_hop_dong;
     if (!activeHd) return;
     
-    const data = await store.updateContract(activeHd.id_ma_hop_dong, editContractPayload);
+    // Chỉ gửi các trường có thể cập nhật, bỏ qua các cột tự động (id, created_at, ngay_tao...)
+    const { ma_hop_dong, chu_hop_dong, id_danh_muc_dich_vu, ghi_chu } = editContractPayload;
+    const safePayload = { ma_hop_dong, chu_hop_dong, id_danh_muc_dich_vu, ghi_chu };
+    
+    const data = await store.updateContract(activeHd.id_ma_hop_dong, safePayload);
     if (data) {
       message.success('Đã cập nhật mã hợp đồng thành công!');
       setShowEditContractModal(false);
     }
   };
+
 
   const openEditContractModal = () => {
     const activeFile = store.selectedServiceFile;
