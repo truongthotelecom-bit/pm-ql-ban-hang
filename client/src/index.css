@@ -254,3 +254,22 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
+
+/* Fix Ant Design RangePicker popup overflowing on mobile */
+@media (max-width: 768px) {
+  .ant-picker-panels {
+    flex-direction: column !important;
+  }
+  .ant-picker-dropdown {
+    width: 90vw !important;
+    max-width: 320px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+  .ant-picker-panel-container {
+    width: 100% !important;
+  }
+  .ant-picker-panel {
+    width: 100% !important;
+  }
+}
