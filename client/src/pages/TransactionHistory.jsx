@@ -364,13 +364,15 @@ export default function TransactionHistory() {
           </Select>
 
           {/* Vị trí 5: Từ ngày đến ngày */}
-          <RangePicker
-            className="w-[260px]"
-            placeholder={['Từ ngày', 'Đến ngày']}
-            format="DD/MM/YYYY"
-            value={filters.customDateRange}
-            onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
-          />
+          {filters.dateRangeType === DATE_RANGES.CUSTOM && (
+            <RangePicker
+              className="w-[260px]"
+              placeholder={['Từ ngày', 'Đến ngày']}
+              format="DD/MM/YYYY"
+              value={filters.customDateRange}
+              onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
+            />
+          )}
 
           {/* Vị trí 6: Trạng thái GD */}
           <Select
