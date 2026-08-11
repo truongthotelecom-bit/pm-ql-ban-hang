@@ -96,7 +96,7 @@ export default function TransactionDrawer({ open, onClose }) {
       return;
     }
 
-    if (!gdPayload.so_tien || gdPayload.so_tien <= 0) {
+    if (!gdPayload.so_tien_yeu_cau || gdPayload.so_tien_yeu_cau <= 0) {
       message.error('Vui lòng nhập số tiền giao dịch hợp lệ!');
       return;
     }

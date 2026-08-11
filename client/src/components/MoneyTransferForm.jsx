@@ -214,6 +214,13 @@ export default function MoneyTransferForm({ value, onChange }) {
   const handleValueChange = (key, val) => {
     setForm(prev => {
       const next = { ...prev, [key]: val };
+      
+      if (key === 'so_tien_yeu_cau' || key === 'so_tien_giam') {
+        const A_yeu_cau = next.so_tien_yeu_cau || 0;
+        const D = next.so_tien_giam || 0;
+        next.so_tien = Math.max(0, A_yeu_cau - D);
+      }
+
       // Nếu đổi Hình thức khách đưa tiền (id_pttt_nguon), thì Hình thức đóng phí (id_pttt_phi) tự động đổi theo
       if (key === 'id_pttt_nguon') {
         next.id_pttt_phi = val;
@@ -241,20 +248,21 @@ export default function MoneyTransferForm({ value, onChange }) {
   const formatCurrency = (val) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0);
 
   // === CÔNG THỨC TOÁN HỌC ===
-  const A = form.so_tien || 0;
+  const A_yeu_cau = form.so_tien_yeu_cau || 0;
   const B = form.phi_dich_vu || 0;
   const C = form.chiet_khau || 0; // Kế toán nội bộ
   const D = form.so_tien_giam || 0;
   
+  const A_thuc_thu_goc = Math.max(0, A_yeu_cau - D); // Tiền thực thu gốc từ khách
+  
   let tongThuKhach = 0;
-  let thucChuyenDi = 0;
+  let thucChuyenDi = A_yeu_cau - (A_yeu_cau * C / 100);
   
   if (form.is_cuoc_trong) {
-    tongThuKhach = A - D;
-    thucChuyenDi = A - B;
+    tongThuKhach = A_thuc_thu_goc;
+    thucChuyenDi = thucChuyenDi - B;
   } else {
-    tongThuKhach = A + B - D;
-    thucChuyenDi = A;
+    tongThuKhach = A_thuc_thu_goc + B;
   }
 
   // Đọc cấu hình cột động từ DB
@@ -299,9 +307,9 @@ export default function MoneyTransferForm({ value, onChange }) {
           <label className="text-white text-xs font-bold block uppercase">{f_tien.label} <span className="text-red-500">*</span></label>
           <div 
             className="w-full text-xl font-bold bg-white/5 border-2 border-violet-500/50 text-white rounded-xl px-4 py-3 cursor-pointer flex justify-between items-center active:scale-[0.98] transition-transform shadow-lg shadow-violet-900/20"
-            onClick={() => openKb('so_tien', form.so_tien, f_tien.label, 'VNĐ')}
+            onClick={() => openKb('so_tien_yeu_cau', form.so_tien_yeu_cau, f_tien.label, 'VNĐ')}
           >
-            <span>{form.so_tien ? form.so_tien.toLocaleString('vi-VN') : '0'}</span>
+            <span>{form.so_tien_yeu_cau ? form.so_tien_yeu_cau.toLocaleString('vi-VN') : '0'}</span>
             <span className="text-violet-400 text-sm flex items-center gap-2 font-bold">VNĐ <span className="text-[10px] bg-violet-600 px-2 py-1 rounded-md text-white shadow-md">⌨ NHẬP</span></span>
           </div>
         </div>
