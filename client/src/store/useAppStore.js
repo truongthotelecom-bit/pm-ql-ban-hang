@@ -33,6 +33,7 @@ const useAppStore = create((set, get) => ({
   allServiceFiles: [],
   historyTransactions: [],
   historyFiles: [],
+  isLoadingDetails: false,
   isHistoryLoading: false,
 
   // Setters
@@ -461,6 +462,7 @@ const useAppStore = create((set, get) => ({
 
   // Lấy chi tiết giao dịch của hồ sơ
   fetchTransactionDetails: async (fileId) => {
+    set({ isLoadingDetails: true });
     try {
       const user = useAuthStore.getState().user;
       let ledgerQuery = supabase.from('lich_su_thu_chi').select('*').order('ngay_tao', { ascending: false });
@@ -478,7 +480,8 @@ const useAppStore = create((set, get) => ({
       set({
         transactionDetails: details || [],
         transactions: details || [],
-        ledger: ledgerData || []
+        ledger: ledgerData || [],
+        isLoadingDetails: false
       });
 
       if (details?.length > 0) {
@@ -488,6 +491,7 @@ const useAppStore = create((set, get) => ({
       }
     } catch (err) {
       console.error('Lỗi tải chi tiết giao dịch:', err);
+      set({ isLoadingDetails: false });
     }
   },
 

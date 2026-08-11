@@ -1117,7 +1117,15 @@ export default function Transactions() {
                 <span className="font-extrabold text-gray-400 text-[10px] tracking-wider uppercase block">Các dòng tiền chi tiết phát sinh</span>
                 
                 <div className="flex-1 space-y-2.5 overflow-y-auto pr-1 scrollbar-thin min-h-0 overscroll-none">
-                  {store.transactionDetails.length === 0 ? (
+                  {store.isLoadingDetails ? (
+                    <div className="flex flex-col items-center justify-center gap-3 py-12">
+                      <div className="relative w-10 h-10">
+                        <div className="absolute inset-0 rounded-full border-4 border-violet-500/20"></div>
+                        <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-violet-500 animate-spin"></div>
+                      </div>
+                      <span className="text-[10px] text-gray-500 font-medium animate-pulse">Đang tải giao dịch...</span>
+                    </div>
+                  ) : store.transactionDetails.length === 0 ? (
                     <div className="p-8 text-center text-gray-500 border border-dashed border-white/5 rounded-xl text-xs">
                       Hồ sơ này chưa phát sinh dòng tiền nào. Vui lòng bấm "Lập phiếu POS" ở trên để tạo giao dịch đầu tiên!
                     </div>
@@ -1235,7 +1243,15 @@ export default function Transactions() {
             </button>
           </div>
 
-          {activeDetail ? (
+          {store.isLoadingDetails ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-16">
+              <div className="relative w-10 h-10">
+                <div className="absolute inset-0 rounded-full border-4 border-violet-500/20"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-violet-500 animate-spin"></div>
+              </div>
+              <span className="text-[10px] text-gray-500 font-medium animate-pulse">Đang tải chi tiết...</span>
+            </div>
+          ) : activeDetail ? (
             <div className="space-y-4">
               {/* Bảng tính toán tiền chi tiết */}
               <div className="p-4 rounded-xl bg-gray-950/80 border border-white/5 space-y-2.5">
