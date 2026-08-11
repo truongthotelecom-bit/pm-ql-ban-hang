@@ -100,11 +100,11 @@ export default function SearchableDropdown({
                 Không tìm thấy kết quả phù hợp.
               </div>
             ) : (
-              filteredOptions.map(opt => {
+              filteredOptions.map((opt, index) => {
                 const isSelected = opt[valueKey] === value;
                 return (
                   <div
-                    key={opt[valueKey]}
+                    key={`${opt[valueKey]}-${index}`}
                     onClick={() => {
                       onChange(opt[valueKey]);
                       setModalOpen(false);
