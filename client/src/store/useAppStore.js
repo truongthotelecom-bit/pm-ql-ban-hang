@@ -302,9 +302,11 @@ const useAppStore = create((set, get) => ({
   },
 
   hasMoreServiceFiles: false,
+  isLoadingFiles: false,
 
   // Lấy hồ sơ dịch vụ
   fetchServiceFiles: async (serviceId = null, searchTerm = '', page = 1, pageSize = 40, isAppend = false) => {
+    if (!isAppend) set({ isLoadingFiles: true });
     try {
       const user = useAuthStore.getState().user;
       
@@ -372,7 +374,8 @@ const useAppStore = create((set, get) => ({
           serviceFiles: isAppend ? [...state.serviceFiles, ...newFiles] : newFiles, 
           totalServiceFiles: count,
           hasMoreServiceFiles: (offset + pageSize) < count,
-          allTransactions: isAppend ? [...state.allTransactions, ...newTxs] : newTxs
+          allTransactions: isAppend ? [...state.allTransactions, ...newTxs] : newTxs,
+          isLoadingFiles: false
         };
       });
 
@@ -387,7 +390,7 @@ const useAppStore = create((set, get) => ({
       }
     } catch (err) {
       console.error('Lỗi lấy hồ sơ dịch vụ:', err);
-      set({ hasMoreServiceFiles: false });
+      set({ hasMoreServiceFiles: false, isLoadingFiles: false });
     }
   },
 
