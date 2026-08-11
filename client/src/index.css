@@ -257,19 +257,19 @@
 
 /* Fix Ant Design RangePicker popup overflowing on mobile */
 @media (max-width: 768px) {
-  .ant-picker-panels {
+  .mobile-date-picker-popup .ant-picker-panels,
+  .mobile-date-picker-popup .ant-picker-panel-layout {
     flex-direction: column !important;
+    display: flex !important;
   }
-  .ant-picker-dropdown {
-    width: 90vw !important;
-    max-width: 320px !important;
+  .mobile-date-picker-popup {
+    width: 310px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
   }
-  .ant-picker-panel-container {
+  .mobile-date-picker-popup .ant-picker-panel-container,
+  .mobile-date-picker-popup .ant-picker-panel {
     width: 100% !important;
-  }
-  .ant-picker-panel {
-    width: 100% !important;
+    min-width: unset !important;
   }
 }

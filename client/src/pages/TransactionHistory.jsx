@@ -428,6 +428,7 @@ export default function TransactionHistory() {
             {filters.dateRangeType === DATE_RANGES.CUSTOM && (
               <RangePicker
                 className="h-10 rounded-xl min-w-[240px]"
+                popupClassName="mobile-date-picker-popup"
                 placeholder={['Từ ngày', 'Đến ngày']}
                 format="DD/MM/YYYY"
                 value={filters.customDateRange}
@@ -464,6 +465,7 @@ export default function TransactionHistory() {
               <div className="w-full">
                 <RangePicker
                   className="w-full h-10 rounded-xl"
+                  popupClassName="mobile-date-picker-popup"
                   placeholder={['Từ ngày', 'Đến ngày']}
                   format="DD/MM/YYYY"
                   value={filters.customDateRange}
