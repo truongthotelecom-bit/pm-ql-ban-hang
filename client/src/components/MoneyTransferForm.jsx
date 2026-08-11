@@ -459,7 +459,7 @@ export default function MoneyTransferForm({ value, onChange }) {
         <div>
           <div className="flex justify-between items-end mb-2">
             <div className="text-gray-400 text-xs font-bold uppercase tracking-wider">SỐ TIỀN GIAO DỊCH</div>
-            <div className="text-xl font-bold text-white">{formatCurrency(A - D)}</div>
+            <div className="text-xl font-bold text-white">{formatCurrency(A_thuc_thu_goc)}</div>
           </div>
           {!f_nguon.hidden && (
             <div className="space-y-1">
