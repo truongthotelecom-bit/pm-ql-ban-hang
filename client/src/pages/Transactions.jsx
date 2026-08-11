@@ -1045,7 +1045,15 @@ export default function Transactions() {
             </button>
           </div>
 
-          {activeFile ? (
+          {store.isLoadingFiles || store.isLoadingDetails ? (
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16">
+              <div className="relative w-10 h-10">
+                <div className="absolute inset-0 rounded-full border-4 border-violet-500/20"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-violet-500 animate-spin"></div>
+              </div>
+              <span className="text-[10px] text-gray-500 font-medium animate-pulse">Đang tải hồ sơ...</span>
+            </div>
+          ) : activeFile ? (
             <div className="flex-1 flex flex-col min-h-0 space-y-4">
               {/* KHU VỰC KHÁCH HÀNG (ROW MỚI) */}
               <div 
