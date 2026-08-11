@@ -340,7 +340,7 @@ export default function TransactionHistory() {
       {/* Vùng Header (Cố định) */}
       <div className="shrink-0 space-y-4">
         {/* 1. SUMMARY CARDS (Đã chuyển lên trên) */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="hidden md:grid grid-cols-3 gap-4">
           <div className="bg-gradient-to-r from-violet-900/40 to-blue-900/40 border border-violet-500/30 rounded-xl p-4">
             <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tổng tiền GD</div>
             <div className="text-2xl font-black text-white">{formatCurrency(totalAmount)}</div>
@@ -739,8 +739,9 @@ export default function TransactionHistory() {
                   </div>
                   
                   {/* MOBILE ACTIONS */}
-                  <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-white/5" onClick={e => e.stopPropagation()}>
+                  <div className="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-white/5" onClick={e => e.stopPropagation()}>
                     <Button 
+                      block
                       size="small" 
                       type="primary" 
                       ghost 
@@ -748,9 +749,9 @@ export default function TransactionHistory() {
                       onClick={() => handleShowQR(item)}
                       disabled={!item.contract?.ma_hop_dong}
                     >QR</Button>
-                    <Button size="small" type="default" ghost icon={<EditOutlined />} onClick={() => handleEdit(item)}>Sửa</Button>
-                    <Button size="small" danger ghost icon={<StopOutlined />} onClick={() => handleCancel(item)}>Hủy</Button>
-                    <Button size="small" danger icon={<DeleteOutlined />} onClick={() => handleDelete(item)} />
+                    <Button block size="small" type="default" ghost icon={<EditOutlined />} onClick={() => handleEdit(item)}>Sửa</Button>
+                    <Button block size="small" danger ghost icon={<StopOutlined />} onClick={() => handleCancel(item)}>Hủy</Button>
+                    <Button block size="small" danger icon={<DeleteOutlined />} onClick={() => handleDelete(item)} />
                   </div>
                 </div>
               </div>
@@ -763,6 +764,26 @@ export default function TransactionHistory() {
             )}
           </>
         )}
+      </div>
+
+      {/* 4. VÙNG TỔNG CỘNG DƯỚI CÙNG (MOBILE ONLY) */}
+      <div className="md:hidden shrink-0 flex flex-col gap-2 pb-2">
+        {/* Row 1: Tổng tiền */}
+        <div className="border border-violet-500 rounded-xl p-2 flex justify-between items-center bg-transparent">
+          <span className="text-violet-400 text-xs font-bold uppercase tracking-wider">Tổng tiền GD</span>
+          <span className="text-white font-black text-lg">{formatCurrency(totalAmount)}</span>
+        </div>
+        {/* Row 2: Phí & Số lượng */}
+        <div className="flex gap-2">
+          <div className="flex-1 border border-orange-500 rounded-xl p-2 flex flex-col justify-center items-center bg-transparent">
+            <span className="text-orange-400 text-[10px] font-bold uppercase tracking-wider">Tổng phí DV</span>
+            <span className="text-white font-black text-lg">{formatCurrency(totalFee)}</span>
+          </div>
+          <div className="flex-1 border border-green-500 rounded-xl p-2 flex flex-col justify-center items-center bg-transparent">
+            <span className="text-green-400 text-[10px] font-bold uppercase tracking-wider">Số lượng GD</span>
+            <span className="text-white font-black text-lg">{validTransactions.length}</span>
+          </div>
+        </div>
       </div>
       </div> {/* Kết thúc Vùng Cuộn Nội Bộ */}
 
@@ -805,8 +826,13 @@ export default function TransactionHistory() {
         open={showEditDetailModal}
         onCancel={() => setShowEditDetailModal(false)}
         footer={null}
-        width={600}
-        className="glass-modal"
+        width="100%"
+        style={{ top: 0, padding: 0, margin: 0, maxWidth: '100vw', paddingBottom: 0 }}
+        classNames={{ 
+          content: '!rounded-none !h-[100dvh] flex flex-col bg-[#0d1426] border-none', 
+          body: 'flex-1 overflow-y-auto !p-2 md:!p-6' 
+        }}
+        className="!m-0 !p-0"
       >
         <div className="p-4 border border-white/5 rounded-xl bg-[#0d1426] space-y-4">
           <MoneyTransferForm value={editDetailPayload} onChange={setEditDetailPayload} />
