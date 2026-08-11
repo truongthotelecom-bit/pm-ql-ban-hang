@@ -423,41 +423,54 @@ export default function TransactionHistory() {
             >
               Bộ lọc
             </Button>
-          </div>
-
-          {/* Vị trí 5: Từ ngày đến ngày (Chung cho Desktop & Mobile) */}
-          {filters.dateRangeType === DATE_RANGES.CUSTOM && (
-            <div className="w-full mt-1">
+            
+            {/* Vị trí 5: Từ ngày đến ngày (Desktop) */}
+            {filters.dateRangeType === DATE_RANGES.CUSTOM && (
               <RangePicker
-                className="w-full h-10 rounded-xl"
+                className="h-10 rounded-xl min-w-[240px]"
                 placeholder={['Từ ngày', 'Đến ngày']}
                 format="DD/MM/YYYY"
                 value={filters.customDateRange}
                 onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
               />
-            </div>
-          )}
+            )}
+          </div>
 
           {/* MOBILE FILTERS (Buttons to open Drawer) */}
-          <div className="flex md:hidden items-center gap-2">
-            <Button 
-              className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10 truncate px-2" 
-              onClick={() => setMobileFilterType('time')}
-            >
-              {filters.dateRangeType === DATE_RANGES.CUSTOM ? 'Tùy chỉnh...' : DATE_RANGE_OPTIONS.find(o => o.value === filters.dateRangeType)?.label || 'Thời gian...'}
-            </Button>
-            <Button 
-              className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10 truncate px-2"
-              onClick={() => setMobileFilterType('status')}
-            >
-              {filters.trangThaiId ? (store.categories.find(c => c.id_danh_muc === filters.trangThaiId)?.ten_danh_muc || 'Trạng thái...') : 'Tất cả trạng thái'}
-            </Button>
-            <Button 
-              type="primary" 
-              icon={<FilterOutlined />} 
-              onClick={() => setMobileFilterType('advanced')}
-              className="bg-violet-600 border-none font-bold shadow-md rounded-xl h-10"
-            />
+          <div className="flex flex-col md:hidden gap-2">
+            <div className="flex items-center gap-2">
+              <Button 
+                className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10 truncate px-2" 
+                onClick={() => setMobileFilterType('time')}
+              >
+                {filters.dateRangeType === DATE_RANGES.CUSTOM ? 'Tùy chỉnh...' : DATE_RANGE_OPTIONS.find(o => o.value === filters.dateRangeType)?.label || 'Thời gian...'}
+              </Button>
+              <Button 
+                className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10 truncate px-2"
+                onClick={() => setMobileFilterType('status')}
+              >
+                {filters.trangThaiId ? (store.categories.find(c => c.id_danh_muc === filters.trangThaiId)?.ten_danh_muc || 'Trạng thái...') : 'Tất cả trạng thái'}
+              </Button>
+              <Button 
+                type="primary" 
+                icon={<FilterOutlined />} 
+                onClick={() => setMobileFilterType('advanced')}
+                className="bg-violet-600 border-none font-bold shadow-md rounded-xl h-10"
+              />
+            </div>
+            
+            {/* Vị trí 5: Từ ngày đến ngày (Mobile) - Hiển thị ngay dưới các nút Lọc */}
+            {filters.dateRangeType === DATE_RANGES.CUSTOM && (
+              <div className="w-full">
+                <RangePicker
+                  className="w-full h-10 rounded-xl"
+                  placeholder={['Từ ngày', 'Đến ngày']}
+                  format="DD/MM/YYYY"
+                  value={filters.customDateRange}
+                  onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div> {/* Kết thúc Vùng Header */}
