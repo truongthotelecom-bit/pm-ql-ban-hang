@@ -216,25 +216,19 @@ export default function IndexPage() {
           <span className="text-[10px] font-semibold">Trang chủ</span>
         </NavLink>
         
-        <NavLink to="/lich-su" className={mobileNavLinkClass}>
-          <CalendarOutlined style={{ fontSize: '20px' }} />
-          <span className="text-[10px] font-semibold">Lịch sử</span>
+        <NavLink to="/hop-dong" className={mobileNavLinkClass}>
+          <FileProtectOutlined style={{ fontSize: '20px' }} />
+          <span className="text-[10px] font-semibold">Hợp đồng</span>
         </NavLink>
-
-        <button 
-          onClick={() => setDrawerOpen(true)}
-          className="w-12 h-12 -mt-6 rounded-full bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white flex items-center justify-center shadow-lg shadow-violet-600/40"
-        >
-          <span className="text-2xl font-bold">+</span>
-        </button>
         
         <NavLink to="/khach-hang" className={mobileNavLinkClass}>
           <UserOutlined style={{ fontSize: '20px' }} />
           <span className="text-[10px] font-semibold">Khách</span>
         </NavLink>
-        <NavLink to="/hop-dong" className={mobileNavLinkClass}>
-          <FileProtectOutlined style={{ fontSize: '20px' }} />
-          <span className="text-[10px] font-semibold">Hợp đồng</span>
+
+        <NavLink to="/lich-su" className={mobileNavLinkClass}>
+          <CalendarOutlined style={{ fontSize: '20px' }} />
+          <span className="text-[10px] font-semibold">Lịch sử</span>
         </NavLink>
       </nav>
 
