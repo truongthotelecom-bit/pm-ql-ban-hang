@@ -553,6 +553,7 @@ export default function TransactionHistory() {
                   </div>
                 </div>
               </div>
+            </div>
             ))}
             {displayCount < filteredTransactions.length && (
               <div className="text-center p-4 text-violet-400 text-sm animate-pulse">
@@ -562,6 +563,7 @@ export default function TransactionHistory() {
           </>
         )}
       </div>
+      </div> {/* Kết thúc wrapper */}
       </div> {/* Kết thúc vùng cuộn */}
     </div>
   );
