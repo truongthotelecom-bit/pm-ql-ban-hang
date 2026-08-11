@@ -412,9 +412,9 @@ export default function TransactionHistory() {
             </Button>
           </div>
 
-          {/* Vị trí 5: Từ ngày đến ngày (Desktop) */}
+          {/* Vị trí 5: Từ ngày đến ngày (Chung cho Desktop & Mobile) */}
           {filters.dateRangeType === DATE_RANGES.CUSTOM && (
-            <div className="hidden md:block">
+            <div className="w-full mt-1">
               <RangePicker
                 className="w-full h-10 rounded-xl"
                 placeholder={['Từ ngày', 'Đến ngày']}
@@ -480,7 +480,10 @@ export default function TransactionHistory() {
                 ].map(opt => (
                   <div
                     key={opt.value}
-                    onClick={() => setFilters({ ...filters, dateRangeType: opt.value, customDateRange: null })}
+                    onClick={() => {
+                      setFilters({ ...filters, dateRangeType: opt.value, customDateRange: null });
+                      if (opt.value === DATE_RANGES.CUSTOM) setMobileFilterType(null); // Đóng Drawer để hiện lịch ở ngoài
+                    }}
                     className={`p-3 rounded-xl border text-center text-sm font-semibold transition-colors cursor-pointer select-none ${
                       filters.dateRangeType === opt.value
                         ? 'bg-violet-600 border-violet-500 text-white shadow-[0_0_10px_rgba(139,92,246,0.3)]'
@@ -491,15 +494,6 @@ export default function TransactionHistory() {
                   </div>
                 ))}
               </div>
-              {filters.dateRangeType === DATE_RANGES.CUSTOM && (
-                <RangePicker
-                  className="w-full h-12 rounded-xl mt-3"
-                  placeholder={['Từ ngày', 'Đến ngày']}
-                  format="DD/MM/YYYY"
-                  value={filters.customDateRange}
-                  onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
-                />
-              )}
             </div>
           )}
 
