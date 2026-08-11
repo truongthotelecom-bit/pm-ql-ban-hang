@@ -90,9 +90,8 @@ export default function TransactionHistory() {
   const navigate = useNavigate();
   
   const handleGoToWorkspace = (record) => {
-    const hoSo = store.allServiceFiles?.find(f => f.id_ho_so_dich_vu === record.tx.id_ho_so_dich_vu);
-    if (hoSo) {
-      store.setSelectedServiceFile(hoSo);
+    if (record.file) {
+      store.setSelectedServiceFile(record.file);
       navigate('/');
     } else {
       message.error('Không tìm thấy thông tin hồ sơ gốc!');
