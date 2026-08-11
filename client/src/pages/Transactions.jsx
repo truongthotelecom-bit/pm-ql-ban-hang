@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useAppStore from '../store/useAppStore';
 import useAuthStore from '../store/useAuthStore';
 import { supabase } from '../lib/supabaseClient';
@@ -151,6 +152,7 @@ const { Option } = Select;
 const { Search } = Input;
 
 export default function Transactions() {
+  const navigate = useNavigate();
   const store = useAppStore();
   const { message, modal: modalInstance } = AntdApp.useApp();
   const [searchInput, setSearchInput] = useState('');
@@ -784,7 +786,7 @@ export default function Transactions() {
               size="small" 
               type="primary" 
               icon={<HistoryOutlined />} 
-              onClick={() => window.open(`/lich-su?id_dich_vu=${store.selectedService?.id_loai_dich_vu || ''}`, '_blank')} 
+              onClick={() => navigate(`/lich-su?id_dich_vu=${store.selectedService?.id_loai_dich_vu || ''}`)} 
               className="bg-violet-600 border-none shadow-md shadow-violet-900/50 hover:bg-violet-500"
             >
               Lịch sử
