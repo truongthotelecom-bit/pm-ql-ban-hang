@@ -308,17 +308,17 @@ export default function Transactions() {
     store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, value, 1, pageSize, false);
   };
 
-  const isFetchingRef = React.useRef(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting && store.hasMoreServiceFiles && !isFetchingRef.current) {
-          isFetchingRef.current = true;
+        if (entries[0].isIntersecting && store.hasMoreServiceFiles && !isFetchingMore) {
+          setIsFetchingMore(true);
           const nextPage = currentPage + 1;
           setCurrentPage(nextPage);
           store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, searchTerm, nextPage, pageSize, true).finally(() => {
-            isFetchingRef.current = false;
+            setIsFetchingMore(false);
           });
         }
       },
@@ -332,7 +332,7 @@ export default function Transactions() {
     return () => {
       if (observerTarget.current) observer.unobserve(observerTarget.current);
     };
-  }, [observerTarget, store.hasMoreServiceFiles, currentPage, searchTerm, pageSize, store.selectedService]);
+  }, [observerTarget, store.hasMoreServiceFiles, currentPage, searchTerm, pageSize, store.selectedService, isFetchingMore]);
 
   // 1. Tiền xử lý tính toán thời gian (Cho dữ liệu trang hiện tại)
   const sortedFiles = useMemo(() => {
