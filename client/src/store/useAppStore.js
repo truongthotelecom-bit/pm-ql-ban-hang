@@ -43,6 +43,7 @@ const useAppStore = create((set, get) => ({
 
   // Flag: đã khởi động hệ thống chưa
   isBootstrapped: false,
+  isBootstrapping: true,
   
   refetchTrigger: 0,
   triggerRefetch: () => set(state => ({ refetchTrigger: state.refetchTrigger + 1 })),
@@ -52,6 +53,7 @@ const useAppStore = create((set, get) => ({
     // Chỉ fetch 1 lần trong suốt phiên làm việc
     // Chỉ bỏ qua nếu đã bootstrap thành công. Cho phép retry khi db offline.
     if (get().isBootstrapped && get().dbOnline) return;
+    set({ isBootstrapping: true });
     try {
       // Hàm helper để fetch đệ quy toàn bộ dữ liệu (bỏ qua giới hạn 1000 dòng)
       const fetchAllRecords = async (query) => {
@@ -130,7 +132,8 @@ const useAppStore = create((set, get) => ({
         bieuPhis: resBp || [],
         danhSachCot: resDanhSachCot || [],
         dbOnline: true,
-        isBootstrapped: true
+        isBootstrapped: true,
+        isBootstrapping: false
       });
 
       if (resLdv?.length > 0 && !get().selectedService) {
@@ -139,7 +142,7 @@ const useAppStore = create((set, get) => ({
       }
     } catch (err) {
       console.error('Lỗi khi nạp cấu hình hệ thống:', err);
-      set({ dbOnline: false });
+      set({ dbOnline: false, isBootstrapping: false });
     }
   },
 

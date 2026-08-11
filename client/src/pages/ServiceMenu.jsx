@@ -37,7 +37,23 @@ export default function ServiceMenu() {
 
   // UI: Hiển thị lưới các Nhóm Dịch Vụ
   const renderGroups = () => {
-    // Offline / chưa có data → hiện nút retry
+    // Đang tải hệ thống (lúc mới F5) -> Hiện spinner xoay xoay
+    if (store.isBootstrapping) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-6 py-20 text-center">
+          <div className="relative w-16 h-16">
+            <div className="absolute inset-0 rounded-full border-4 border-violet-500/20"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-violet-500 animate-spin"></div>
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-200 mb-1">Đang tải danh mục...</h3>
+            <p className="text-sm text-gray-500 max-w-xs">Hệ thống đang đồng bộ dữ liệu, vui lòng đợi.</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Offline / chưa có data → hiện nút retry (Sau khi loading xong mà dbOnline false)
     if (!store.dbOnline || store.menuGroups.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center gap-6 py-20 text-center">

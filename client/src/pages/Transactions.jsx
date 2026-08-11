@@ -839,13 +839,13 @@ export default function Transactions() {
     : '';
 
   return (
-    <div className="flex flex-col xl:flex-row gap-5 h-[calc(100vh-112px)] md:h-[calc(100vh-140px)] animate-fadeIn">
+    <div className="flex flex-col xl:flex-row gap-5 h-[calc(100vh-112px)] md:h-[calc(100vh-140px)] animate-fadeIn -mx-4 sm:mx-0">
       
       {/* ============================================================
          CỘT 1 (BÊN TRÁI): DANH SÁCH HỒ SƠ DỊCH VỤ (CASE MANAGEMENT)
          ============================================================ */}
-      <div className="relative w-full xl:w-[32%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md h-full">
-        <div className="flex justify-between items-center border-b border-white/5 pb-3 flex-shrink-0">
+      <div className="relative w-full xl:w-[32%] p-2 sm:p-3 rounded-none sm:rounded-2xl bg-[#0d1426]/70 border-y sm:border-y-0 sm:border border-white/5 flex flex-col gap-3 sm:gap-4 shadow-xl backdrop-blur-md h-full">
+        <div className="flex justify-between items-center border-b border-white/5 pb-3 flex-shrink-0 px-2 sm:px-1">
           <div className="flex items-center gap-2">
             {store.selectedService?.icon?.startsWith('http') 
               ? <img src={store.selectedService.icon} alt="icon" className="h-6 w-6 object-contain" />
@@ -1404,6 +1404,10 @@ export default function Transactions() {
                 </button>
               </div>
 
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center opacity-60">
+              <span className="text-[11px] text-gray-400 font-medium tracking-wide">Chưa có thông tin giao dịch</span>
             </div>
           )}
         </div>
