@@ -144,6 +144,7 @@ export default function TransactionDrawer({ open, onClose }) {
       onClose={onClose}
       open={open}
       className="glass-panel"
+      classNames={{ body: '!px-2 sm:!px-6 !py-4' }}
       footer={
         <div className="flex justify-end gap-3 p-3 bg-[#0d1426] border-t border-white/5">
           <Button onClick={onClose} className="border-gray-700 text-gray-300 bg-white/5 rounded-lg">Hủy bỏ</Button>

@@ -44,7 +44,7 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFal
             onSelectDesktop(file);
           }
         }}
-        className={`h-full px-3.5 py-3 rounded-xl border transition-all cursor-pointer hover:scale-[1.01] overflow-hidden ${isSelected ? 'bg-violet-600/10 border-violet-500/50 shadow-lg shadow-violet-600/5' : 'bg-[#131c33]/40 border-white/5 hover:border-white/10'}`}
+        className={`px-3.5 py-3 rounded-xl border transition-all cursor-pointer hover:scale-[1.01] overflow-hidden ${isSelected ? 'bg-violet-600/10 border-violet-500/50 shadow-lg shadow-violet-600/5' : 'bg-[#131c33]/40 border-white/5 hover:border-white/10'}`}
       >
         {/* Dòng trên cùng: Ngày GD cuối (trái) & Ngày tạo (phải) */}
         <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-white/5 text-[9px] font-medium">
@@ -1017,7 +1017,7 @@ export default function Transactions() {
          CỘT 2 + 3: Chi TIET - an tren mobile, hien tren desktop
          ============================================================ */}
       {React.useMemo(() => (
-      <div className={`${showMobileDetail ? 'fixed inset-0 z-[100] bg-[#0d1426] flex flex-col gap-4 p-4 animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
+      <div className={`${showMobileDetail ? 'fixed inset-0 z-[100] bg-[#0d1426] flex flex-col gap-2 p-1 pt-4 animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
         
         {/* Nút đóng trên Mobile cho Cột 2 */}
         <div className="xl:hidden flex justify-between items-center mb-2 flex-shrink-0">
@@ -1030,7 +1030,7 @@ export default function Transactions() {
           </button>
         </div>
 
-      <div className="relative w-full xl:w-[40%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 xl:h-full">
+      <div className="relative w-full xl:w-[40%] p-2 xl:p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 xl:h-full">
         <div className="flex-1 flex flex-col min-h-0 space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">THÔNG TIN HỒ SƠ</span>
@@ -1223,7 +1223,7 @@ export default function Transactions() {
          CỘT 3 (BÊN PHẢI): BẢNG TỔNG CỘNG, VIETQR & IN ẤN NHANH
          ============================================================ */}
       {React.useMemo(() => (
-      <div className={`${showMobileTxDetail ? 'fixed inset-0 z-[110] bg-[#0d1426] flex flex-col gap-4 p-4 animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
+      <div className={`${showMobileTxDetail ? 'fixed inset-0 z-[110] bg-[#0d1426] flex flex-col gap-2 p-1 pt-4 animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
         
         {/* Nút đóng trên Mobile cho Cột 3 */}
         <div className="xl:hidden flex justify-between items-center mb-2 flex-shrink-0">
@@ -1236,7 +1236,7 @@ export default function Transactions() {
           </button>
         </div>
 
-      <div className="w-full xl:w-[28%] p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 overflow-y-auto scrollbar-thin xl:h-full">
+      <div className="w-full xl:w-[28%] p-2 xl:p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 overflow-y-auto scrollbar-thin xl:h-full">
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">CHI TIẾT GIAO DỊCH</span>
