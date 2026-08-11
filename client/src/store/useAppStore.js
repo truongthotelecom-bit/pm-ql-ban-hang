@@ -49,7 +49,8 @@ const useAppStore = create((set, get) => ({
   // Actions
   fetchSystemConfig: async () => {
     // Chỉ fetch 1 lần trong suốt phiên làm việc
-    if (get().isBootstrapped) return;
+    // Chỉ bỏ qua nếu đã bootstrap thành công. Cho phép retry khi db offline.
+    if (get().isBootstrapped && get().dbOnline) return;
     try {
       // Hàm helper để fetch đệ quy toàn bộ dữ liệu (bỏ qua giới hạn 1000 dòng)
       const fetchAllRecords = async (query) => {
