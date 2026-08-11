@@ -94,6 +94,21 @@ export default function TransactionHistory() {
     customDateRange: null
   });
 
+  const [displayCount, setDisplayCount] = useState(20);
+
+  // Khóa cuộn body toàn trang để dùng cuộn nội bộ
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
+  // Reset số lượng hiển thị khi đổi bộ lọc
+  useEffect(() => {
+    setDisplayCount(20);
+  }, [filters]);
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const id_dich_vu = params.get('id_dich_vu');
@@ -208,11 +223,22 @@ export default function TransactionHistory() {
     return new Date(d).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
-  return (
-    <div className="flex flex-col gap-6">
+  const handleScroll = (e) => {
+    const bottom = e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 100;
+    if (bottom && displayCount < filteredTransactions.length) {
+      setDisplayCount(prev => prev + 20);
+    }
+  };
 
-      {/* FILTER BAR */}
-      <div className="glass-panel rounded-2xl p-4 lg:p-6 border border-white/5 shadow-xl">
+  const visibleTransactions = filteredTransactions.slice(0, displayCount);
+
+  return (
+    <div className="flex flex-col gap-6 h-[calc(100vh-100px)] md:h-[calc(100vh-40px)] flex-1 min-h-0">
+
+      {/* Vùng Header (Cố định) */}
+      <div className="shrink-0 space-y-6">
+        {/* FILTER BAR */}
+        <div className="glass-panel rounded-2xl p-4 lg:p-6 border border-white/5 shadow-xl">
         <div className="flex items-center gap-2 mb-4">
           <FilterOutlined className="text-violet-400" />
           <h3 className="text-white font-extrabold uppercase tracking-wider text-sm">Bộ lọc tìm kiếm</h3>
@@ -357,9 +383,15 @@ export default function TransactionHistory() {
           <div className="text-2xl font-black text-white">{validTransactions.length}</div>
         </div>
       </div>
+      </div> {/* Kết thúc Vùng Header */}
 
-      {/* DESKTOP TABLE VIEW */}
-      <div className="hidden lg:block glass-panel rounded-2xl border border-white/5 shadow-xl overflow-hidden">
+      {/* Vùng Cuộn Nội Bộ (Scrollable) */}
+      <div 
+        className="flex-1 min-h-0 overflow-y-auto overscroll-none scrollbar-thin pb-20 md:pb-0"
+        onScroll={handleScroll}
+      >
+        {/* DESKTOP TABLE VIEW */}
+        <div className="hidden lg:block glass-panel rounded-2xl border border-white/5 shadow-xl overflow-hidden mb-6">
         <Table
           loading={store.isHistoryLoading}
           dataSource={filteredTransactions}
@@ -467,7 +499,8 @@ export default function TransactionHistory() {
             <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<span className="text-gray-400">Không tìm thấy giao dịch nào trong khoảng thời gian này</span>} />
           </div>
         ) : (
-          filteredTransactions.map((item, index) => (
+          <>
+            {visibleTransactions.map((item, index) => (
             <div
               key={item.tx.id_chi_tiet_giao_dich || index}
               className="bg-[#0d1426] border border-white/10 rounded-2xl shadow-lg transition-all hover:border-violet-500/50 hover:shadow-violet-500/20"
@@ -520,10 +553,16 @@ export default function TransactionHistory() {
                   </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+            {displayCount < filteredTransactions.length && (
+              <div className="text-center p-4 text-violet-400 text-sm animate-pulse">
+                Đang tải thêm... vuốt lên nữa đi
+              </div>
+            )}
+          </>
         )}
       </div>
+      </div> {/* Kết thúc vùng cuộn */}
     </div>
   );
 }
