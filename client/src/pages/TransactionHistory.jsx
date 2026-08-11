@@ -765,12 +765,13 @@ export default function TransactionHistory() {
                 Đang tải thêm... vuốt lên nữa đi
               </div>
             )}
+            <div className="h-[100px] shrink-0"></div> {/* Spacer for fixed mobile summary */}
           </>
         )}
       </div>
 
       {/* 4. VÙNG TỔNG CỘNG DƯỚI CÙNG (MOBILE ONLY) */}
-      <div className="md:hidden shrink-0 flex flex-col gap-2 pb-2">
+      <div className="md:hidden fixed bottom-[75px] left-3 right-3 z-40 flex flex-col gap-2 pointer-events-none">
         {/* Row 1: Tổng tiền */}
         <div className="border border-violet-500 rounded-xl p-2 flex justify-between items-center bg-transparent">
           <span className="text-violet-400 text-xs font-bold uppercase tracking-wider">Tổng tiền GD</span>
