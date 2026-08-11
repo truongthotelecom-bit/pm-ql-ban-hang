@@ -773,17 +773,17 @@ export default function TransactionHistory() {
       {/* 4. VÙNG TỔNG CỘNG DƯỚI CÙNG (MOBILE ONLY) */}
       <div className="md:hidden fixed bottom-[75px] left-3 right-3 z-40 flex flex-col gap-2 pointer-events-none">
         {/* Row 1: Tổng tiền */}
-        <div className="border border-violet-500 rounded-xl p-2 flex justify-between items-center bg-transparent">
+        <div className="border border-violet-500 rounded-xl p-2 flex justify-between items-center bg-[#0d1426]">
           <span className="text-violet-400 text-xs font-bold uppercase tracking-wider">Tổng tiền GD</span>
           <span className="text-white font-black text-lg">{formatCurrency(totalAmount)}</span>
         </div>
         {/* Row 2: Phí & Số lượng */}
         <div className="flex gap-2">
-          <div className="flex-1 border border-orange-500 rounded-xl p-2 flex flex-col justify-center items-center bg-transparent">
+          <div className="flex-1 border border-orange-500 rounded-xl p-2 flex flex-col justify-center items-center bg-[#0d1426]">
             <span className="text-orange-400 text-[10px] font-bold uppercase tracking-wider">Tổng phí DV</span>
             <span className="text-white font-black text-lg">{formatCurrency(totalFee)}</span>
           </div>
-          <div className="flex-1 border border-green-500 rounded-xl p-2 flex flex-col justify-center items-center bg-transparent">
+          <div className="flex-1 border border-green-500 rounded-xl p-2 flex flex-col justify-center items-center bg-[#0d1426]">
             <span className="text-green-400 text-[10px] font-bold uppercase tracking-wider">Số lượng GD</span>
             <span className="text-white font-black text-lg">{validTransactions.length}</span>
           </div>
