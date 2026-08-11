@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Select, DatePicker, Empty, Table, Tag, message, Modal, Tooltip, Button } from 'antd';
+import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, App as AntdApp } from 'antd';
 import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
 import { supabase } from '../lib/supabaseClient';
@@ -97,6 +97,7 @@ export default function TransactionHistory() {
   });
 
   const [displayCount, setDisplayCount] = useState(20);
+  const { message } = AntdApp.useApp();
 
   // States cho các chức năng quản lý
   const [showQrModal, setShowQrModal] = useState(false);
@@ -167,14 +168,26 @@ export default function TransactionHistory() {
 
   const handleShowQR = (record) => {
     const bank = record.bank;
-    if (!bank || !bank.bin || !bank.so_tai_khoan) {
-      message.error('Chưa có thông tin ngân hàng để tạo QR');
+    const contract = record.contract;
+    const customer = record.customer;
+    
+    if (!contract || !contract.ma_hop_dong) {
+      message.error('Không có thông tin hợp đồng để tạo mã QR');
       return;
     }
-    const contract = record.contract;
-    const amount = record.tx.so_tien_di;
-    const desc = `${contract?.ma_hop_dong || ''} ${contract?.chu_hop_dong || ''}`.trim();
-    const url = `https://img.vietqr.io/image/${bank.bin}-${bank.so_tai_khoan}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(desc)}&accountName=${encodeURIComponent(bank.chu_tai_khoan || '')}`;
+
+    const binCode = bank?.ma_bin || '970422'; // fallback về MBBank
+    if (binCode === '000000') {
+      message.error('Ngân hàng này không hỗ trợ tạo mã QR');
+      return;
+    }
+
+    const amount = record.tx.so_tien_di || 0;
+    const noiDung = record.tx.noi_dung || '';
+    const accountName = customer?.ho_va_ten || 'AURA CUSTOMER';
+
+    const url = `https://api.vietqr.io/image/${binCode}-${contract.ma_hop_dong}-compact.png?amount=${amount}&addInfo=${encodeURIComponent(noiDung)}&accountName=${encodeURIComponent(accountName)}`;
+    
     setActiveQrUrl(url);
     setActiveDetail(record);
     setShowQrModal(true);
@@ -546,8 +559,8 @@ export default function TransactionHistory() {
                     onChange={(val) => handleStatusChange(record, val)}
                     className="w-[120px]"
                     onClick={(e) => e.stopPropagation()}
-                    bordered={false}
-                    dropdownStyle={{ minWidth: 150 }}
+                    variant="borderless"
+                    popupClassName="min-w-[150px]"
                   >
                     {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
                       <Option key={s.id_danh_muc} value={s.id_danh_muc}>
@@ -676,8 +689,8 @@ export default function TransactionHistory() {
                         value={item.tx.id_trang_thai}
                         onChange={(val) => handleStatusChange(item, val)}
                         className="min-w-[130px]"
-                        bordered={false}
-                        dropdownStyle={{ minWidth: 150 }}
+                        variant="borderless"
+                        popupClassName="min-w-[150px]"
                       >
                         {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
                           <Option key={s.id_danh_muc} value={s.id_danh_muc}>
