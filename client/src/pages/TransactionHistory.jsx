@@ -465,22 +465,32 @@ export default function TransactionHistory() {
           {mobileFilterType === 'time' && (
             <div className="space-y-2">
               <label className="text-[10px] text-gray-400 font-bold uppercase block">Khoảng thời gian</label>
-              <Select
-                value={filters.dateRangeType}
-                onChange={v => setFilters({ ...filters, dateRangeType: v, customDateRange: null })}
-                className="w-full h-10"
-              >
-                <Option value={DATE_RANGES.ALL}>Tất cả</Option>
-                <Option value={DATE_RANGES.TODAY}>Hôm nay</Option>
-                <Option value={DATE_RANGES.YESTERDAY}>Hôm qua</Option>
-                <Option value={DATE_RANGES.THIS_WEEK}>Tuần này</Option>
-                <Option value={DATE_RANGES.LAST_WEEK}>Tuần trước</Option>
-                <Option value={DATE_RANGES.THIS_MONTH}>Tháng này</Option>
-                <Option value={DATE_RANGES.LAST_MONTH}>Tháng trước</Option>
-                <Option value={DATE_RANGES.THIS_YEAR}>Năm nay</Option>
-                <Option value={DATE_RANGES.LAST_YEAR}>Năm trước</Option>
-                <Option value={DATE_RANGES.CUSTOM}>Tùy chỉnh khoảng ngày...</Option>
-              </Select>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: DATE_RANGES.ALL, label: 'Tất cả' },
+                  { value: DATE_RANGES.TODAY, label: 'Hôm nay' },
+                  { value: DATE_RANGES.YESTERDAY, label: 'Hôm qua' },
+                  { value: DATE_RANGES.THIS_WEEK, label: 'Tuần này' },
+                  { value: DATE_RANGES.LAST_WEEK, label: 'Tuần trước' },
+                  { value: DATE_RANGES.THIS_MONTH, label: 'Tháng này' },
+                  { value: DATE_RANGES.LAST_MONTH, label: 'Tháng trước' },
+                  { value: DATE_RANGES.THIS_YEAR, label: 'Năm nay' },
+                  { value: DATE_RANGES.LAST_YEAR, label: 'Năm trước' },
+                  { value: DATE_RANGES.CUSTOM, label: 'Tùy chỉnh khoảng ngày...' },
+                ].map(opt => (
+                  <div
+                    key={opt.value}
+                    onClick={() => setFilters({ ...filters, dateRangeType: opt.value, customDateRange: null })}
+                    className={`p-3 rounded-xl border text-center text-sm font-semibold transition-colors cursor-pointer select-none ${
+                      filters.dateRangeType === opt.value
+                        ? 'bg-violet-600 border-violet-500 text-white shadow-[0_0_10px_rgba(139,92,246,0.3)]'
+                        : 'bg-[#131b33] border-white/10 text-gray-300'
+                    } ${opt.value === DATE_RANGES.CUSTOM ? 'col-span-2' : ''}`}
+                  >
+                    {opt.label}
+                  </div>
+                ))}
+              </div>
               {filters.dateRangeType === DATE_RANGES.CUSTOM && (
                 <RangePicker
                   className="w-full h-12 rounded-xl mt-3"
@@ -496,17 +506,31 @@ export default function TransactionHistory() {
           {mobileFilterType === 'status' && (
             <div className="space-y-2">
               <label className="text-[10px] text-gray-400 font-bold uppercase block">Trạng thái giao dịch</label>
-              <Select
-                allowClear
-                placeholder="Tất cả trạng thái"
-                className="w-full h-10"
-                value={filters.trangThaiId}
-                onChange={v => setFilters({ ...filters, trangThaiId: v })}
-              >
+              <div className="grid grid-cols-2 gap-2">
+                <div
+                  onClick={() => setFilters({ ...filters, trangThaiId: null })}
+                  className={`p-3 rounded-xl border text-center text-sm font-semibold transition-colors cursor-pointer select-none col-span-2 ${
+                    !filters.trangThaiId
+                      ? 'bg-violet-600 border-violet-500 text-white shadow-[0_0_10px_rgba(139,92,246,0.3)]'
+                      : 'bg-[#131b33] border-white/10 text-gray-300'
+                  }`}
+                >
+                  Tất cả trạng thái
+                </div>
                 {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
-                  <Option key={s.id_danh_muc} value={s.id_danh_muc}>{s.icon} {s.ten_danh_muc}</Option>
+                  <div
+                    key={s.id_danh_muc}
+                    onClick={() => setFilters({ ...filters, trangThaiId: s.id_danh_muc })}
+                    className={`p-3 rounded-xl border flex items-center justify-center gap-2 text-sm font-semibold transition-colors cursor-pointer select-none ${
+                      filters.trangThaiId === s.id_danh_muc
+                        ? 'bg-violet-600 border-violet-500 text-white shadow-[0_0_10px_rgba(139,92,246,0.3)]'
+                        : 'bg-[#131b33] border-white/10 text-gray-300'
+                    }`}
+                  >
+                    <span>{s.icon}</span> <span>{s.ten_danh_muc}</span>
+                  </div>
                 ))}
-              </Select>
+              </div>
             </div>
           )}
           
