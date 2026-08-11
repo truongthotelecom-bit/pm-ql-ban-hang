@@ -1367,23 +1367,22 @@ export default function Transactions() {
                   onChange={e => setNewContractPayload({ ...newContractPayload, chu_hop_dong: e.target.value })}
                   className="bg-white/5 border-white/5 text-gray-300"
                 />
-                <Select
+                <SearchableDropdown
                   placeholder="Chọn danh mục dịch vụ..."
                   className="w-full"
-                  showSearch
-                  optionFilterProp="children"
-                  value={newContractPayload.id_danh_muc_dich_vu}
+                  value={newContractPayload.id_danh_muc_dich_vu || undefined}
                   onChange={v => setNewContractPayload({ ...newContractPayload, id_danh_muc_dich_vu: v })}
-                >
-                  {store.banks
+                  options={store.banks
                     .filter(b => store.selectedService ? b.id_loai_dich_vu === store.selectedService.id_loai_dich_vu : true)
-                    .map(b => (
-                      <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>
-                        {b.ten_viet_tat ? `${b.ten_viet_tat} - ${b.ten_dich_vu}` : b.ten_dich_vu}
-                      </Option>
-                    ))
+                    .map(b => ({
+                      ...b,
+                      displayLabel: b.ten_viet_tat ? `${b.ten_viet_tat} - ${b.ten_dich_vu}` : b.ten_dich_vu
+                    }))
                   }
-                </Select>
+                  labelKey="displayLabel"
+                  valueKey="id_danh_muc_dich_vu"
+                  iconKey="logo"
+                />
                 <Input 
                   placeholder="Ghi chú thêm" 
                   value={newContractPayload.ghi_chu} 
@@ -1415,7 +1414,11 @@ export default function Transactions() {
               valueKey="id_ma_hop_dong"
               subLabelKey="chu_hop_dong"
               iconKey="logo"
-              onAddNew={() => setAddNewContractInline(true)}
+              onAddNew={() => {
+                const defaultBank = store.banks?.find(b => store.selectedService ? b.id_loai_dich_vu === store.selectedService.id_loai_dich_vu : true);
+                setNewContractPayload({ ma_hop_dong: '', chu_hop_dong: '', ghi_chu: '', id_danh_muc_dich_vu: defaultBank?.id_danh_muc_dich_vu });
+                setAddNewContractInline(true);
+              }}
               addNewText="+ Thêm hợp đồng mới"
             />
           </div>
@@ -1704,11 +1707,22 @@ export default function Transactions() {
               <div className="space-y-3 pt-4 text-gray-200">
                 <Input placeholder="Mã số hợp đồng (ví dụ: AURA-2026-X)" value={newContractPayload.ma_hop_dong} onChange={e => setNewContractPayload({ ...newContractPayload, ma_hop_dong: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
                 <Input placeholder="Họ tên chủ hợp đồng" value={newContractPayload.chu_hop_dong} onChange={e => setNewContractPayload({ ...newContractPayload, chu_hop_dong: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
-                <Select placeholder="Chọn danh mục dịch vụ..." className="w-full" showSearch optionFilterProp="children" value={newContractPayload.id_danh_muc_dich_vu} onChange={v => setNewContractPayload({ ...newContractPayload, id_danh_muc_dich_vu: v })}>
-                  {store.banks.filter(b => store.selectedService ? b.id_loai_dich_vu === store.selectedService.id_loai_dich_vu : true).map(b => (
-                    <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>{b.ten_viet_tat ? `${b.ten_viet_tat} - ${b.ten_dich_vu}` : b.ten_dich_vu}</Option>
-                  ))}
-                </Select>
+                <SearchableDropdown
+                  placeholder="Chọn danh mục dịch vụ..."
+                  className="w-full"
+                  value={newContractPayload.id_danh_muc_dich_vu || undefined}
+                  onChange={v => setNewContractPayload({ ...newContractPayload, id_danh_muc_dich_vu: v })}
+                  options={store.banks
+                    .filter(b => store.selectedService ? b.id_loai_dich_vu === store.selectedService.id_loai_dich_vu : true)
+                    .map(b => ({
+                      ...b,
+                      displayLabel: b.ten_viet_tat ? `${b.ten_viet_tat} - ${b.ten_dich_vu}` : b.ten_dich_vu
+                    }))
+                  }
+                  labelKey="displayLabel"
+                  valueKey="id_danh_muc_dich_vu"
+                  iconKey="logo"
+                />
                 <Input placeholder="Ghi chú thêm" value={newContractPayload.ghi_chu} onChange={e => setNewContractPayload({ ...newContractPayload, ghi_chu: e.target.value })} className="bg-white/5 border-white/5 text-gray-300" />
               </div>
             </Modal>
@@ -1732,7 +1746,11 @@ export default function Transactions() {
               valueKey="id_ma_hop_dong"
               subLabelKey="chu_hop_dong"
               iconKey="logo"
-              onAddNew={() => setEditAddNewContractInline(true)}
+              onAddNew={() => {
+                const defaultBank = store.banks?.find(b => store.selectedService ? b.id_loai_dich_vu === store.selectedService.id_loai_dich_vu : true);
+                setNewContractPayload({ ma_hop_dong: '', chu_hop_dong: '', ghi_chu: '', id_danh_muc_dich_vu: defaultBank?.id_danh_muc_dich_vu });
+                setEditAddNewContractInline(true);
+              }}
               addNewText="Tạo Hợp Đồng Mới"
             />
           </div>
@@ -1840,20 +1858,19 @@ export default function Transactions() {
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-gray-400">Phân hệ dịch vụ / Ngân hàng</label>
-            <Select
+            <SearchableDropdown
               className="w-full"
-              showSearch
-              optionFilterProp="children"
+              placeholder="Chọn ngân hàng / nhà mạng"
               value={editContractPayload.id_danh_muc_dich_vu || undefined}
               onChange={v => setEditContractPayload({...editContractPayload, id_danh_muc_dich_vu: v})}
-              placeholder="Chọn ngân hàng / nhà mạng"
-            >
-              {store.banks?.map(b => (
-                <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>
-                  {b.ten_viet_tat ? `${b.ten_viet_tat} - ${b.ten_dich_vu}` : b.ten_dich_vu}
-                </Option>
-              ))}
-            </Select>
+              options={store.banks?.map(b => ({
+                ...b,
+                displayLabel: b.ten_viet_tat ? `${b.ten_viet_tat} - ${b.ten_dich_vu}` : b.ten_dich_vu
+              })) || []}
+              labelKey="displayLabel"
+              valueKey="id_danh_muc_dich_vu"
+              iconKey="logo"
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-gray-400">Ghi chú thêm</label>
