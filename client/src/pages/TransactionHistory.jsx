@@ -195,9 +195,13 @@ export default function TransactionHistory() {
 
     return result;
   }, [store.historyTransactions, store.historyFiles, store.ma_hop_dong, store.customers, store.banks, store.services, store.categories, filters]);
+  const validTransactions = filteredTransactions.filter(i => {
+    const statusName = (i.status?.ten_danh_muc || '').toLowerCase();
+    return !statusName.includes('hủy') && !statusName.includes('thất bại') && !statusName.includes('lỗi');
+  });
 
-  const totalAmount = filteredTransactions.reduce((s, i) => s + (i.tx.so_tien_di || 0), 0);
-  const totalFee = filteredTransactions.reduce((s, i) => s + (i.tx.phi_dich_vu || 0), 0);
+  const totalAmount = validTransactions.reduce((s, i) => s + (i.tx.so_tien_di || 0), 0);
+  const totalFee = validTransactions.reduce((s, i) => s + (i.tx.phi_dich_vu || 0), 0);
 
   const fmtDate = (d) => {
     if (!d) return '---';
@@ -349,8 +353,8 @@ export default function TransactionHistory() {
           <div className="text-2xl font-black text-white">{formatCurrency(totalFee)}</div>
         </div>
         <div className="bg-gradient-to-r from-green-900/40 to-teal-900/40 border border-green-500/30 rounded-xl p-4 flex flex-col items-center justify-center">
-          <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Số lượng GD</div>
-          <div className="text-2xl font-black text-white">{filteredTransactions.length}</div>
+          <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Số lượng GD (Hợp lệ)</div>
+          <div className="text-2xl font-black text-white">{validTransactions.length}</div>
         </div>
       </div>
 
