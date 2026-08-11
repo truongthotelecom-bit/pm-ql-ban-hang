@@ -24,6 +24,7 @@ const useAppStore = create((set, get) => ({
 
   // --- SCHEMA V2 STATES ---
   services: [],
+  recentServices: [],
   selectedService: null,
   serviceFiles: [],
   selectedServiceFile: null,
@@ -147,9 +148,50 @@ const useAppStore = create((set, get) => ({
           set({ selectedService: defaultSvc });
         }
       }
+      get().fetchRecentServices();
     } catch (err) {
       console.error('Lỗi khi nạp cấu hình hệ thống:', err);
       set({ dbOnline: false, isBootstrapping: false });
+    }
+  },
+
+  // Fetch recent services based on transaction history
+  fetchRecentServices: async () => {
+    try {
+      const { data: recentTxs } = await supabase
+        .from('chi_tiet_giao_dich')
+        .select('id_ho_so_dich_vu')
+        .order('thoi_gian_giao_dich', { ascending: false })
+        .limit(50);
+        
+      if (!recentTxs || recentTxs.length === 0) return;
+      
+      const fileIds = [...new Set(recentTxs.map(t => t.id_ho_so_dich_vu).filter(Boolean))];
+      if (fileIds.length === 0) return;
+      
+      const { data: files } = await supabase
+        .from('ho_so_dich_vu')
+        .select('id_ho_so_dich_vu, id_loai_dich_vu')
+        .in('id_ho_so_dich_vu', fileIds);
+        
+      if (!files) return;
+      
+      const serviceIds = [];
+      for (const fId of fileIds) {
+        const file = files.find(f => f.id_ho_so_dich_vu === fId);
+        if (file && file.id_loai_dich_vu && !serviceIds.includes(file.id_loai_dich_vu)) {
+          serviceIds.push(file.id_loai_dich_vu);
+          if (serviceIds.length === 4) break;
+        }
+      }
+      
+      const { services } = get();
+      if (services?.length > 0) {
+        const recentServices = serviceIds.map(id => services.find(s => s.id_loai_dich_vu === id)).filter(Boolean);
+        set({ recentServices });
+      }
+    } catch (error) {
+      console.error('Error fetching recent services:', error);
     }
   },
 

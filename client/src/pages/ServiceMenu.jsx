@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAppStore from '../store/useAppStore';
 import { MoreOutlined } from '@ant-design/icons';
-import { ArrowLeft, Layers, RefreshCw, WifiOff } from 'lucide-react';
+import { ArrowLeft, Layers, RefreshCw, WifiOff, Search, History } from 'lucide-react';
 
 export default function ServiceMenu() {
   const store = useAppStore();
   const navigate = useNavigate();
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [retrying, setRetrying] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleSelectService = async (service) => {
     await store.selectService(service);
@@ -150,17 +151,111 @@ export default function ServiceMenu() {
     );
   };
 
+  const renderSearchResults = () => {
+    const filtered = store.services.filter(s => 
+      (s.ten_danh_muc || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (s.ma_viet_tat || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+      <div className="space-y-4 animate-in fade-in slide-in-from-right-8 duration-300">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-2">
+          {filtered.map(service => (
+            <div
+              key={service.id_loai_dich_vu}
+              onClick={() => handleSelectService(service)}
+              className="p-4 rounded-xl bg-[#0d1426]/80 backdrop-blur-md border border-gray-800 hover:border-violet-500/50 hover:bg-[#131b33] transition-all flex items-center justify-between cursor-pointer group hover:scale-[1.02] active:scale-95 shadow-lg"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${getGradient(service.id_nhom || service.id_nhom_dich_vu)} flex items-center justify-center text-xl shadow-md group-hover:rotate-3 transition-transform duration-300 overflow-hidden`}>
+                  {service.icon?.startsWith('http')
+                    ? <img src={service.icon} alt="icon" className="w-8 h-8 object-contain drop-shadow-md" />
+                    : (service.icon || '💼')}
+                </div>
+                <div>
+                  <span className="font-bold text-xs text-gray-200 tracking-wide uppercase block">{service.ten_danh_muc}</span>
+                  <span className="text-[10px] text-violet-400/80 font-bold tracking-wider">{service.ma_viet_tat}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+          {filtered.length === 0 && (
+            <div className="col-span-full p-8 text-center text-gray-500 border border-dashed border-gray-700 rounded-xl bg-[#0d1426]/40 backdrop-blur-sm">
+              Không tìm thấy dịch vụ nào phù hợp.
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderRecentServices = () => {
+    if (!store.recentServices || store.recentServices.length === 0) return null;
+    
+    return (
+      <div className="space-y-3 mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <h2 className="text-[11px] md:text-xs font-bold text-gray-400 flex items-center gap-2 uppercase tracking-wider"><History size={14} /> DÙNG GẦN ĐÂY</h2>
+        <div className="grid grid-cols-4 gap-2 md:gap-4">
+          {store.recentServices.map(service => (
+            <div
+              key={service.id_loai_dich_vu}
+              onClick={() => handleSelectService(service)}
+              className="p-2 md:p-3 rounded-2xl bg-[#0d1426]/60 backdrop-blur-md border border-white/5 hover:border-violet-500/40 hover:bg-[#131b33]/80 transition-all cursor-pointer flex flex-col items-center justify-start gap-1 md:gap-2 text-center group hover:scale-[1.02] active:scale-95 shadow-lg shadow-black/20"
+            >
+              <div className={`w-10 h-10 md:w-12 md:h-12 shrink-0 rounded-xl bg-gradient-to-tr ${getGradient(service.id_nhom || service.id_nhom_dich_vu)} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300 overflow-hidden`}>
+                {service.icon?.startsWith('http')
+                  ? <img src={service.icon} alt="icon" className="w-6 h-6 object-contain drop-shadow-md" />
+                  : <span className="text-xl md:text-2xl">{service.icon || '💼'}</span>}
+              </div>
+              <div className="flex flex-col flex-1 items-center justify-start w-full">
+                <h3 className="font-bold text-[9px] md:text-xs text-gray-200 tracking-wide uppercase line-clamp-2 leading-tight w-full">{service.ma_viet_tat || service.ten_danh_muc}</h3>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* Banner của Menu Dịch vụ */}
-      <div className="p-6 rounded-2xl glass-panel border border-white/10">
-        <h1 className="text-xl font-bold text-white tracking-wide">💼 DANH MỤC DỊCH VỤ DỰ ÁN</h1>
-        <p className="text-gray-400 text-sm mt-1">Chọn một phân hệ dịch vụ bất kỳ bên dưới để quản lý hồ sơ và thanh toán tự động.</p>
+      {/* Search & Banner */}
+      <div className="p-4 md:p-6 rounded-2xl glass-panel border border-white/10 flex flex-col gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-white tracking-wide">💼 DANH MỤC DỊCH VỤ DỰ ÁN</h1>
+          <p className="text-gray-400 text-sm mt-1">Chọn một phân hệ dịch vụ bất kỳ bên dưới để quản lý hồ sơ và thanh toán tự động.</p>
+        </div>
+        
+        {/* Search Input */}
+        <div className="relative mt-2">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search size={18} className="text-gray-400" />
+          </div>
+          <input
+            type="text"
+            className="block w-full pl-10 pr-3 py-3 border border-gray-700 rounded-xl leading-5 bg-[#0d1426]/80 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 sm:text-sm transition-all shadow-inner"
+            placeholder="Tìm kiếm dịch vụ..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       {/* Hiển thị Lưới dựa vào State */}
       <div className="pt-2">
-        {!selectedGroupId ? renderGroups() : renderServices()}
+        {searchTerm ? (
+          renderSearchResults()
+        ) : !selectedGroupId ? (
+          <>
+            {renderRecentServices()}
+            <div className="space-y-3">
+              <h2 className="text-[11px] md:text-xs font-bold text-gray-400 flex items-center gap-2 uppercase tracking-wider"><Layers size={14} /> TẤT CẢ DANH MỤC</h2>
+              {renderGroups()}
+            </div>
+          </>
+        ) : (
+          renderServices()
+        )}
       </div>
     </div>
   );
