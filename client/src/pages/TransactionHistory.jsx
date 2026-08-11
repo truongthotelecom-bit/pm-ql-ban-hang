@@ -107,6 +107,9 @@ export default function TransactionHistory() {
   const [showEditDetailModal, setShowEditDetailModal] = useState(false);
   const [editDetailPayload, setEditDetailPayload] = useState(null);
 
+  // Modal bộ lọc nâng cao
+  const [showFilterModal, setShowFilterModal] = useState(false);
+
   // Khóa cuộn body toàn trang để dùng cuộn nội bộ
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -323,62 +326,92 @@ export default function TransactionHistory() {
     <div className="flex flex-col gap-6 h-[calc(100vh-100px)] md:h-[calc(100vh-40px)] flex-1 min-h-0">
 
       {/* Vùng Header (Cố định) */}
-      <div className="shrink-0 space-y-6">
-        {/* FILTER BAR */}
-        <div className="glass-panel rounded-2xl p-4 lg:p-6 border border-white/5 shadow-xl">
-        <div className="flex items-center gap-2 mb-4">
-          <FilterOutlined className="text-violet-400" />
-          <h3 className="text-white font-extrabold uppercase tracking-wider text-sm">Bộ lọc tìm kiếm</h3>
+      <div className="shrink-0 space-y-4">
+        {/* 1. SUMMARY CARDS (Đã chuyển lên trên) */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-gradient-to-r from-violet-900/40 to-blue-900/40 border border-violet-500/30 rounded-xl p-4">
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tổng tiền GD</div>
+            <div className="text-2xl font-black text-white">{formatCurrency(totalAmount)}</div>
+          </div>
+          <div className="bg-gradient-to-r from-orange-900/40 to-red-900/40 border border-orange-500/30 rounded-xl p-4">
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tổng phí DV</div>
+            <div className="text-2xl font-black text-white">{formatCurrency(totalFee)}</div>
+          </div>
+          <div className="bg-gradient-to-r from-green-900/40 to-teal-900/40 border border-green-500/30 rounded-xl p-4 flex flex-col items-center justify-center">
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Số lượng GD (Hợp lệ)</div>
+            <div className="text-2xl font-black text-white">{validTransactions.length}</div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
-          {/* Thời gian */}
-          <div className="space-y-1 lg:col-span-2">
-            <label className="text-[10px] text-gray-400 font-bold uppercase block">Giai đoạn</label>
-            <div className="flex gap-2">
-              <Select
-                value={filters.dateRangeType}
-                onChange={v => setFilters({ ...filters, dateRangeType: v, customDateRange: null })}
-                className="w-[150px] shrink-0"
-              >
-                <Option value={DATE_RANGES.ALL}>Tất cả</Option>
-                <Option value={DATE_RANGES.TODAY}>Hôm nay</Option>
-                <Option value={DATE_RANGES.YESTERDAY}>Hôm qua</Option>
-                <Option value={DATE_RANGES.THIS_WEEK}>Tuần này</Option>
-                <Option value={DATE_RANGES.LAST_WEEK}>Tuần trước</Option>
-                <Option value={DATE_RANGES.THIS_MONTH}>Tháng này</Option>
-                <Option value={DATE_RANGES.LAST_MONTH}>Tháng trước</Option>
-                <Option value={DATE_RANGES.THIS_YEAR}>Năm nay</Option>
-                <Option value={DATE_RANGES.LAST_YEAR}>Năm trước</Option>
-                <Option value={DATE_RANGES.CUSTOM}>Tùy chỉnh...</Option>
-              </Select>
-              <RangePicker
-                className="flex-1"
-                placeholder={['Từ ngày', 'Đến ngày']}
-                format="DD/MM/YYYY"
-                value={filters.customDateRange}
-                onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
-              />
-            </div>
-          </div>
+        {/* 2. BỘ LỌC TÌM KIẾM CƠ BẢN (1 Dòng) */}
+        <div className="flex items-center gap-2">
+          {/* Vị trí 3: Giai đoạn (Select) */}
+          <Select
+            value={filters.dateRangeType}
+            onChange={v => setFilters({ ...filters, dateRangeType: v, customDateRange: null })}
+            className="w-[140px]"
+          >
+            <Option value={DATE_RANGES.ALL}>Tất cả</Option>
+            <Option value={DATE_RANGES.TODAY}>Hôm nay</Option>
+            <Option value={DATE_RANGES.YESTERDAY}>Hôm qua</Option>
+            <Option value={DATE_RANGES.THIS_WEEK}>Tuần này</Option>
+            <Option value={DATE_RANGES.LAST_WEEK}>Tuần trước</Option>
+            <Option value={DATE_RANGES.THIS_MONTH}>Tháng này</Option>
+            <Option value={DATE_RANGES.LAST_MONTH}>Tháng trước</Option>
+            <Option value={DATE_RANGES.THIS_YEAR}>Năm nay</Option>
+            <Option value={DATE_RANGES.LAST_YEAR}>Năm trước</Option>
+            <Option value={DATE_RANGES.CUSTOM}>Tùy chỉnh...</Option>
+          </Select>
 
-          {/* Trạng thái */}
-          <div className="space-y-1">
-            <label className="text-[10px] text-gray-400 font-bold uppercase block">Trạng thái GD</label>
-            <Select
-              allowClear
-              placeholder="Tất cả"
-              className="w-full"
-              value={filters.trangThaiId}
-              onChange={v => setFilters({ ...filters, trangThaiId: v })}
-            >
-              {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
-                <Option key={s.id_danh_muc} value={s.id_danh_muc}>{s.icon} {s.ten_danh_muc}</Option>
-              ))}
-            </Select>
-          </div>
+          {/* Vị trí 5: Từ ngày đến ngày */}
+          {filters.dateRangeType === DATE_RANGES.CUSTOM && (
+            <RangePicker
+              className="w-[260px]"
+              placeholder={['Từ ngày', 'Đến ngày']}
+              format="DD/MM/YYYY"
+              value={filters.customDateRange}
+              onChange={dates => setFilters({ ...filters, dateRangeType: DATE_RANGES.CUSTOM, customDateRange: dates })}
+            />
+          )}
 
-          {/* Người thanh toán */}
+          {/* Vị trí 6: Trạng thái GD */}
+          <Select
+            allowClear
+            placeholder="Tất cả trạng thái"
+            className="w-[180px]"
+            value={filters.trangThaiId}
+            onChange={v => setFilters({ ...filters, trangThaiId: v })}
+          >
+            {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
+              <Option key={s.id_danh_muc} value={s.id_danh_muc}>{s.icon} {s.ten_danh_muc}</Option>
+            ))}
+          </Select>
+
+          {/* Vị trí 4: Nút Bộ lọc nâng cao */}
+          <Button 
+            type="primary" 
+            icon={<FilterOutlined />} 
+            onClick={() => setShowFilterModal(true)}
+            className="bg-violet-600 border-none font-bold ml-auto shadow-md"
+          >
+            Bộ lọc
+          </Button>
+        </div>
+      </div> {/* Kết thúc Vùng Header */}
+
+      {/* MODAL BỘ LỌC NÂNG CAO */}
+      <Modal
+        title={<span className="font-extrabold text-white">BỘ LỌC NÂNG CAO</span>}
+        open={showFilterModal}
+        onCancel={() => setShowFilterModal(false)}
+        footer={[
+          <Button key="close" type="primary" onClick={() => setShowFilterModal(false)} className="bg-violet-600 border-none font-bold">
+            Hoàn tất
+          </Button>
+        ]}
+        className="dark-modal"
+      >
+        <div className="space-y-4 pt-4">
           <div className="space-y-1">
             <label className="text-[10px] text-gray-400 font-bold uppercase block">Người thanh toán</label>
             <Select
@@ -394,11 +427,7 @@ export default function TransactionHistory() {
               ))}
             </Select>
           </div>
-        </div>
 
-        {/* Row 2 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {/* Nhóm Menu */}
           <div className="space-y-1">
             <label className="text-[10px] text-gray-400 font-bold uppercase block">Nhóm Menu</label>
             <Select
@@ -414,7 +443,6 @@ export default function TransactionHistory() {
             </Select>
           </div>
 
-          {/* Loại Dịch Vụ - lọc theo Nhóm Menu */}
           <div className="space-y-1">
             <label className="text-[10px] text-gray-400 font-bold uppercase block">
               Loại Dịch Vụ {filters.nhomMenuId && <span className="text-violet-400">(đã lọc)</span>}
@@ -432,7 +460,6 @@ export default function TransactionHistory() {
             </Select>
           </div>
 
-          {/* Danh mục (NH/Nhà mạng) - lọc theo Loại DV */}
           <div className="space-y-1">
             <label className="text-[10px] text-gray-400 font-bold uppercase block">
               Danh mục (NH/Nhà mạng) {filters.loaiDichVuId && <span className="text-violet-400">(đã lọc)</span>}
@@ -453,24 +480,7 @@ export default function TransactionHistory() {
             </Select>
           </div>
         </div>
-      </div>
-
-      {/* SUMMARY */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-gradient-to-r from-violet-900/40 to-blue-900/40 border border-violet-500/30 rounded-xl p-4">
-          <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tổng tiền GD</div>
-          <div className="text-2xl font-black text-white">{formatCurrency(totalAmount)}</div>
-        </div>
-        <div className="bg-gradient-to-r from-orange-900/40 to-red-900/40 border border-orange-500/30 rounded-xl p-4">
-          <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tổng phí DV</div>
-          <div className="text-2xl font-black text-white">{formatCurrency(totalFee)}</div>
-        </div>
-        <div className="bg-gradient-to-r from-green-900/40 to-teal-900/40 border border-green-500/30 rounded-xl p-4 flex flex-col items-center justify-center">
-          <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Số lượng GD (Hợp lệ)</div>
-          <div className="text-2xl font-black text-white">{validTransactions.length}</div>
-        </div>
-      </div>
-      </div> {/* Kết thúc Vùng Header */}
+      </Modal>
 
       {/* Vùng Cuộn Nội Bộ (Scrollable) */}
       <div 
