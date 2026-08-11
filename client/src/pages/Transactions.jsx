@@ -780,7 +780,15 @@ export default function Transactions() {
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">{store.selectedService?.ten_danh_muc || 'TẤT CẢ DỊCH VỤ'} - DANH SÁCH HỒ SƠ</span>
           </div>
           <div className="flex gap-1.5">
-            {/* Removed top reload button */}
+            <Button 
+              size="small" 
+              type="primary" 
+              icon={<HistoryOutlined />} 
+              onClick={() => window.open(`http://localhost:3001/lich-su?dich_vu=${encodeURIComponent(store.selectedService?.ten_danh_muc || '')}`, '_blank')} 
+              className="bg-violet-600 border-none shadow-md shadow-violet-900/50 hover:bg-violet-500"
+            >
+              Lịch sử
+            </Button>
           </div>
         </div>
 
