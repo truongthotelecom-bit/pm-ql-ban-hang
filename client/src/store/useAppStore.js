@@ -139,7 +139,11 @@ const useAppStore = create((set, get) => ({
       if (resLdv?.length > 0 && !get().selectedService) {
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
         if (!isMobile) {
-          const defaultSvc = resLdv.find(s => (s.ten_danh_muc || '').toLowerCase().includes('chuyển tiền') || s.ma_viet_tat === 'CK') || resLdv[0];
+          const defaultSvc = resLdv.find(s => {
+            const svcName = (s.ten_danh_muc || '').toLowerCase();
+            const groupName = (s.nhom_menu_id?.ten_nhom || '').toLowerCase();
+            return svcName.includes('chuyển tiền') || svcName.includes('chuyển khoản') || groupName.includes('chuyển tiền') || groupName.includes('chuyển khoản') || s.ma_viet_tat === 'CK';
+          }) || resLdv[0];
           set({ selectedService: defaultSvc });
         }
       }
