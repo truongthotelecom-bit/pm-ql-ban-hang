@@ -73,7 +73,12 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFal
           {/* Thông tin */}
           <div className={`flex flex-1 ${isSelected ? 'flex-col gap-2' : 'justify-between items-start gap-2'} min-w-0`}>
             {/* TRÁI (hoặc dòng trên): Mã HĐ + Chủ HĐ */}
-            <div className="flex flex-col min-w-0">
+            <div className={`flex flex-col min-w-0 ${isSelected ? 'items-center text-center' : ''}`}>
+              {isSelected && (
+                <span className="text-[10px] font-bold text-violet-400 uppercase tracking-widest mb-0.5">
+                  {bank?.ten_danh_muc || bank?.ten_viet_tat || 'DỊCH VỤ'}
+                </span>
+              )}
               <h4 className={`font-extrabold leading-tight uppercase tracking-wide truncate text-red-400 ${isSelected ? 'text-2xl mb-1' : 'text-sm'}`}>
                 {hd?.ma_hop_dong || 'CHƯA CÓ HĐ'}
               </h4>
