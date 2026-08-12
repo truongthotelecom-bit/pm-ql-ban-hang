@@ -301,14 +301,14 @@ export default function Transactions() {
   useEffect(() => {
     if (store.isBootstrapped) {
       setCurrentPage(1);
-      store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, searchTerm, 1, pageSize, false);
+      store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, searchTerm, 1, pageSize, false, filterCustId, filterCategoryId);
     }
-  }, [store.selectedService, pageSize, store.refetchTrigger]);
+  }, [store.selectedService, pageSize, store.refetchTrigger, filterCustId, filterCategoryId]);
 
   const handleSearch = (value) => {
     setSearchTerm(value);
     setCurrentPage(1);
-    store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, value, 1, pageSize, false);
+    store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, value, 1, pageSize, false, filterCustId, filterCategoryId);
   };
 
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -320,7 +320,7 @@ export default function Transactions() {
           setIsFetchingMore(true);
           const nextPage = currentPage + 1;
           setCurrentPage(nextPage);
-          store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, searchTerm, nextPage, pageSize, true).finally(() => {
+          store.fetchServiceFiles(store.selectedService?.id_loai_dich_vu || null, searchTerm, nextPage, pageSize, true, filterCustId, filterCategoryId).finally(() => {
             setIsFetchingMore(false);
           });
         }
@@ -335,7 +335,7 @@ export default function Transactions() {
     return () => {
       if (observerTarget.current) observer.unobserve(observerTarget.current);
     };
-  }, [observerTarget, store.hasMoreServiceFiles, currentPage, searchTerm, pageSize, store.selectedService, isFetchingMore]);
+  }, [observerTarget, store.hasMoreServiceFiles, currentPage, searchTerm, pageSize, store.selectedService, isFetchingMore, filterCustId, filterCategoryId]);
 
   // 1. Tiền xử lý tính toán thời gian và Áp dụng bộ lọc (Cho dữ liệu trang hiện tại)
   const sortedFiles = useMemo(() => {

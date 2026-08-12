@@ -358,7 +358,7 @@ const useAppStore = create((set, get) => ({
   isLoadingFiles: false,
 
   // Lấy hồ sơ dịch vụ
-  fetchServiceFiles: async (serviceId = null, searchTerm = '', page = 1, pageSize = 40, isAppend = false) => {
+  fetchServiceFiles: async (serviceId = null, searchTerm = '', page = 1, pageSize = 40, isAppend = false, filterCustId = null, filterCategoryId = null) => {
     // Khi tải trang mới (không phải cuộn thêm): bật cả 3 cột loading cùng lúc
     if (!isAppend) set({ isLoadingFiles: true, isLoadingDetails: true });
     try {
@@ -378,6 +378,14 @@ const useAppStore = create((set, get) => ({
 
       if (searchTerm) {
         filesQuery = filesQuery.ilike('search_text', `%${searchTerm.toLowerCase()}%`);
+      }
+
+      if (filterCustId) {
+        filesQuery = filesQuery.eq('id_khach_hang', filterCustId);
+      }
+
+      if (filterCategoryId) {
+        filesQuery = filesQuery.eq('id_danh_muc_dich_vu', filterCategoryId);
       }
 
       // Pagination
