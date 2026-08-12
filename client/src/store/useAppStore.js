@@ -442,7 +442,14 @@ const useAppStore = create((set, get) => ({
       });
 
       if (!isAppend) {
-        set({ selectedServiceFile: null, selectedDetail: null, transactionDetails: [], isLoadingDetails: false });
+        const currentSelected = get().selectedServiceFile;
+        const stillExists = currentSelected && filesData.some(f => f.id_ho_so_dich_vu === currentSelected.id_ho_so_dich_vu);
+        if (!stillExists) {
+          set({ selectedServiceFile: null, selectedDetail: null, transactionDetails: [], isLoadingDetails: false });
+        } else {
+          const updatedFile = filesData.find(f => f.id_ho_so_dich_vu === currentSelected.id_ho_so_dich_vu);
+          set({ selectedServiceFile: updatedFile, isLoadingDetails: false });
+        }
       }
     } catch (err) {
       console.error('Lỗi lấy hồ sơ dịch vụ:', err);
