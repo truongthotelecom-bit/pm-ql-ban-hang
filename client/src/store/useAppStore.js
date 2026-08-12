@@ -539,11 +539,7 @@ const useAppStore = create((set, get) => ({
         isLoadingDetails: false
       });
 
-      if (details?.length > 0) {
-        set({ selectedDetail: details[0] });
-      } else {
-        set({ selectedDetail: null });
-      }
+      set({ selectedDetail: null });
     } catch (err) {
       console.error('Lỗi tải chi tiết giao dịch:', err);
       set({ isLoadingDetails: false });
