@@ -860,7 +860,7 @@ export default function Transactions() {
       {/* ============================================================
          CỘT 1 (BÊN TRÁI): DANH SÁCH HỒ SƠ DỊCH VỤ (CASE MANAGEMENT)
          ============================================================ */}
-      <div className={`relative w-full p-2 sm:p-3 rounded-none sm:rounded-2xl bg-[#0d1426]/70 border-y sm:border-y-0 sm:border border-white/5 flex flex-col gap-3 sm:gap-4 shadow-xl backdrop-blur-md h-full transition-all duration-300 ${!activeFile ? 'xl:w-1/2' : (!activeDetail && !drawerOpen ? 'xl:w-[40%]' : 'xl:w-[32%]')}`}>
+      <div className={`relative w-full p-2 sm:p-3 rounded-none sm:rounded-2xl bg-[#0d1426]/70 border-y sm:border-y-0 sm:border border-white/5 flex flex-col gap-3 sm:gap-4 shadow-xl backdrop-blur-md h-full transition-all duration-300 ${!activeFile ? 'xl:w-1/2' : (!activeDetail ? 'xl:w-[40%]' : 'xl:w-[32%]')}`}>
         <div className="flex justify-between items-center border-b border-white/5 pb-3 flex-shrink-0 px-2 sm:px-1">
           <div className="flex items-center gap-2">
             {store.selectedService?.icon?.startsWith('http') 
@@ -995,7 +995,7 @@ export default function Transactions() {
                     iconFallback={store.selectedService?.icon || '📁'}
                     onSelectMobile={handleSelectMobile}
                     onSelectDesktop={handleSelectDesktop}
-                    onAddTx={() => setDrawerOpen(true)}
+                    onAddTx={() => { handleSelectDesktop(file); setDrawerOpen(true); }}
                     onEditFile={() => { setShowCol2Menu(false); openEditFileModal(); }}
                     onViewFile={() => setShowMobileDetail(true)}
                     onCopyFile={() => setShowCopyModal(true)}
@@ -1048,7 +1048,7 @@ export default function Transactions() {
           </button>
         </div>
 
-      <div className={`relative w-full p-2 xl:p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 xl:h-full transition-all duration-300 ${!activeFile ? 'xl:hidden' : (!activeDetail && !drawerOpen ? 'xl:w-[60%]' : 'xl:w-[40%]')}`}>
+      <div className={`relative w-full p-2 xl:p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 xl:h-full transition-all duration-300 ${!activeFile ? 'xl:hidden' : (!activeDetail ? 'xl:w-[60%]' : 'xl:w-[40%]')}`}>
         <div className="flex-1 flex flex-col min-h-0 space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">THÔNG TIN HỒ SƠ</span>
@@ -1254,7 +1254,7 @@ export default function Transactions() {
           </button>
         </div>
 
-      <div className={`w-full p-2 xl:p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 overflow-y-auto scrollbar-thin xl:h-full transition-all duration-300 ${!activeDetail && !drawerOpen ? 'xl:hidden' : 'xl:w-[28%]'}`}>
+      <div className={`w-full p-2 xl:p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 overflow-y-auto scrollbar-thin xl:h-full transition-all duration-300 ${!activeDetail ? 'xl:hidden' : 'xl:w-[28%]'}`}>
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">CHI TIẾT GIAO DỊCH</span>
