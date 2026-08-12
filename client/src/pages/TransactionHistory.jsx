@@ -359,7 +359,7 @@ export default function TransactionHistory() {
   const visibleTransactions = filteredTransactions.slice(0, displayCount);
 
   return (
-    <div className="flex flex-col gap-6 h-[calc(100vh-100px)] md:h-[calc(100vh-40px)] flex-1 min-h-0">
+    <div className="flex flex-col gap-6 h-[calc(100vh-100px)] md:h-[calc(100vh-140px)] flex-1 min-h-0">
 
       {/* Vùng Header (Cố định) */}
       <div className="shrink-0 space-y-4">
