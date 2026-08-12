@@ -441,13 +441,7 @@ const useAppStore = create((set, get) => ({
         };
       });
 
-      if (filesData.length > 0) {
-        if (!isAppend) {
-          const firstFile = filesData[0];
-          set({ selectedServiceFile: firstFile });
-          await get().fetchTransactionDetails(firstFile.id_ho_so_dich_vu);
-        }
-      } else if (!isAppend) {
+      if (!isAppend) {
         set({ selectedServiceFile: null, selectedDetail: null, transactionDetails: [], isLoadingDetails: false });
       }
     } catch (err) {
