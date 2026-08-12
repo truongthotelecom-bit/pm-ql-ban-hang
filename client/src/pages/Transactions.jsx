@@ -860,7 +860,7 @@ export default function Transactions() {
       {/* ============================================================
          CỘT 1 (BÊN TRÁI): DANH SÁCH HỒ SƠ DỊCH VỤ (CASE MANAGEMENT)
          ============================================================ */}
-      <div className={`relative w-full p-2 sm:p-3 rounded-none sm:rounded-2xl bg-[#0d1426]/70 border-y sm:border-y-0 sm:border border-white/5 flex flex-col gap-3 sm:gap-4 shadow-xl backdrop-blur-md h-full transition-all duration-300 ${!activeFile ? 'xl:w-full' : (!activeDetail && !drawerOpen ? 'xl:w-[40%]' : 'xl:w-[32%]')}`}>
+      <div className={`relative w-full p-2 sm:p-3 rounded-none sm:rounded-2xl bg-[#0d1426]/70 border-y sm:border-y-0 sm:border border-white/5 flex flex-col gap-3 sm:gap-4 shadow-xl backdrop-blur-md h-full transition-all duration-300 ${!activeFile ? 'xl:w-1/2' : (!activeDetail && !drawerOpen ? 'xl:w-[40%]' : 'xl:w-[32%]')}`}>
         <div className="flex justify-between items-center border-b border-white/5 pb-3 flex-shrink-0 px-2 sm:px-1">
           <div className="flex items-center gap-2">
             {store.selectedService?.icon?.startsWith('http') 
