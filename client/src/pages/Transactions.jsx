@@ -337,9 +337,22 @@ export default function Transactions() {
     };
   }, [observerTarget, store.hasMoreServiceFiles, currentPage, searchTerm, pageSize, store.selectedService, isFetchingMore]);
 
-  // 1. Tiền xử lý tính toán thời gian (Cho dữ liệu trang hiện tại)
+  // 1. Tiền xử lý tính toán thời gian và Áp dụng bộ lọc (Cho dữ liệu trang hiện tại)
   const sortedFiles = useMemo(() => {
-    return store.serviceFiles.map(file => {
+    let filesToProcess = store.serviceFiles;
+
+    if (filterCustId) {
+      filesToProcess = filesToProcess.filter(f => f.id_khach_hang === filterCustId);
+    }
+    
+    if (filterCategoryId) {
+      filesToProcess = filesToProcess.filter(f => {
+        const hd = store.ma_hop_dong?.find(h => h.id_ma_hop_dong === f.id_ma_hop_dong) || f.ma_hop_dong;
+        return hd && hd.id_danh_muc_dich_vu === filterCategoryId;
+      });
+    }
+
+    return filesToProcess.map(file => {
       const txs = store.allTransactions?.filter(t => t.id_ho_so_dich_vu === file.id_ho_so_dich_vu) || [];
       let latestDate = new Date(file.ngay_tao || 0).getTime();
       if (txs.length > 0) {
@@ -354,7 +367,7 @@ export default function Transactions() {
         _lastTxDate: txs.length > 0 && latestDate > 0 ? new Date(latestDate) : null
       };
     }).sort((a, b) => b._sortTime - a._sortTime);
-  }, [store.serviceFiles, store.allTransactions]);
+  }, [store.serviceFiles, store.allTransactions, filterCustId, filterCategoryId, store.ma_hop_dong]);
 
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text);
