@@ -192,7 +192,7 @@ export default function IndexPage() {
         {/* TAB CONTENTS */}
         <div className="flex-grow">
           {location.pathname === '/' ? (
-            store.selectedService ? <Transactions /> : <ServiceMenu />
+            store.selectedService ? <Transactions key={store.selectedService.id_loai_dich_vu} /> : <ServiceMenu />
           ) : (
             <Outlet context={{ setDrawerOpen }} />
           )}
