@@ -684,15 +684,21 @@ const useAppStore = create((set, get) => ({
   // Cập nhật chữ ký
   updateSignature: async (sigData) => {
     try {
-      const id = get().signature.id_chu_ky || 'sig-1';
-      const { data } = await supabase
-        .from('quan_ly_chu_ky')
-        .upsert({ ...sigData, id_chu_ky: id })
+      const id = get().signature?.id_chu_ky;
+      const payload = { ...sigData };
+      if (id) payload.id_chu_ky = id;
+      
+      const { data, error } = await supabase
+        .from('sys_quan_ly_chu_ky')
+        .upsert(payload)
         .select()
         .single();
+        
+      if (error) throw error;
       if (data) set({ signature: data });
     } catch (err) {
-      console.error(err);
+      console.error('Lỗi khi cập nhật chữ ký:', err);
+      throw err;
     }
   },
 
