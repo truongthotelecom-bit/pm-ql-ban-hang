@@ -1338,7 +1338,6 @@ export default function TransactionHistory() {
                     }
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col justify-center h-[60px] pt-0.5">
-                     <div className="text-[10px] font-bold text-violet-400 uppercase tracking-widest">{item.bank?.ten_viet_tat ? `${item.bank.ten_viet_tat}` : item.service?.ten_danh_muc || '---'}</div>
                      <div className="text-[22px] font-black text-red-500 tracking-wider truncate leading-tight mt-0.5">{item.contract?.ma_hop_dong || '---'}</div>
                      <div className="flex flex-wrap items-center gap-2 mt-0.5">
                         <span className="text-xs text-gray-100 font-bold uppercase truncate max-w-[150px]">{item.contract?.chu_hop_dong || '---'}</span>
@@ -1352,16 +1351,21 @@ export default function TransactionHistory() {
                 {/* Khách hàng & Số tiền */}
                 <div className="flex justify-between items-start gap-2">
                   <div className="flex-1 space-y-2 min-w-0 pt-1">
-                     <div className="flex items-center gap-1.5 text-xs text-gray-300">
-                        <span className="text-violet-400 shrink-0">👤</span>
-                        <span className="font-bold uppercase truncate max-w-[100px]">{item.customer?.ho_va_ten || 'Khách lẻ'}</span>
-                        <span className="text-gray-600 shrink-0">|</span>
-                        <span className="text-violet-400 shrink-0">📞</span>
-                        <span className="truncate">{item.customer?.so_dien_thoai || '---'}</span>
+                     <div className="flex flex-col gap-1 text-xs text-gray-300">
+                        <div className="flex items-center gap-1.5">
+                           <span className="text-violet-400 shrink-0">👤</span>
+                           <span className="font-bold uppercase truncate max-w-[140px]">{item.customer?.ho_va_ten || 'Khách lẻ'}</span>
+                        </div>
+                        {item.customer?.so_dien_thoai && (
+                           <div className="flex items-center gap-1.5 text-gray-400">
+                              <span className="text-violet-400 shrink-0">📞</span>
+                              <span className="truncate">{item.customer.so_dien_thoai}</span>
+                           </div>
+                        )}
                      </div>
-                     <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                        <span className="shrink-0">📝</span>
-                        <span className="uppercase truncate italic" title={item.tx.noi_dung}>{item.tx.noi_dung || '---'}</span>
+                     <div className="flex items-start gap-1.5 text-xs text-gray-400">
+                        <span className="shrink-0 mt-0.5">📝</span>
+                        <span className="uppercase italic line-clamp-2" title={item.tx.noi_dung}>{item.tx.noi_dung || '---'}</span>
                      </div>
                   </div>
                   <div className="text-right shrink-0">
