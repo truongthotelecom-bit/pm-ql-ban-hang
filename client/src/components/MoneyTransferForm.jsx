@@ -130,7 +130,7 @@ export default function MoneyTransferForm({ value, onChange }) {
         is_cuoc_trong: false
       }));
     }
-  }, [activeFile?.id_ho_so_dich_vu]);
+  }, [activeFile?.id_ho_so_dich_vu, store.transactionDetails?.length]);
 
   useEffect(() => {
     if (form.so_tien_giam > 0 && !showDiscount) {
