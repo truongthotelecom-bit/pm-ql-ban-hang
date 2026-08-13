@@ -20,7 +20,8 @@ import {
   UserOutlined, 
   KeyOutlined, 
   CheckCircleOutlined, 
-  PhoneOutlined
+  PhoneOutlined,
+  EllipsisOutlined
 } from '@ant-design/icons';
 import TransactionDrawer from '../components/TransactionDrawer';
 import MoneyTransferForm from '../components/MoneyTransferForm';
@@ -1071,68 +1072,83 @@ export default function Transactions() {
             </div>
           ) : activeFile ? (
             <div className="flex-1 flex flex-col min-h-0 space-y-4">
-              {/* KHU VỰC KHÁCH HÀNG (ROW MỚI) */}
-              <div 
-                className="flex items-center justify-between p-3 rounded-xl bg-violet-900/10 border border-violet-500/20 cursor-pointer hover:bg-violet-900/20 hover:border-violet-500/40 transition-all group"
-                onClick={() => setShowCustomerModal(true)}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 p-[2px] flex-shrink-0 shadow-lg">
-                    <div className="w-full h-full rounded-full bg-[#0d1426] flex items-center justify-center overflow-hidden">
-                      {activeCust?.anh_khach_hang ? (
-                        <img src={activeCust.anh_khach_hang} alt="avatar" className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-white font-bold text-sm">{activeCust?.ho_va_ten?.[0] || 'K'}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-gray-100 font-bold text-sm truncate">
-                      {activeCust?.ho_va_ten || 'Khách lẻ'}
-                    </span>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-xs text-violet-400 font-semibold truncate">
-                        {activeCust?.so_dien_thoai || 'Không có SĐT'}
-                      </span>
-                      <Tag color="purple" className="border-none font-bold text-[9px] px-1.5 py-0 rounded m-0">
-                        {activeCust?.id_level === 'dm-lvl-vip' ? 'VIP Vàng' : 'Thành viên'}
-                      </Tag>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-gray-500 group-hover:text-violet-400 transition-colors pl-2">
-                  <InfoCircleOutlined />
-                </div>
-              </div>
-
-              {/* Card thông tin khách hàng & Hợp đồng (Chia 2/3 và 1/3) */}
-              <div className="p-4 rounded-xl bg-[#131c33]/50 border border-white/5 relative overflow-hidden flex flex-col gap-3">
+              {/* Card thông tin Hợp đồng */}
+              <div className="p-4 rounded-2xl bg-[#131c33]/50 border border-white/5 relative overflow-hidden flex flex-col gap-3">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-violet-600/5 rounded-full blur-xl pointer-events-none" />
                 
-                <div className="flex justify-between items-stretch gap-4">
-                  {/* Phần ưu tiên: Logo, Mã HĐ, Tên Chủ HĐ */}
-                  <div className="flex flex-1 items-center gap-3.5 min-w-0">
-                    <div className="w-14 h-14 bg-white rounded-xl border border-white/20 p-1 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div className="flex gap-4 min-w-0 flex-1">
+                    {/* Logo */}
+                    <div className="w-[72px] h-[72px] bg-white rounded-2xl border border-white/20 p-2 flex items-center justify-center flex-shrink-0 shadow-sm">
                       {activeBank?.logo ? (
                         <img src={activeBank.logo} alt="logo" className="w-full h-full object-contain" />
                       ) : (
-                        <span className="text-2xl text-violet-600 font-bold">{store.selectedService?.icon || '📁'}</span>
+                        <span className="text-3xl text-violet-600 font-bold">{store.selectedService?.icon || '📁'}</span>
                       )}
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-red-500 font-black text-lg tracking-wide uppercase truncate">
+                    {/* Info */}
+                    <div className="flex flex-col min-w-0 pt-0.5 justify-center">
+                      <span className="text-violet-400 font-black text-sm tracking-wider uppercase mb-1">
+                        {activeBank?.ten_viet_tat || store.selectedService?.ten_danh_muc || 'CHƯA PHÂN LOẠI'}
+                      </span>
+                      <span className="text-red-500 font-black text-2xl tracking-wider uppercase truncate leading-none mb-1.5">
                         {activeHd?.ma_hop_dong || 'CHƯA CÓ HỢP ĐỒNG'}
                       </span>
                       {activeHd?.chu_hop_dong && (
-                        <span className="text-gray-300 font-bold text-sm truncate mt-0.5">
+                        <span className="text-gray-200 font-medium text-sm truncate">
                           {activeHd.chu_hop_dong}
                         </span>
                       )}
-                      <span className="text-[10px] text-gray-500 font-semibold mt-1 truncate">
-                        {activeBank?.ten_dich_vu || store.selectedService?.ten_danh_muc || 'Chưa phân loại'}
+                      
+                      {/* Badge Loại Hồ Sơ */}
+                      <div className="mt-2.5 flex items-center">
+                        <span className="px-3 py-1 rounded-full bg-[#0d1426] text-green-500 font-bold text-[10px] uppercase shadow-inner border border-green-500/20 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                          {store.loaiHopDongs?.find(l => l.id_loai_hop_dong === activeFile?.id_loai_hop_dong)?.ten_loai || 'TIÊU CHUẨN'}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-gray-500 mt-1 truncate">
+                        {activeBank?.ten_dich_vu || '---'}
                       </span>
                     </div>
                   </div>
+                  {/* Options Menu button */}
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowCol2Menu(!showCol2Menu);
+                    }}
+                    className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all flex-shrink-0"
+                  >
+                    <EllipsisOutlined className="text-lg" />
+                  </button>
+                </div>
+              </div>
+
+              {/* KHU VỰC KHÁCH HÀNG */}
+              <div 
+                className="p-4 rounded-2xl bg-[#131c33]/50 border border-white/5 flex flex-col gap-4 cursor-pointer hover:bg-[#131c33]/70 hover:border-white/10 transition-all group"
+                onClick={() => setShowCustomerModal(true)}
+              >
+                <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+                  <UserOutlined className="text-violet-400 text-lg" />
+                  <span className="font-extrabold text-violet-400 text-sm tracking-wider uppercase">KHÁCH HÀNG</span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <div className="flex gap-8">
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] text-gray-500 font-medium">Loại khách hàng</span>
+                      <span className="text-gray-100 font-bold uppercase text-sm truncate max-w-[150px]">{activeCust?.ho_va_ten || 'KHÁCH LẺ'}</span>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] text-gray-500 font-medium">Số điện thoại</span>
+                      <span className="text-violet-400 font-bold text-sm">{activeCust?.so_dien_thoai || '---'}</span>
+                    </div>
+                  </div>
+                  <button className="w-10 h-10 rounded-full bg-violet-600 flex items-center justify-center text-white shadow-[0_4px_15px_rgba(124,58,237,0.3)] hover:scale-105 active:scale-95 transition-all flex-shrink-0 group-hover:bg-violet-500">
+                    <PhoneOutlined className="text-lg" />
+                  </button>
                 </div>
               </div>
 
