@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabaseClient';
 import useAuthStore from './useAuthStore';
+import { removeVietnameseTones } from '../utils/stringUtils';
 
 const useAppStore = create((set, get) => ({
   classifications: [],
@@ -364,7 +365,7 @@ const useAppStore = create((set, get) => ({
     try {
       const user = useAuthStore.getState().user;
       
-      let filesQuery = supabase.from('vw_ho_so_dich_vu_v2')
+      let filesQuery = supabase.from('vw_ho_so_dich_vu_v3')
         .select('*', { count: 'exact' })
         .order('ngay_sua', { ascending: false });
 
@@ -377,7 +378,8 @@ const useAppStore = create((set, get) => ({
       }
 
       if (searchTerm) {
-        filesQuery = filesQuery.ilike('search_text', `%${searchTerm.toLowerCase()}%`);
+        const cleanSearchTerm = removeVietnameseTones(searchTerm);
+        filesQuery = filesQuery.ilike('search_text_unaccent', `%${cleanSearchTerm}%`);
       }
 
       if (filterCustId) {
