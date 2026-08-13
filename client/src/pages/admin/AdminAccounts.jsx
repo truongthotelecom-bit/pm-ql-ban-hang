@@ -8,7 +8,10 @@ export default function AdminAccounts() {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editingAccountId, setEditingAccountId] = useState(null);
   const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
 
   const fetchData = async () => {
     setLoading(true);
@@ -81,6 +84,65 @@ export default function AdminAccounts() {
     }
   };
 
+  const openEditModal = (acc) => {
+    setEditingAccountId(acc.id_tai_khoan);
+    editForm.setFieldsValue({
+      username: acc.username,
+      ho_ten: acc.ho_ten,
+      id_nhom_quyen: acc.id_nhom_quyen,
+      id_diem_ban: acc.id_diem_ban,
+      is_active: acc.is_active,
+      password: '' // trống nếu không đổi
+    });
+    setIsEditModalVisible(true);
+  };
+
+  const handleEditUser = async (values) => {
+    try {
+      // 1. Cập nhật thông tin profile
+      const { error: profileError } = await supabase
+        .from('tai_khoan_nguoi_dung')
+        .update({
+          username: values.username,
+          ho_ten: values.ho_ten,
+          id_nhom_quyen: values.id_nhom_quyen,
+          id_diem_ban: values.id_diem_ban,
+          is_active: values.is_active
+        })
+        .eq('id_tai_khoan', editingAccountId);
+        
+      if (profileError) throw profileError;
+
+      // 2. Cập nhật mật khẩu nếu có nhập (gọi RPC)
+      if (values.password && values.password.trim() !== '') {
+        if (values.password.length < 6) {
+          throw new Error('Mật khẩu phải từ 6 ký tự trở lên');
+        }
+        
+        const { error: rpcError } = await supabase.rpc('admin_update_user_password', {
+          user_id: editingAccountId,
+          new_password: values.password
+        });
+        
+        if (rpcError) {
+          console.error("RPC Error:", rpcError);
+          // Fallback if RPC is not created yet
+          message.warning('Lưu thông tin thành công, nhưng tính năng Đổi Mật Khẩu cần chạy file SQL (setup_password_rpc.sql) trong Supabase!');
+        } else {
+          message.success('Cập nhật thông tin và mật khẩu thành công!');
+        }
+      } else {
+        message.success('Cập nhật thông tin thành công!');
+      }
+
+      setIsEditModalVisible(false);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      message.error(err.message || 'Lỗi khi cập nhật tài khoản');
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -101,6 +163,7 @@ export default function AdminAccounts() {
               <th className="p-4 text-sm font-semibold text-gray-300">Họ tên</th>
               <th className="p-4 text-sm font-semibold text-gray-300">Quyền hạn (Role)</th>
               <th className="p-4 text-sm font-semibold text-gray-300">Thuộc Điểm Bán</th>
+              <th className="p-4 text-sm font-semibold text-gray-300 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -134,6 +197,15 @@ export default function AdminAccounts() {
                         ...stores.map(s => ({ value: s.id_diem_ban, label: s.ten_diem_ban }))
                       ]}
                     />
+                  </td>
+                  <td className="p-4 text-right">
+                    <Button 
+                      type="text" 
+                      onClick={() => openEditModal(acc)} 
+                      className="text-violet-400 hover:text-violet-300 font-bold bg-violet-900/20 px-4 rounded-lg"
+                    >
+                      Sửa
+                    </Button>
                   </td>
                 </tr>
               ))
@@ -176,6 +248,47 @@ export default function AdminAccounts() {
           <div className="flex justify-end gap-2 mt-6">
             <Button onClick={() => setIsModalVisible(false)}>Hủy</Button>
             <Button type="primary" htmlType="submit" className="bg-violet-600">Tạo Mới</Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* Modal Sửa Tài Khoản */}
+      <Modal
+        title={<span className="text-gray-800">Sửa Tài Khoản & Mật Khẩu</span>}
+        open={isEditModalVisible}
+        onCancel={() => setIsEditModalVisible(false)}
+        footer={null}
+        destroyOnHidden
+      >
+        <Form form={editForm} layout="vertical" onFinish={handleEditUser} className="mt-4">
+          <Form.Item name="username" label="Username" rules={[{ required: true }]}>
+            <Input placeholder="VD: admin_hcm" />
+          </Form.Item>
+          
+          <Form.Item name="password" label="Mật khẩu mới (Bỏ trống nếu không muốn đổi)">
+            <Input.Password placeholder="Tối thiểu 6 ký tự" />
+          </Form.Item>
+          
+          <Form.Item name="ho_ten" label="Họ tên" rules={[{ required: true }]}>
+            <Input placeholder="Nguyễn Văn A" />
+          </Form.Item>
+          
+          <div className="flex gap-4">
+            <Form.Item name="id_nhom_quyen" label="Quyền hạn" className="flex-1">
+              <Select options={[{ value: null, label: 'Chưa phân quyền' }, ...roles.map(r => ({ value: r.id_nhom_quyen, label: r.ten_nhom_quyen }))]} placeholder="Chọn quyền" />
+            </Form.Item>
+            <Form.Item name="id_diem_ban" label="Điểm bán" className="flex-1">
+              <Select options={[{ value: null, label: 'Toàn hệ thống' }, ...stores.map(s => ({ value: s.id_diem_ban, label: s.ten_diem_ban }))]} placeholder="Chọn điểm bán" />
+            </Form.Item>
+          </div>
+
+          <Form.Item name="is_active" label="Hoạt động" valuePropName="checked">
+            <Switch checkedChildren="Bật" unCheckedChildren="Khóa" />
+          </Form.Item>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <Button onClick={() => setIsEditModalVisible(false)}>Hủy</Button>
+            <Button type="primary" htmlType="submit" className="bg-violet-600">Lưu Thay Đổi</Button>
           </div>
         </Form>
       </Modal>
