@@ -1230,7 +1230,7 @@ export default function TransactionHistory() {
 
       {/* FLOATING CALCULATOR BAR */}
       {selectedRows.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[95%] md:w-[700px] animate-in slide-in-from-bottom-5 fade-in duration-300">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[95%] md:w-[900px] animate-in slide-in-from-bottom-5 fade-in duration-300">
           <div className="glass-panel bg-[#0d1426]/95 backdrop-blur-xl border border-violet-500/50 rounded-2xl shadow-[0_10px_40px_rgba(139,92,246,0.3)] p-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex flex-1 justify-between items-center w-full md:w-auto">
               <div className="text-center">
@@ -1239,13 +1239,18 @@ export default function TransactionHistory() {
               </div>
               <div className="h-10 w-[1px] bg-white/10 hidden md:block"></div>
               <div className="text-center">
-                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Tổng Khách Đưa</div>
-                <div className="text-lg font-black text-emerald-400">{formatCurrency(selectedRows.reduce((sum, r) => sum + (r.tx.so_tien_di || 0), 0))}</div>
+                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Tiền Giao Dịch</div>
+                <div className="text-lg font-black text-white">{formatCurrency(selectedRows.reduce((sum, r) => sum + (r.tx.so_tien || 0), 0))}</div>
               </div>
               <div className="h-10 w-[1px] bg-white/10 hidden md:block"></div>
               <div className="text-center">
-                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Hoa hồng</div>
-                <div className="text-lg font-black text-orange-400">{formatCurrency(selectedRows.reduce((sum, r) => sum + (r.tx.phi_dich_vu || 0), 0))}</div>
+                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Phí Dịch Vụ</div>
+                <div className="text-lg font-black text-orange-400">+{formatCurrency(selectedRows.reduce((sum, r) => sum + (r.tx.phi_dich_vu || 0), 0))}</div>
+              </div>
+              <div className="h-10 w-[1px] bg-white/10 hidden md:block"></div>
+              <div className="text-center">
+                <div className="text-[10px] text-emerald-400/80 font-bold uppercase tracking-wider mb-1">Tổng Khách Đưa</div>
+                <div className="text-xl font-black text-emerald-400">{formatCurrency(selectedRows.reduce((sum, r) => sum + (r.tx.so_tien_di || 0), 0))}</div>
               </div>
             </div>
             
