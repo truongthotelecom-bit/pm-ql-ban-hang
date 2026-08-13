@@ -1077,7 +1077,7 @@ export default function Transactions() {
               type="primary"
               onClick={() => {
                 if (activeCust?.id_khach_hang) {
-                  navigate(`/transaction-history?id_khach_hang=${activeCust.id_khach_hang}`);
+                  navigate(`/lich-su?id_khach_hang=${activeCust.id_khach_hang}`);
                 }
               }}
               className="bg-violet-600 hover:bg-violet-500 border-none font-bold text-[10px] xl:text-xs h-7 xl:h-8 px-2 xl:px-4 !rounded-lg shadow-[0_0_15px_rgba(124,58,237,0.3)] flex items-center gap-1.5"
