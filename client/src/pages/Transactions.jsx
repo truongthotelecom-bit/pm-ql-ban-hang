@@ -126,48 +126,44 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, loaiHop
 
         {/* ACTION BAR (Chỉ hiện khi Card đang được chọn) */}
         {isSelected && (
-          <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between animate-in fade-in slide-in-from-top-2 px-1">
+          <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between gap-1.5 animate-in fade-in slide-in-from-top-2">
             <button 
               onClick={(e) => { e.stopPropagation(); onViewFile(); }}
-              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-green-400 transition-colors"
+              className="flex-1 flex flex-col items-center justify-center gap-1 text-blue-400 bg-blue-900/30 border border-blue-500/30 rounded-xl py-1.5 hover:bg-blue-500/30 hover:border-blue-500/60 transition-all shadow-inner shadow-blue-500/10"
             >
-              <InfoCircleOutlined className="text-lg" />
-              <span className="text-[9px] font-medium tracking-wide">Xem</span>
+              <InfoCircleOutlined className="text-base" />
+              <span className="text-[9px] font-extrabold uppercase tracking-wider">Xem</span>
             </button>
-            <div className="w-[1px] h-6 bg-white/5"></div>
             <button 
               onClick={(e) => { e.stopPropagation(); onEditFile(); }}
-              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-blue-400 transition-colors"
+              className="flex-1 flex flex-col items-center justify-center gap-1 text-violet-400 bg-violet-900/30 border border-violet-500/30 rounded-xl py-1.5 hover:bg-violet-500/30 hover:border-violet-500/60 transition-all shadow-inner shadow-violet-500/10"
             >
-              <EditOutlined className="text-lg" />
-              <span className="text-[9px] font-medium tracking-wide">Sửa</span>
+              <EditOutlined className="text-base" />
+              <span className="text-[9px] font-extrabold uppercase tracking-wider">Sửa</span>
             </button>
-            <div className="w-[1px] h-6 bg-white/5"></div>
             <button 
               onClick={(e) => { e.stopPropagation(); onCopyFile(); }}
-              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-teal-400 transition-colors"
+              className="flex-1 flex flex-col items-center justify-center gap-1 text-cyan-400 bg-cyan-900/30 border border-cyan-500/30 rounded-xl py-1.5 hover:bg-cyan-500/30 hover:border-cyan-500/60 transition-all shadow-inner shadow-cyan-500/10"
             >
-              <CopyOutlined className="text-lg" />
-              <span className="text-[9px] font-medium tracking-wide">Copy</span>
+              <CopyOutlined className="text-base" />
+              <span className="text-[9px] font-extrabold uppercase tracking-wider">Copy</span>
             </button>
-            <div className="w-[1px] h-6 bg-white/5"></div>
             <button 
               onClick={(e) => { e.stopPropagation(); onAddTx(); }}
-              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-green-500 transition-colors"
+              className="flex-1 flex flex-col items-center justify-center gap-1 text-green-400 bg-green-900/30 border border-green-500/30 rounded-xl py-1.5 hover:bg-green-500/30 hover:border-green-500/60 transition-all shadow-inner shadow-green-500/10"
             >
-              <PlusOutlined className="text-lg" />
-              <span className="text-[9px] font-medium tracking-wide text-green-500">Giao dịch</span>
+              <PlusOutlined className="text-base" />
+              <span className="text-[9px] font-extrabold uppercase tracking-wider">Giao dịch</span>
             </button>
-            <div className="w-[1px] h-6 bg-white/5"></div>
             <button 
               onClick={(e) => { 
                 e.stopPropagation(); 
                 if (onDeleteFile) onDeleteFile(file); 
               }}
-              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-red-400 transition-colors"
+              className="flex-1 flex flex-col items-center justify-center gap-1 text-red-400 bg-red-900/30 border border-red-500/30 rounded-xl py-1.5 hover:bg-red-500/30 hover:border-red-500/60 transition-all shadow-inner shadow-red-500/10"
             >
-              <DeleteOutlined className="text-lg" />
-              <span className="text-[9px] font-medium tracking-wide text-red-400">Xóa</span>
+              <DeleteOutlined className="text-base" />
+              <span className="text-[9px] font-extrabold uppercase tracking-wider">Xóa</span>
             </button>
           </div>
         )}
