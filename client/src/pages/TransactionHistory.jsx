@@ -374,8 +374,11 @@ export default function TransactionHistory() {
           <div class="invoice-subtitle">Ngày in: ${new Date().toLocaleString('vi-VN')}</div>
           
           <div class="customer-info">
-              <div class="customer-row"><div class="customer-label">Khách hàng:</div><div>${customer.ho_va_ten || 'Khách lẻ'}</div></div>
-              <div class="customer-row"><div class="customer-label">Số điện thoại:</div><div>${customer.so_dien_thoai || ''}</div></div>
+              <div class="customer-row">
+                  <div class="customer-label">Khách hàng:</div>
+                  <div>${customer.ho_va_ten || 'Khách lẻ'}${customer.so_dien_thoai ? ` - SĐT: ${customer.so_dien_thoai}` : ''}</div>
+              </div>
+              ${customer.dia_chi ? `<div class="customer-row"><div class="customer-label">Địa chỉ:</div><div>${customer.dia_chi}</div></div>` : ''}
               <div class="customer-row"><div class="customer-label">Số lượng GD:</div><div>${String(sortedRows.length).padStart(2, '0')} giao dịch</div></div>
           </div>
 
