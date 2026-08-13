@@ -1101,13 +1101,20 @@ export default function TransactionHistory() {
               width: 150,
             },
             {
-              title: 'Hợp đồng / Dịch vụ',
-              key: 'hop_dong_dich_vu',
+              title: 'Dịch vụ',
+              key: 'loai_dich_vu',
+              render: (_, record) => (
+                <span className="text-emerald-400 font-bold uppercase">{record.service?.ten_danh_muc || '---'}</span>
+              ),
+              width: 140,
+            },
+            {
+              title: 'Hợp đồng',
+              key: 'hop_dong',
               render: (_, record) => (
                 <div className="flex flex-col gap-0.5">
                   <span className="text-red-400 font-black tracking-wide whitespace-nowrap">{record.contract?.ma_hop_dong || '---'}</span>
                   <span className="text-gray-100 font-bold uppercase">{record.contract?.chu_hop_dong || '---'}</span>
-                  <span className="text-emerald-400 text-[10px] font-bold uppercase">{record.service?.ten_danh_muc || '---'}</span>
                   {record.bank?.ten_viet_tat && (
                     <span className="text-gray-400 text-[10px] whitespace-nowrap truncate max-w-[200px]" title={`${record.bank.ten_viet_tat} - ${record.bank.ten_dich_vu}`}>
                       {record.bank.ten_viet_tat} - {record.bank.ten_dich_vu}
@@ -1115,7 +1122,7 @@ export default function TransactionHistory() {
                   )}
                 </div>
               ),
-              width: 200,
+              width: 180,
             },
             {
               title: 'Khách hàng',
