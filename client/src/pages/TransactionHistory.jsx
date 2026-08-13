@@ -846,12 +846,11 @@ export default function TransactionHistory() {
 
             {/* Vị trí 6: Trạng thái GD */}
             <Select
-              allowClear
-              placeholder="Tất cả"
               className="flex-1 min-w-[110px]"
-              value={filters.trangThaiId}
-              onChange={v => setFilters({ ...filters, trangThaiId: v })}
+              value={filters.trangThaiId || ''}
+              onChange={v => setFilters({ ...filters, trangThaiId: v === '' ? null : v })}
             >
+              <Option value="">Tất cả</Option>
               {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
                 <Option key={s.id_danh_muc} value={s.id_danh_muc}>{s.icon} {s.ten_danh_muc}</Option>
               ))}
