@@ -1428,9 +1428,6 @@ export default function Transactions() {
                       </div>
                     </div>
                   </div>
-                  <Button type="primary" className="bg-violet-600 hover:bg-violet-500 border-none font-bold shadow-[0_4px_12px_rgba(124,58,237,0.4)] w-full max-w-[240px]" icon={<DownloadOutlined />} onClick={() => handleDownloadQR(col3QrRef)}>
-                    Tải & Chuyển tiền
-                  </Button>
                 </div>
               )}
             </div>
