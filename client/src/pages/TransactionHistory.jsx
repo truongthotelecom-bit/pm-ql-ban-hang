@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, Drawer, App as AntdApp } from 'antd';
-import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons';
+import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
 import { supabase } from '../lib/supabaseClient';
 import MoneyTransferForm from '../components/MoneyTransferForm';
@@ -226,6 +226,131 @@ export default function TransactionHistory() {
     setActiveQrUrl(url);
     setActiveDetail(record);
     setShowQrModal(true);
+  };
+
+  const handlePrintInvoice = (record) => {
+    if (!record || !record.tx) return;
+
+    const fmtVND = (val) => {
+      const num = parseFloat(val || 0);
+      return isNaN(num) ? '0 ₫' : num.toLocaleString('vi-VN') + ' ₫';
+    };
+
+    const bank = record.bank || {};
+    const contract = record.contract || {};
+    const customer = record.customer || {};
+    const service = record.service || {};
+    const tx = record.tx || {};
+
+    const tenDonVi = bank.ten_dich_vu || service.ten_danh_muc || '';
+    const maTaiKhoan = contract.ma_hop_dong || '';
+    const chuTaiKhoan = contract.chu_hop_dong || '';
+    const ngayGD = new Date(tx.thoi_gian_giao_dich || tx.ngay_tao).toLocaleString('vi-VN');
+
+    const sig = store.signature || {};
+    const chuKyText = [
+      sig.ten_cua_hang || '',
+      sig.dia_chi ? 'DC: ' + sig.dia_chi : '',
+      sig.sdt1 ? 'SĐT: ' + sig.sdt1 : '',
+      sig.zalo ? 'Zalo: ' + sig.zalo : '',
+    ].filter(Boolean).join('\n');
+
+    const createPane = (lienName) => `
+    <div class="invoice-pane">
+      <div class="lien-badge">${lienName}</div>
+      <div class="title">BIÊN LAI GIAO DỊCH</div>
+      <div class="dynamic-title">DV: ${service.ten_danh_muc || ''}</div>
+
+      <div class="section-title">⌨ THÔNG TIN THANH TOÁN</div>
+      <div class="data-row"><div class="data-label">- Đơn vị DV</div><div class="data-value">: ${tenDonVi}</div></div>
+      <div class="data-row"><div class="data-label">- Mã TT</div><div class="data-value">: ${maTaiKhoan}</div></div>
+      <div class="data-row"><div class="data-label">- Chủ HĐ</div><div class="data-value">: ${chuTaiKhoan}</div></div>
+
+      <div class="section-title">⌨ THÔNG TIN NGƯỜI GỎI</div>
+      <div class="data-row"><div class="data-label">- Họ và tên</div><div class="data-value">: ${customer.ho_va_ten || 'Khách lẻ'}</div></div>
+      <div class="data-row"><div class="data-label">- Sđt</div><div class="data-value">: ${customer.so_dien_thoai || ''}</div></div>
+
+      <div class="section-title">⌨ THÔNG TIN CHI TIẾT</div>
+      <div class="data-row"><div class="data-label">- Nội dung</div><div class="data-value">: ${tx.noi_dung || ''}</div></div>
+      <div class="data-row"><div class="data-label">- Số tiền</div><div class="data-value">: ${fmtVND(tx.so_tien)}</div></div>
+      <div class="data-row"><div class="data-label">- Phí DV</div><div class="data-value">: ${fmtVND(tx.phi_dich_vu)}</div></div>
+      ${parseFloat(tx.chiet_khau) > 0 ? `<div class="data-row"><div class="data-label">- Giảm</div><div class="data-value">: -${fmtVND(tx.so_tien_giam)}</div></div>` : ''}
+      <div class="data-row total-row"><div class="data-label">- Tổng</div><div class="data-value">: ${fmtVND(tx.so_tien_di)}</div></div>
+      <div class="data-row"><div class="data-label">- Ngày GD</div><div class="data-value">: ${ngayGD}</div></div>
+
+      <div style="flex-grow:1"></div>
+
+      <div class="sign-block">
+        <div class="sign-row">
+          <div class="sign-col"><b>Khách hàng</b><i>(Ký, ghi rõ)</i></div>
+          <div class="sign-col"><b>Nhân viên</b><i>(Ký, ghi rõ)</i></div>
+        </div>
+      </div>
+
+      <div class="contact-box">${chuKyText}</div>
+
+      <div class="service-box">
+        <b>CUNG CẤP DỊCH VỤ</b>
+        <div class="srv-table">
+          <div class="srv-row">
+            <div class="srv-cell">- Thu hộ trả góp, điện, nước</div>
+            <div class="srv-cell">- Trả trước – trả sau</div>
+          </div>
+          <div class="srv-row">
+            <div class="srv-cell">- Chuyển tiền, nhận tiền mặt</div>
+            <div class="srv-cell">- Internet, camera, định vị</div>
+          </div>
+          <div class="srv-row">
+            <div class="srv-cell">- Cấp lại sim Viettel</div>
+            <div class="srv-cell">- Sim số đẹp, 4G–5G</div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-ad">BẢO HIỂM XE MÁY 2 NĂM 100K</div>
+    </div>`;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;width:0;height:0;border:0';
+    document.body.appendChild(iframe);
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Biên lai 2 liên Nửa A4</title>
+    <style>
+      @page { size: A4 portrait; margin: 0; }
+      body { margin:0; font-family: Arial, Helvetica, sans-serif; color:#000; box-sizing:border-box; }
+      .page-container { width:210mm; height:148.5mm; display:flex; flex-direction:row; border-bottom:1px dashed #bbb; }
+      .invoice-pane { width:50%; height:100%; box-sizing:border-box; padding:5mm 8mm; position:relative; display:flex; flex-direction:column; }
+      .invoice-pane:first-child { border-right:1px dashed #666; }
+      .lien-badge { text-align:center; font-size:11px; font-weight:bold; text-transform:uppercase; margin-bottom:4px; color:#555; }
+      .title { text-align:center; font-size:16px; font-weight:bold; text-transform:uppercase; margin-bottom:6px; }
+      .dynamic-title { font-size:13px; font-weight:bold; margin-bottom:6px; text-transform:uppercase; color:#222; border-bottom:1px solid #000; padding-bottom:3px; }
+      .section-title { font-weight:bold; font-size:12px; margin-top:5px; margin-bottom:2px; }
+      .data-row { display:flex; font-size:11px; line-height:1.4; }
+      .data-label { width:65px; flex-shrink:0; }
+      .data-value { font-weight:bold; flex-grow:1; }
+      .total-row .data-value { font-size:12px; }
+      .sign-block { width:100%; margin-bottom:6px; }
+      .sign-row { display:flex; justify-content:space-around; }
+      .sign-col { text-align:center; }
+      .sign-col b { display:block; font-size:11.5px; margin-bottom:1px; }
+      .sign-col i { font-size:10px; color:#555; font-weight:normal; }
+      .contact-box { font-size:10.5px; line-height:1.35; margin-bottom:6px; border-top:1px dashed #ccc; padding-top:4px; white-space:pre-wrap; }
+      .service-box { border:1px solid #000; padding:4px; margin-bottom:6px; border-radius:3px; }
+      .service-box b { display:block; text-align:center; font-size:11px; margin-bottom:3px; }
+      .srv-table { display:table; width:100%; font-size:10px; line-height:1.3; }
+      .srv-row { display:table-row; }
+      .srv-cell { display:table-cell; width:50%; }
+      .footer-ad { text-align:center; font-weight:bold; font-size:12px; }
+    </style></head><body>
+      <div class="page-container">
+        ${createPane('Liên 1: Cửa hàng lưu')}
+        ${createPane('Liên 2: Giao khách hàng')}
+      </div>
+    </body></html>`);
+    doc.close();
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+    setTimeout(() => iframe.remove(), 1500);
   };
 
   const handleEdit = (record) => {
@@ -811,6 +936,14 @@ export default function TransactionHistory() {
                         icon={<FolderOpenOutlined />} 
                         onClick={() => handleGoToWorkspace(record)}
                         className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10"
+                      />
+                    </Tooltip>
+                    <Tooltip title="In Biên Lai">
+                      <Button 
+                        type="text" 
+                        icon={<PrinterOutlined />} 
+                        onClick={() => handlePrintInvoice(record)}
+                        className="text-fuchsia-400 hover:text-fuchsia-300 hover:bg-fuchsia-400/10"
                       />
                     </Tooltip>
                     <Tooltip title="Sửa">
