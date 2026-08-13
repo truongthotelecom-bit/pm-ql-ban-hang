@@ -1073,17 +1073,18 @@ export default function Transactions() {
         <div className="flex-1 flex flex-col min-h-0 space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">THÔNG TIN HỒ SƠ</span>
-            <button 
+            <Button 
+              type="primary"
               onClick={() => {
                 if (activeCust?.id_khach_hang) {
                   navigate(`/transaction-history?id_khach_hang=${activeCust.id_khach_hang}`);
                 }
               }}
-              className="text-gray-400 hover:text-white transition-colors"
+              className="bg-violet-600 hover:bg-violet-500 border-none font-bold text-[10px] xl:text-xs h-7 xl:h-8 px-2 xl:px-4 rounded-xl shadow-[0_0_15px_rgba(124,58,237,0.3)] flex items-center gap-1.5"
               title="Lịch sử giao dịch khách hàng"
             >
-              <HistoryOutlined />
-            </button>
+              <HistoryOutlined /> Lịch sử
+            </Button>
           </div>
 
           {store.isLoadingFiles || store.isLoadingDetails ? (
