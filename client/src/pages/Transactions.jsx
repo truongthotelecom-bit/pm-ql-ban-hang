@@ -1064,11 +1064,15 @@ export default function Transactions() {
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
             <span className="font-extrabold text-white text-xs tracking-wider uppercase">THÔNG TIN HỒ SƠ</span>
             <button 
-              onClick={() => setShowCopyModal(true)}
+              onClick={() => {
+                if (activeCust?.id_khach_hang) {
+                  navigate(`/transaction-history?id_khach_hang=${activeCust.id_khach_hang}`);
+                }
+              }}
               className="text-gray-400 hover:text-white transition-colors"
-              title="Copy thông tin"
+              title="Lịch sử giao dịch khách hàng"
             >
-              <CopyOutlined />
+              <HistoryOutlined />
             </button>
           </div>
 
@@ -1251,10 +1255,10 @@ export default function Transactions() {
                 </Button>
               </Popover>
               <Button 
-                onClick={() => setShowCustHistoryModal(true)}
+                onClick={() => setShowCopyModal(true)}
                 className="flex-1 h-12 bg-[#131c33] border border-white/10 text-white font-bold hover:border-violet-500 hover:text-violet-400 shadow-lg flex items-center justify-center gap-2"
               >
-                <HistoryOutlined /> <span className="hidden sm:inline">LỊCH SỬ</span>
+                <CopyOutlined /> <span className="hidden sm:inline">COPY</span>
               </Button>
             </div>
           )}

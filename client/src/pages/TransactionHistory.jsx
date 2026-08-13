@@ -152,8 +152,14 @@ export default function TransactionHistory() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const id_dich_vu = params.get('id_dich_vu');
-    if (id_dich_vu) {
-      setFilters(prev => ({ ...prev, loaiDichVuId: id_dich_vu }));
+    const id_khach_hang = params.get('id_khach_hang');
+    
+    if (id_dich_vu || id_khach_hang) {
+      setFilters(prev => ({
+        ...prev,
+        ...(id_dich_vu && { loaiDichVuId: id_dich_vu }),
+        ...(id_khach_hang && { khachHangId: id_khach_hang, dateRangeType: DATE_RANGES.ALL }) // Default to ALL to see full customer history
+      }));
     }
   }, [location.search]);
 
