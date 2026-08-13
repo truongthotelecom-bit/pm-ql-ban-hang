@@ -85,16 +85,29 @@ export default function MoneyTransferForm({ value, onChange }) {
     };
 
     // Ưu tiên 1: Cùng hồ sơ
-    lastTx = store.allTransactions?.find(t => t.id_ho_so_dich_vu === idHoSo);
+    let profileTxs = store.transactionDetails || [];
+    if (profileTxs.length === 0 && store.allTransactions) {
+      profileTxs = store.allTransactions.filter(t => t.id_ho_so_dich_vu === idHoSo);
+    }
+    if (profileTxs.length > 0) {
+      const sorted = [...profileTxs].sort((a, b) => new Date(b.thoi_gian_giao_dich || b.ngay_tao || 0) - new Date(a.thoi_gian_giao_dich || a.ngay_tao || 0));
+      lastTx = sorted[0];
+    }
     
     // Ưu tiên 2: Cùng danh mục dịch vụ
     if (!lastTx) {
-      lastTx = store.allTransactions?.find(t => getDanhMucId(t) === idDanhMuc);
+      const dmTxs = store.allTransactions?.filter(t => getDanhMucId(t) === idDanhMuc) || [];
+      if (dmTxs.length > 0) {
+        lastTx = dmTxs.sort((a, b) => new Date(b.thoi_gian_giao_dich || b.ngay_tao || 0) - new Date(a.thoi_gian_giao_dich || a.ngay_tao || 0))[0];
+      }
     }
     
     // Ưu tiên 3: Cùng loại dịch vụ
     if (!lastTx) {
-      lastTx = store.allTransactions?.find(t => getLoaiDichVuId(t) === idLoaiDV);
+      const loaiTxs = store.allTransactions?.filter(t => getLoaiDichVuId(t) === idLoaiDV) || [];
+      if (loaiTxs.length > 0) {
+        lastTx = loaiTxs.sort((a, b) => new Date(b.thoi_gian_giao_dich || b.ngay_tao || 0) - new Date(a.thoi_gian_giao_dich || a.ngay_tao || 0))[0];
+      }
     }
 
     if (lastTx) {
