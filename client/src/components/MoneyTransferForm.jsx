@@ -113,7 +113,7 @@ export default function MoneyTransferForm({ value, onChange }) {
        // Mặc định
        onChange(prev => ({
         ...(prev || {}),
-        loai_cuoc_phi: 'ngoai',
+        loai_cuoc_phi: 'mien_phi',
         is_cuoc_trong: false
       }));
     }
@@ -196,9 +196,7 @@ export default function MoneyTransferForm({ value, onChange }) {
 
       setForm(prev => {
         let newLoaiCuoc = prev.loai_cuoc_phi;
-        if (newPhi > 0 && newLoaiCuoc === 'mien_phi') {
-          newLoaiCuoc = 'ngoai'; // Tự động bật tính phí nếu biểu phí có phí
-        }
+        // Bỏ tự động nhảy sang 'ngoai', giữ nguyên lựa chọn của user hoặc kế thừa
         return { 
           ...prev, 
           phi_dich_vu: newPhi, 
