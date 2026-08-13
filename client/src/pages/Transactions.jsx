@@ -1200,25 +1200,54 @@ export default function Transactions() {
                             store.setSelectedDetail(detail);
                             if (isMobile) setShowMobileTxDetail(true);
                           }}
-                          className={`p-3 rounded-xl border transition-all cursor-pointer flex justify-between items-center ${isSelected ? 'bg-violet-600/5 border-violet-500/30' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}
+                          className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col gap-3 ${isSelected ? 'bg-violet-600/5 border-violet-500/30' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}
                         >
-                          <div>
-                            <span className="text-[9px] text-gray-500 font-bold block">
-                              {new Date(detail.thoi_gian_giao_dich || detail.ngay_tao).toLocaleString('vi-VN')}
-                            </span>
-                            <span className="text-xs text-gray-200 font-bold mt-1 block max-w-[220px] truncate">
-                              {detail.noi_dung}
-                            </span>
+                          <div className="flex justify-between items-center w-full">
+                            <div>
+                              <span className="text-[9px] text-gray-500 font-bold block">
+                                {new Date(detail.thoi_gian_giao_dich || detail.ngay_tao).toLocaleString('vi-VN')}
+                              </span>
+                              <span className="text-xs text-gray-200 font-bold mt-1 block max-w-[220px] truncate">
+                                {detail.noi_dung}
+                              </span>
+                            </div>
+                            
+                            <div className="text-right flex flex-col items-end">
+                              <span className={`text-[13px] font-extrabold block ${getAmountColorClass(detail.id_trang_thai)}`}>
+                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.so_tien_di)}
+                              </span>
+                              <span className="text-[9px] text-gray-400 font-semibold mt-1.5 bg-white/5 px-1.5 py-0.5 rounded border border-white/5 uppercase tracking-wide">
+                                Phí: <span className="text-gray-200">+{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.phi_dich_vu)}</span>
+                              </span>
+                            </div>
                           </div>
-                          
-                          <div className="text-right flex flex-col items-end">
-                            <span className={`text-[13px] font-extrabold block ${getAmountColorClass(detail.id_trang_thai)}`}>
-                              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.so_tien_di)}
-                            </span>
-                            <span className="text-[9px] text-gray-400 font-semibold mt-1.5 bg-white/5 px-1.5 py-0.5 rounded border border-white/5 uppercase tracking-wide">
-                              Phí: <span className="text-gray-200">+{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.phi_dich_vu)}</span>
-                            </span>
-                          </div>
+
+                          {/* 3 buttons below if selected */}
+                          {isSelected && (
+                            <div className="flex gap-2 mt-1 pt-3 border-t border-white/5 w-full">
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); setShowQrModal(true); }}
+                                className="flex-1 flex flex-col items-center justify-center gap-1 text-blue-400 bg-blue-900/30 border border-blue-500/30 rounded-xl py-1.5 hover:bg-blue-500/30 hover:border-blue-500/60 transition-all shadow-inner shadow-blue-500/10"
+                              >
+                                <QrcodeOutlined className="text-base" />
+                                <span className="text-[9px] font-extrabold uppercase tracking-wider">Tạo QR</span>
+                              </button>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handlePrintInvoice(); }}
+                                className="flex-1 flex flex-col items-center justify-center gap-1 text-fuchsia-400 bg-fuchsia-900/30 border border-fuchsia-500/30 rounded-xl py-1.5 hover:bg-fuchsia-500/30 hover:border-fuchsia-500/60 transition-all shadow-inner shadow-fuchsia-500/10"
+                              >
+                                <PrinterOutlined className="text-base" />
+                                <span className="text-[9px] font-extrabold uppercase tracking-wider">In hóa đơn</span>
+                              </button>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); setEditDetailPayload(detail); setShowEditDetailModal(true); }}
+                                className="flex-1 flex flex-col items-center justify-center gap-1 text-violet-400 bg-violet-900/30 border border-violet-500/30 rounded-xl py-1.5 hover:bg-violet-500/30 hover:border-violet-500/60 transition-all shadow-inner shadow-violet-500/10"
+                              >
+                                <EditOutlined className="text-base" />
+                                <span className="text-[9px] font-extrabold uppercase tracking-wider">Sửa GD</span>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       );
                     })
