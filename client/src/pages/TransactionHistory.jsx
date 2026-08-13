@@ -729,6 +729,26 @@ export default function TransactionHistory() {
 
   const visibleTransactions = filteredTransactions.slice(0, displayCount);
 
+  const hasActiveFilters = filters.nhomMenuId !== null 
+    || filters.loaiDichVuId !== null 
+    || filters.danhMucId !== null 
+    || filters.khachHangId !== null 
+    || filters.trangThaiId !== null 
+    || filters.dateRangeType !== DATE_RANGES.TODAY 
+    || filters.customDateRange !== null;
+
+  const handleClearFilters = () => {
+    setFilters({
+      nhomMenuId: null,
+      loaiDichVuId: null,
+      danhMucId: null,
+      khachHangId: null,
+      trangThaiId: null,
+      dateRangeType: DATE_RANGES.TODAY,
+      customDateRange: null
+    });
+  };
+
   const handleExportExcel = (onlySelected = false) => {
     const rowsToExport = onlySelected ? selectedRows : filteredTransactions;
     if (rowsToExport.length === 0) {
@@ -836,6 +856,16 @@ export default function TransactionHistory() {
             >
               Bộ lọc
             </Button>
+            {hasActiveFilters && (
+              <Button 
+                type="text" 
+                danger
+                onClick={handleClearFilters}
+                className="font-bold bg-red-500/10 hover:bg-red-500/20"
+              >
+                Xóa lọc
+              </Button>
+            )}
             
             {/* Vị trí 5: Từ ngày đến ngày (Desktop) */}
             {filters.dateRangeType === DATE_RANGES.CUSTOM && (
@@ -871,6 +901,16 @@ export default function TransactionHistory() {
                 onClick={() => setMobileFilterType('advanced')}
                 className="bg-violet-600 border-none font-bold shadow-md rounded-xl h-10"
               />
+              {hasActiveFilters && (
+                <Button 
+                  type="text" 
+                  danger
+                  onClick={handleClearFilters}
+                  className="font-bold bg-red-500/10 hover:bg-red-500/20 rounded-xl h-10 px-3"
+                >
+                  Xóa
+                </Button>
+              )}
             </div>
             
             {/* Vị trí 5: Từ ngày đến ngày (Mobile) - Hiển thị ngay dưới các nút Lọc */}
