@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { createClient } from '@supabase/supabase-js';
-import { Select, message, Modal, Form, Input, Button, Switch } from 'antd';
+import { Select, message, Modal, Form, Input, Button, Switch, Popconfirm } from 'antd';
 
 export default function AdminAccounts() {
   const [accounts, setAccounts] = useState([]);
@@ -151,6 +151,26 @@ export default function AdminAccounts() {
     }
   };
 
+  const handleDeleteUser = async (accountId) => {
+    try {
+      const { error } = await supabase.rpc('admin_delete_user', {
+        target_user_id: accountId
+      });
+      
+      if (error) {
+        console.error("RPC Error:", error);
+        message.error('Lỗi khi xóa tài khoản. Vui lòng chạy lại file SQL setup_password_rpc.sql trên Supabase!');
+        return;
+      }
+      
+      message.success('Đã xóa tài khoản thành công!');
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      message.error('Đã xảy ra lỗi khi xóa tài khoản.');
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -206,14 +226,30 @@ export default function AdminAccounts() {
                       ]}
                     />
                   </td>
-                  <td className="p-4 text-right">
+                  <td className="p-4 text-right whitespace-nowrap">
                     <Button 
                       type="text" 
                       onClick={() => openEditModal(acc)} 
-                      className="text-violet-400 hover:text-violet-300 font-bold bg-violet-900/20 px-4 rounded-lg"
+                      className="text-violet-400 hover:text-violet-300 font-bold bg-violet-900/20 px-4 rounded-lg mr-2"
                     >
                       Sửa
                     </Button>
+                    <Popconfirm
+                      title="Xóa tài khoản này?"
+                      description="Hành động này không thể hoàn tác!"
+                      onConfirm={() => handleDeleteUser(acc.id_tai_khoan)}
+                      okText="Xóa luôn"
+                      cancelText="Hủy"
+                      okButtonProps={{ danger: true }}
+                    >
+                      <Button 
+                        type="text" 
+                        danger
+                        className="font-bold bg-red-900/20 px-4 rounded-lg"
+                      >
+                        Xóa
+                      </Button>
+                    </Popconfirm>
                   </td>
                 </tr>
               ))
