@@ -1165,7 +1165,7 @@ export default function Transactions() {
 
               {/* KHU VỰC KHÁCH HÀNG */}
               <div 
-                className="p-4 rounded-2xl bg-[#131c33]/50 border border-white/5 flex flex-col gap-4 cursor-pointer hover:bg-[#131c33]/70 hover:border-white/10 transition-all group"
+                className="p-4 rounded-2xl bg-[#131c33]/50 border border-white/5 flex flex-col gap-4 cursor-pointer hover:bg-[#131c33]/70 hover:border-white/10 transition-all group lg:hidden"
                 onClick={() => setShowCustomerModal(true)}
               >
                 <div className="flex items-center gap-2 border-b border-white/5 pb-3">
