@@ -1043,7 +1043,7 @@ export default function Transactions() {
                 setNewFilePayload(prev => ({ ...prev, id_loai_hop_dong: stdType || '' }));
                 setShowNewFileModal(true);
               }}
-              className="h-14 px-6 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center gap-2 shadow-[0_8px_30px_rgb(124,58,237,0.5)] transition-all hover:scale-105 active:scale-95"
+              className="h-14 px-6 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center gap-2 shadow-[0_8px_30px_rgb(124,58,237,0.5)] transition-all hover:scale-105 active:scale-95"
             >
               <PlusOutlined className="text-xl font-bold" />
               <span className="font-extrabold uppercase text-sm">Tạo hồ sơ</span>
@@ -1425,7 +1425,7 @@ export default function Transactions() {
                   return (
                     <button
                       onClick={() => { setShowCol3StatusMenu(!showCol3StatusMenu); setShowCol3Menu(false); }}
-                      className={`h-14 px-5 rounded-full flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 ${showCol3StatusMenu ? 'bg-[#131c33] text-white border border-white/20' : `bg-gradient-to-tr ${statusColorClass} text-white`}`}
+                      className={`h-14 px-5 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 ${showCol3StatusMenu ? 'bg-[#131c33] text-white border border-white/20' : `bg-gradient-to-tr ${statusColorClass} text-white`}`}
                     >
                       {showCol3StatusMenu ? <span className="text-xl font-bold rotate-45 transition-transform w-[90px] text-center">✕</span> : (
                         <>
@@ -1455,7 +1455,7 @@ export default function Transactions() {
                 )}
                 <button
                   onClick={() => { setShowCol3Menu(!showCol3Menu); setShowCol3StatusMenu(false); }}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(59,130,246,0.5)] transition-all hover:scale-105 active:scale-95 ${showCol3Menu ? 'bg-[#131c33] text-white border border-white/20' : 'bg-gradient-to-tr from-blue-600 to-indigo-500 text-white hover:from-blue-500 hover:to-indigo-400'}`}
+                  className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-[0_8px_30px_rgb(59,130,246,0.5)] transition-all hover:scale-105 active:scale-95 ${showCol3Menu ? 'bg-[#131c33] text-white border border-white/20' : 'bg-gradient-to-tr from-blue-600 to-indigo-500 text-white hover:from-blue-500 hover:to-indigo-400'}`}
                 >
                   {showCol3Menu ? <span className="text-xl font-bold rotate-45 transition-transform">✕</span> : <span className="text-2xl font-bold transition-transform">⚙️</span>}
                 </button>
