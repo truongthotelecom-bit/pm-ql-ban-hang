@@ -1,8 +1,8 @@
 // Force HMR
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, Drawer, App as AntdApp } from 'antd';
-import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined, DownloadOutlined } from '@ant-design/icons';
+import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, Drawer, App as AntdApp, Dropdown, FloatButton } from 'antd';
+import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined, DownloadOutlined, FileExcelOutlined, CheckSquareOutlined } from '@ant-design/icons';
 import { numberToWords } from '../utils/stringUtils';
 import useAppStore from '../store/useAppStore';
 import { supabase } from '../lib/supabaseClient';
@@ -713,13 +713,17 @@ export default function TransactionHistory() {
 
   const visibleTransactions = filteredTransactions.slice(0, displayCount);
 
-  const handleExportExcel = () => {
-    if (selectedRows.length === 0) return;
+  const handleExportExcel = (onlySelected = false) => {
+    const rowsToExport = onlySelected ? selectedRows : filteredTransactions;
+    if (rowsToExport.length === 0) {
+      message.warning('Không có dữ liệu để xuất Excel!');
+      return;
+    }
     
     // Header CSV
     const headers = ['Thời gian', 'Mã HĐ', 'Chủ HĐ', 'Dịch vụ', 'Khách hàng', 'SĐT', 'Số tiền khách đưa', 'Hoa hồng (Phí DV)', 'Trạng thái'];
     
-    const rows = selectedRows.map(record => {
+    const rows = rowsToExport.map(record => {
       const trangThai = store.categories.find(c => c.id_danh_muc === record.tx.id_trang_thai)?.ten_danh_muc || '';
       return [
         fmtDate(record.tx.thoi_gian_giao_dich || record.tx.ngay_tao),
@@ -1518,7 +1522,7 @@ export default function TransactionHistory() {
               </Button>
               <Button 
                 type="primary"
-                onClick={handleExportExcel}
+                onClick={() => handleExportExcel(true)}
                 icon={<DownloadOutlined />}
                 className="flex-1 md:flex-none bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 border-none shadow-lg shadow-emerald-500/20 rounded-xl font-bold h-10"
               >
@@ -1539,6 +1543,33 @@ export default function TransactionHistory() {
           </div>
         </div>
       )}
+      <Dropdown 
+        menu={{ 
+          items: [
+            {
+              key: 'filtered',
+              label: 'Xuất tất cả giao dịch (theo bộ lọc)',
+              icon: <FilterOutlined />,
+              onClick: () => handleExportExcel(false)
+            },
+            {
+              key: 'selected',
+              label: 'Xuất các giao dịch đang chọn',
+              icon: <CheckSquareOutlined />,
+              disabled: selectedRows.length === 0,
+              onClick: () => handleExportExcel(true)
+            }
+          ]
+        }} 
+        placement="topLeft"
+      >
+        <FloatButton
+          icon={<FileExcelOutlined />}
+          type="primary"
+          style={{ right: 24, bottom: selectedRows.length > 0 ? 100 : 24 }}
+          tooltip="Xuất Excel"
+        />
+      </Dropdown>
 
     </div>
   );
