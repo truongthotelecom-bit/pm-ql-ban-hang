@@ -271,7 +271,16 @@ export default function TransactionHistory() {
         year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
       });
       const dichVu = service.ten_danh_muc || '';
-      const maHD = contract.ma_hop_dong || '';
+      const maHD = contract.ma_hop_dong || '---';
+      const chuHD = contract.chu_hop_dong || '---';
+      const tenVietTat = r.bank?.ten_viet_tat || '';
+      
+      const hopDongHtml = `
+        <div style="font-weight: bold; color: #dc2626;">${maHD}</div>
+        <div style="font-weight: bold;">${chuHD}</div>
+        ${tenVietTat ? `<div style="font-size: 11px; color: #666;">${tenVietTat}</div>` : ''}
+      `;
+
       const tienGD = parseFloat(tx.so_tien || 0);
       const phiDV = parseFloat(tx.phi_dich_vu || 0);
       const thanhTien = parseFloat(tx.so_tien_di || 0) + (parseFloat(tx.phi_dich_vu || 0));
@@ -284,7 +293,7 @@ export default function TransactionHistory() {
           <td class="col-stt">${index + 1}</td>
           <td>${ngayGD}</td>
           <td>${dichVu}</td>
-          <td>${maHD}</td>
+          <td>${hopDongHtml}</td>
           <td class="col-money">${fmtVND(tx.so_tien_di)}</td>
           <td class="col-money">${fmtVND(phiDV)}</td>
           <td class="col-money">${fmtVND(thanhTien)}</td>
