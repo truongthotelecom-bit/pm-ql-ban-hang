@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, Drawer, App as AntdApp, Dropdown, FloatButton } from 'antd';
-import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined, DownloadOutlined, FileExcelOutlined, CheckSquareOutlined } from '@ant-design/icons';
+import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined, DownloadOutlined, FileExcelOutlined, CheckSquareOutlined, SearchOutlined } from '@ant-design/icons';
 import { numberToWords } from '../utils/stringUtils';
 import useAppStore from '../store/useAppStore';
 import { supabase } from '../lib/supabaseClient';
@@ -881,37 +881,49 @@ export default function TransactionHistory() {
             )}
           </div>
 
-          {/* MOBILE FILTERS (Buttons to open Drawer) */}
-          <div className="flex flex-col md:hidden gap-2">
-            <div className="flex items-center gap-2">
-              <Button 
-                className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10 truncate px-2" 
-                onClick={() => setMobileFilterType('time')}
-              >
-                {filters.dateRangeType === DATE_RANGES.CUSTOM ? 'Tùy chỉnh...' : DATE_RANGE_OPTIONS.find(o => o.value === filters.dateRangeType)?.label || 'Thời gian...'}
-              </Button>
-              <Button 
-                className="flex-1 bg-[#131b33] border-white/10 text-gray-300 rounded-xl h-10 truncate px-2"
-                onClick={() => setMobileFilterType('status')}
-              >
-                {filters.trangThaiId ? (store.categories.find(c => c.id_danh_muc === filters.trangThaiId)?.ten_danh_muc || 'Trạng thái...') : 'Tất cả trạng thái'}
-              </Button>
-              <Button 
-                type="primary" 
-                icon={<FilterOutlined />} 
-                onClick={() => setMobileFilterType('advanced')}
-                className="bg-violet-600 border-none font-bold shadow-md rounded-xl h-10"
-              />
-              {hasActiveFilters && (
-                <Button 
-                  type="text" 
-                  danger
-                  onClick={handleClearFilters}
-                  className="font-bold bg-red-500/10 hover:bg-red-500/20 rounded-xl h-10 px-3"
-                >
-                  Xóa
-                </Button>
-              )}
+          {/* MOBILE HEADER & CHIPS */}
+          <div className="flex flex-col md:hidden gap-3 mb-2">
+            <div className="flex justify-between items-center mb-1">
+               <h1 className="text-[17px] font-black text-white uppercase tracking-wider">Lịch sử giao dịch</h1>
+               <div className="flex items-center gap-2">
+                 <Button type="text" icon={<SearchOutlined />} className="text-gray-400 bg-white/5 hover:bg-white/10 rounded-full w-9 h-9 flex items-center justify-center" />
+                 <Button type="primary" icon={<FilterOutlined />} className="bg-violet-600 hover:bg-violet-500 border-none rounded-full w-9 h-9 shadow-[0_4px_12px_rgba(124,58,237,0.4)] flex items-center justify-center" onClick={() => setMobileFilterType('advanced')} />
+                 {hasActiveFilters && (
+                   <Button type="text" danger onClick={handleClearFilters} className="font-bold bg-red-500/10 hover:bg-red-500/20 rounded-full w-9 h-9 flex items-center justify-center px-0">Xóa</Button>
+                 )}
+               </div>
+            </div>
+
+            {/* Row 1: Thời gian */}
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
+               {DATE_RANGE_OPTIONS.map(opt => (
+                  <div 
+                     key={opt.value}
+                     onClick={() => setFilters({ ...filters, dateRangeType: opt.value, customDateRange: null })}
+                     className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors ${filters.dateRangeType === opt.value ? 'bg-violet-600/90 text-white shadow-[0_4px_12px_rgba(124,58,237,0.3)]' : 'bg-[#131b33] text-gray-400 hover:bg-white/10'}`}
+                  >
+                     {opt.label}
+                  </div>
+               ))}
+            </div>
+            
+            {/* Row 2: Trạng thái */}
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
+               <div 
+                  onClick={() => setFilters({ ...filters, trangThaiId: null })}
+                  className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors border ${!filters.trangThaiId ? 'bg-white/10 border-white/20 text-white' : 'bg-[#131b33] border-white/5 text-gray-400 hover:bg-white/10'}`}
+               >
+                  Tất cả trạng thái
+               </div>
+               {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
+                  <div 
+                     key={s.id_danh_muc}
+                     onClick={() => setFilters({ ...filters, trangThaiId: s.id_danh_muc })}
+                     className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors border flex items-center gap-1.5 ${filters.trangThaiId === s.id_danh_muc ? 'bg-white/10 border-white/20 text-white' : 'bg-[#131b33] border-white/5 text-gray-400 hover:bg-white/10'}`}
+                  >
+                     {s.ten_danh_muc}
+                  </div>
+               ))}
             </div>
             
             {/* Vị trí 5: Từ ngày đến ngày (Mobile) - Hiển thị ngay dưới các nút Lọc */}
@@ -1465,22 +1477,19 @@ export default function TransactionHistory() {
       </div>
 
       {/* 4. VÙNG TỔNG CỘNG DƯỚI CÙNG (MOBILE ONLY) */}
-      <div className="md:hidden fixed bottom-[75px] left-3 right-3 z-40 flex flex-col gap-1.5 pointer-events-none">
-        {/* Row 1: Tổng tiền */}
-        <div className="flex justify-between items-center">
-          <span className="text-violet-400 text-[11px] font-bold uppercase tracking-wider bg-[#0d1426]/70 backdrop-blur-md px-2 py-1 rounded-lg">Tổng tiền GD</span>
-          <span className="text-white font-black text-lg bg-[#0d1426]/70 backdrop-blur-md px-2 py-0.5 rounded-lg">{formatCurrency(totalAmount)}</span>
-        </div>
-        {/* Row 2: Phí */}
-        <div className="flex justify-between items-center">
-          <span className="text-orange-400 text-[11px] font-bold uppercase tracking-wider bg-[#0d1426]/70 backdrop-blur-md px-2 py-1 rounded-lg">Tổng phí DV</span>
-          <span className="text-white font-black text-lg bg-[#0d1426]/70 backdrop-blur-md px-2 py-0.5 rounded-lg">{formatCurrency(totalFee)}</span>
-        </div>
-        {/* Row 3: Số lượng */}
-        <div className="flex justify-between items-center">
-          <span className="text-green-400 text-[11px] font-bold uppercase tracking-wider bg-[#0d1426]/70 backdrop-blur-md px-2 py-1 rounded-lg">Số lượng GD</span>
-          <span className="text-white font-black text-lg bg-[#0d1426]/70 backdrop-blur-md px-2 py-0.5 rounded-lg">{validTransactions.length}</span>
-        </div>
+      <div className="md:hidden fixed bottom-[75px] left-3 right-3 z-40 bg-[#090e1a]/95 backdrop-blur-xl border border-white/10 rounded-2xl py-3 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex justify-between items-center divide-x divide-white/10 pointer-events-none">
+         <div className="flex-1 flex flex-col items-center justify-center">
+            <span className="text-gray-400 text-[9px] uppercase font-bold tracking-wider mb-1">Tổng tiền GD</span>
+            <span className="text-violet-400 font-black text-[13px] tracking-wide">{formatCurrency(totalAmount)}</span>
+         </div>
+         <div className="flex-1 flex flex-col items-center justify-center">
+            <span className="text-gray-400 text-[9px] uppercase font-bold tracking-wider mb-1">Tổng phí DV</span>
+            <span className="text-orange-500 font-black text-[13px] tracking-wide">{formatCurrency(totalFee)}</span>
+         </div>
+         <div className="flex-1 flex flex-col items-center justify-center">
+            <span className="text-gray-400 text-[9px] uppercase font-bold tracking-wider mb-1">Số lượng GD</span>
+            <span className="text-green-500 font-black text-[14px]">{validTransactions.length}</span>
+         </div>
       </div>
       </div> {/* Kết thúc Vùng Cuộn Nội Bộ */}
 
