@@ -270,7 +270,7 @@ export default function TransactionHistory() {
       <div class="data-row"><div class="data-label">- Mã TT</div><div class="data-value">: ${maTaiKhoan}</div></div>
       <div class="data-row"><div class="data-label">- Chủ HĐ</div><div class="data-value">: ${chuTaiKhoan}</div></div>
 
-      <div class="section-title">⌨ THÔNG TIN NGƯỜI GỎI</div>
+      <div class="section-title">⌨ THÔNG TIN NGƯỜI GỬI</div>
       <div class="data-row"><div class="data-label">- Họ và tên</div><div class="data-value">: ${customer.ho_va_ten || 'Khách lẻ'}</div></div>
       <div class="data-row"><div class="data-label">- Sđt</div><div class="data-value">: ${customer.so_dien_thoai || ''}</div></div>
 

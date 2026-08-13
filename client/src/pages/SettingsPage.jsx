@@ -9,6 +9,7 @@ export default function SettingsPage() {
   const [sigAddress, setSigAddress] = useState('');
   const [sigPhone, setSigPhone] = useState('');
   const [sigTitle, setSigTitle] = useState('');
+  const [sigZalo, setSigZalo] = useState('');
 
   useEffect(() => {
     store.fetchSystemConfig();
@@ -20,6 +21,7 @@ export default function SettingsPage() {
       setSigAddress(store.signature.dia_chi || '');
       setSigPhone(store.signature.sdt1 || '');
       setSigTitle(store.signature.ten_chu_ky || '');
+      setSigZalo(store.signature.zalo || '');
     }
   }, [store.signature]);
 
@@ -29,7 +31,8 @@ export default function SettingsPage() {
         ten_cua_hang: shopName,
         dia_chi: sigAddress,
         sdt1: sigPhone,
-        ten_chu_ky: sigTitle
+        ten_chu_ky: sigTitle,
+        zalo: sigZalo
       });
       message.success('Cập nhật thông tin chữ ký hóa đơn thành công!');
     } catch (error) {
@@ -60,6 +63,10 @@ export default function SettingsPage() {
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-semibold text-gray-400">Đại diện ký tên in ấn *</label>
           <Input value={sigTitle} onChange={e => setSigTitle(e.target.value)} placeholder="Kế toán trưởng/Thu ngân..." />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-gray-400">Số Zalo hỗ trợ (Tùy chọn)</label>
+          <Input value={sigZalo} onChange={e => setSigZalo(e.target.value)} placeholder="Nhập số Zalo (để trống nếu không muốn in)" />
         </div>
         <Button type="primary" onClick={handleSaveSettings} className="bg-violet-600 hover:bg-violet-700 w-full mt-2 font-bold py-2 rounded-lg border-none">
           Lưu cấu hình chữ ký hóa đơn
