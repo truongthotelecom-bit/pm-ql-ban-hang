@@ -1282,13 +1282,14 @@ export default function Transactions() {
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
             <span className="font-extrabold text-white text-base xl:text-xs tracking-wider uppercase">CHI TIẾT GIAO DỊCH</span>
             <div className="flex items-center gap-2">
-              <button 
+              <Button 
+                type="primary"
                 onClick={() => setShowCopyModal(true)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="bg-cyan-600 hover:bg-cyan-500 border-none font-bold text-[10px] xl:text-xs h-7 xl:h-8 px-2 xl:px-4 !rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-1.5"
                 title="Copy thông tin"
               >
-                <CopyOutlined />
-              </button>
+                <CopyOutlined /> COPY
+              </Button>
               <button 
                 onClick={() => setShowMobileTxDetail(false)}
                 className="xl:hidden w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white font-bold active:scale-95"
