@@ -29,7 +29,7 @@ import MoneyTransferForm from '../components/MoneyTransferForm';
 import SearchableDropdown from '../components/SearchableDropdown';
 import { adminCategoriesConfig } from '../config/adminConfig';
 
-const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFallback, onSelectMobile, onSelectDesktop, onAddTx, onEditFile, onViewFile, onCopyFile, onDeleteFile }) => {
+const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, loaiHopDongText, iconFallback, onSelectMobile, onSelectDesktop, onAddTx, onEditFile, onViewFile, onCopyFile, onDeleteFile }) => {
   const lastDateObj = file._lastTxDate || (file.ngay_tao ? new Date(file.ngay_tao) : new Date());
   const diffDays = (new Date().getTime() - lastDateObj.getTime()) / (1000 * 60 * 60 * 24);
   let dotColorClass = "bg-red-500 shadow-red-500/50";
@@ -84,9 +84,17 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFal
               <span className={`text-red-500 font-black tracking-wider uppercase truncate leading-none ${isSelected ? 'text-xl mb-1' : 'text-sm mb-0.5'}`}>
                 {hd?.ma_hop_dong || 'CHƯA CÓ HỢP ĐỒNG'}
               </span>
-              <span className={`text-gray-200 font-medium truncate ${isSelected ? 'text-sm' : 'text-xs'}`}>
-                {hd?.chu_hop_dong || '—'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`text-gray-200 font-medium truncate ${isSelected ? 'text-sm' : 'text-xs'}`}>
+                  {hd?.chu_hop_dong || '—'}
+                </span>
+                {isSelected && (
+                  <span className="px-2 py-0.5 rounded-full bg-[#0d1426] text-green-500 font-bold text-[8px] uppercase shadow-inner border border-green-500/20 flex items-center gap-1">
+                    <span className="w-1 h-1 rounded-full bg-green-500"></span>
+                    {loaiHopDongText}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -994,6 +1002,7 @@ export default function Transactions() {
                 const hd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === file.id_ma_hop_dong) || file.ma_hop_dong;
                 const bank = store.banks.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
                 const isSelected = store.selectedServiceFile?.id_ho_so_dich_vu === file.id_ho_so_dich_vu;
+                const loaiHopDongText = store.loaiHopDongs?.find(l => l.id_loai_hop_dong === file.id_loai_hop_dong)?.ten_loai || 'TIÊU CHUẨN';
                 
                 return (
                   <MemoizedFileCard
@@ -1003,6 +1012,7 @@ export default function Transactions() {
                     hd={hd}
                     bank={bank}
                     isSelected={isSelected}
+                    loaiHopDongText={loaiHopDongText}
                     iconFallback={store.selectedService?.icon || '📁'}
                     onSelectMobile={handleSelectMobile}
                     onSelectDesktop={handleSelectDesktop}
