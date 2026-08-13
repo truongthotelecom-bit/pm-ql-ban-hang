@@ -143,6 +143,7 @@ export default function TransactionDrawer({ open, onClose }) {
       width={600}
       onClose={onClose}
       open={open}
+      destroyOnClose={true}
       className="glass-panel"
       classNames={{ body: '!px-2 sm:!px-6 !py-4' }}
       footer={

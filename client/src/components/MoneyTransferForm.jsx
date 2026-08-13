@@ -111,7 +111,7 @@ export default function MoneyTransferForm({ value, onChange }) {
     }
 
     if (lastTx) {
-      const isMienPhi = lastTx.phi_dich_vu === 0 || !lastTx.phi_dich_vu;
+      const isMienPhi = !lastTx.phi_dich_vu || Number(lastTx.phi_dich_vu) === 0;
       const inheritedLoaiCuoc = isMienPhi ? 'mien_phi' : (lastTx.is_cuoc_trong ? 'trong' : 'ngoai');
       
       onChange(prev => ({
