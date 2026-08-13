@@ -493,6 +493,38 @@ export default function TransactionHistory() {
 
   const visibleTransactions = filteredTransactions.slice(0, displayCount);
 
+  const handleExportExcel = () => {
+    if (selectedRows.length === 0) return;
+    
+    // Header CSV
+    const headers = ['Thời gian', 'Mã HĐ', 'Chủ HĐ', 'Dịch vụ', 'Khách hàng', 'SĐT', 'Số tiền khách đưa', 'Hoa hồng (Phí DV)', 'Trạng thái'];
+    
+    const rows = selectedRows.map(record => {
+      const trangThai = store.categories.find(c => c.id_danh_muc === record.tx.id_trang_thai)?.ten_danh_muc || '';
+      return [
+        fmtDate(record.tx.thoi_gian_giao_dich || record.tx.ngay_tao),
+        record.contract?.ma_hop_dong || '',
+        record.contract?.chu_hop_dong || '',
+        record.bank?.ten_viet_tat ? `${record.bank.ten_viet_tat} - ${record.bank.ten_dich_vu}` : record.service?.ten_danh_muc || '',
+        record.customer?.ho_va_ten || 'Khách lẻ',
+        record.customer?.so_dien_thoai || '',
+        record.tx.so_tien_di || 0,
+        record.tx.phi_dich_vu || 0,
+        trangThai
+      ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(',');
+    });
+    
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `GiaoDich_${new Date().getTime()}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="flex flex-col gap-6 h-[calc(100vh-100px)] md:h-[calc(100vh-140px)] flex-1 min-h-0">
 
