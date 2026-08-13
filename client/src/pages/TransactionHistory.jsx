@@ -126,6 +126,14 @@ export default function TransactionHistory() {
   const { message } = AntdApp.useApp();
   const qrRef = useRef(null);
 
+  const getStatusStyle = (statusId) => {
+    const statusName = store.categories.find(c => c.id_danh_muc === statusId)?.ten_danh_muc?.toLowerCase() || '';
+    if (statusName.includes('hoàn thành')) return 'bg-green-600/30 border-green-500/50';
+    if (statusName.includes('xử lý')) return 'bg-orange-600/30 border-orange-500/50';
+    if (statusName.includes('lỗi') || statusName.includes('hủy')) return 'bg-red-600/30 border-red-500/50';
+    return 'bg-black/40 border-white/5';
+  };
+
   // States cho các chức năng quản lý
   const [showQrModal, setShowQrModal] = useState(false);
   const [activeQrUrl, setActiveQrUrl] = useState('');
@@ -1247,23 +1255,25 @@ export default function TransactionHistory() {
               key: 'trang_thai',
               render: (_, record) => {
                 return (
-                  <Select
-                    value={record.tx.id_trang_thai}
-                    onChange={(val) => handleStatusChange(record, val)}
-                    className="w-[120px]"
-                    onClick={(e) => e.stopPropagation()}
-                    variant="borderless"
-                    popupClassName="min-w-[150px]"
-                  >
-                    {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
-                      <Option key={s.id_danh_muc} value={s.id_danh_muc}>
-                        <div className="flex items-center gap-1.5 font-bold uppercase text-[10px]">
-                          <span>{s.icon}</span>
-                          <span>{s.ten_danh_muc}</span>
-                        </div>
-                      </Option>
-                    ))}
-                  </Select>
+                  <div className={`rounded-lg border transition-colors inline-block ${getStatusStyle(record.tx.id_trang_thai)}`}>
+                    <Select
+                      value={record.tx.id_trang_thai}
+                      onChange={(val) => handleStatusChange(record, val)}
+                      className="w-[120px]"
+                      onClick={(e) => e.stopPropagation()}
+                      variant="borderless"
+                      popupClassName="min-w-[150px]"
+                    >
+                      {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
+                        <Option key={s.id_danh_muc} value={s.id_danh_muc}>
+                          <div className="flex items-center gap-1.5 font-bold uppercase text-[10px]">
+                            <span>{s.icon}</span>
+                            <span>{s.ten_danh_muc}</span>
+                          </div>
+                        </Option>
+                      ))}
+                    </Select>
+                  </div>
                 );
               },
               width: 130,
@@ -1432,7 +1442,7 @@ export default function TransactionHistory() {
                        <div className="text-[9px] text-orange-400 font-medium tracking-wide">+ Phí: {formatCurrency(item.tx.phi_dich_vu)}</div>
                      )}
                      <div className="mt-2 flex justify-end" onClick={e => e.stopPropagation()}>
-                        <div className="shrink-0 rounded-lg bg-black/40 border border-white/5">
+                        <div className={`shrink-0 rounded-lg border transition-colors ${getStatusStyle(item.tx.id_trang_thai)}`}>
                           <Select
                             value={item.tx.id_trang_thai}
                             onChange={(val) => handleStatusChange(item, val)}
