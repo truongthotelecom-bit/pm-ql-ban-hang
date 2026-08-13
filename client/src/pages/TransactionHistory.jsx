@@ -167,11 +167,14 @@ export default function TransactionHistory() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'chi_tiet_giao_dich' },
         (payload) => {
-          console.log('Realtime change received (History):', payload);
-          store.triggerRefetch();
+          console.log('\u2705 Realtime change received:', payload.eventType);
+          // Gọi lại fetchHistory qua store trực tiếp (không dùng trigger để tránh stale closure)
+          store.fetchHistoryTransactions(null, null);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);

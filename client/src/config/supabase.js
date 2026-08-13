@@ -10,5 +10,11 @@ const supabaseUrl = envUrl || savedUrl;
 const supabaseKey = envKey || savedKey;
 
 export const supabase = (supabaseUrl && supabaseKey) 
-  ? createClient(supabaseUrl, supabaseKey) 
+  ? createClient(supabaseUrl, supabaseKey, {
+      realtime: {
+        params: {
+          eventsPerSecond: 10,
+        },
+      },
+    }) 
   : null;
