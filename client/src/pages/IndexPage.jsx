@@ -176,7 +176,7 @@ export default function IndexPage() {
         {/* HEADER */}
         <header className="hidden md:flex justify-between items-center bg-[#0d1426]/40 backdrop-blur border border-white/5 rounded-2xl p-4 sm:px-6 shadow-sm">
           <div>
-            <h2 className="text-xl font-bold text-gray-100 capitalize">Phân hệ {getPageTitle()}</h2>
+            <h2 className="text-xl font-bold text-gray-100 uppercase">{getPageTitle()}</h2>
             <p className="text-xs text-gray-400 mt-0.5">Hệ thống chuyển khoản chi tiết & định dạng in hóa đơn nhanh</p>
           </div>
           <div className="flex items-center gap-4">

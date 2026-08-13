@@ -882,7 +882,7 @@ export default function Transactions() {
               ? <img src={store.selectedService.icon} alt="icon" className="h-6 w-6 object-contain" />
               : <span className="text-lg">{store.selectedService?.icon || '📁'}</span>
             }
-            <span className="font-extrabold text-white text-xs tracking-wider uppercase">{store.selectedService?.ten_danh_muc || 'TẤT CẢ DỊCH VỤ'} - DANH SÁCH HỒ SƠ</span>
+            <span className="font-extrabold text-white text-xs tracking-wider uppercase">DANH SÁCH HỒ SƠ</span>
           </div>
           <div className="flex gap-1.5">
             <Button 
