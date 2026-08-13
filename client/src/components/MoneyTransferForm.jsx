@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Input, InputNumber, Select, Switch, Button, Divider, Alert, Radio, Popover } from 'antd';
 import { SwapOutlined, CheckCircleOutlined, DollarOutlined, RetweetOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
@@ -62,8 +62,18 @@ export default function MoneyTransferForm({ value, onChange }) {
   }, [activeFile?.id_loai_hop_dong, activeContract?.id_danh_muc_dich_vu]);
 
   // Tự động điền hình thức thanh toán & chế độ phí từ giao dịch gần nhất
+  const hasInherited = useRef(false);
+
   useEffect(() => {
-    if (!activeFile || Object.keys(value || {}).length > 1) return; // Chỉ tự động điền khi là tạo mới
+    // Reset khi đổi hồ sơ
+    hasInherited.current = false;
+  }, [activeFile?.id_ho_so_dich_vu]);
+
+  useEffect(() => {
+    // Chỉ chạy nếu chưa kế thừa thành công, và đang tạo mới
+    if (!activeFile || hasInherited.current) return;
+    // Nếu value đã có > 2 fields (tức là người dùng đang sửa hoặc đã điền), bỏ qua
+    if (Object.keys(value || {}).length > 2) return;
 
     const idLoaiDV = store.banks?.find(b => b.id_danh_muc_dich_vu === activeContract?.id_danh_muc_dich_vu)?.id_loai_dich_vu;
     const idHoSo = activeFile?.id_ho_so_dich_vu;
@@ -84,10 +94,10 @@ export default function MoneyTransferForm({ value, onChange }) {
       return hd?.id_danh_muc_dich_vu;
     };
 
-    // Ưu tiên 1: Cùng hồ sơ
-    let profileTxs = store.transactionDetails || [];
-    if (profileTxs.length === 0 && store.allTransactions) {
-      profileTxs = store.allTransactions.filter(t => t.id_ho_so_dich_vu === idHoSo);
+    // Ưu tiên 1: Cùng hồ sơ - dùng transactionDetails (đã load từ cột giữa)
+    let profileTxs = (store.transactionDetails || []).filter(t => t.id_ho_so_dich_vu === idHoSo);
+    if (profileTxs.length === 0) {
+      profileTxs = (store.allTransactions || []).filter(t => t.id_ho_so_dich_vu === idHoSo);
     }
     if (profileTxs.length > 0) {
       const sorted = [...profileTxs].sort((a, b) => new Date(b.thoi_gian_giao_dich || b.ngay_tao || 0) - new Date(a.thoi_gian_giao_dich || a.ngay_tao || 0));
@@ -96,7 +106,7 @@ export default function MoneyTransferForm({ value, onChange }) {
     
     // Ưu tiên 2: Cùng danh mục dịch vụ
     if (!lastTx) {
-      const dmTxs = store.allTransactions?.filter(t => getDanhMucId(t) === idDanhMuc) || [];
+      const dmTxs = (store.allTransactions || []).filter(t => getDanhMucId(t) === idDanhMuc);
       if (dmTxs.length > 0) {
         lastTx = dmTxs.sort((a, b) => new Date(b.thoi_gian_giao_dich || b.ngay_tao || 0) - new Date(a.thoi_gian_giao_dich || a.ngay_tao || 0))[0];
       }
@@ -104,7 +114,7 @@ export default function MoneyTransferForm({ value, onChange }) {
     
     // Ưu tiên 3: Cùng loại dịch vụ
     if (!lastTx) {
-      const loaiTxs = store.allTransactions?.filter(t => getLoaiDichVuId(t) === idLoaiDV) || [];
+      const loaiTxs = (store.allTransactions || []).filter(t => getLoaiDichVuId(t) === idLoaiDV);
       if (loaiTxs.length > 0) {
         lastTx = loaiTxs.sort((a, b) => new Date(b.thoi_gian_giao_dich || b.ngay_tao || 0) - new Date(a.thoi_gian_giao_dich || a.ngay_tao || 0))[0];
       }
@@ -122,15 +132,16 @@ export default function MoneyTransferForm({ value, onChange }) {
         is_cuoc_trong: lastTx.is_cuoc_trong || false,
         loai_cuoc_phi: inheritedLoaiCuoc
       }));
+      hasInherited.current = true; // Đánh dấu đã kế thừa xong
     } else {
-       // Mặc định
+       // Mặc định miễn phí
        onChange(prev => ({
         ...(prev || {}),
         loai_cuoc_phi: 'mien_phi',
         is_cuoc_trong: false
       }));
     }
-  }, [activeFile?.id_ho_so_dich_vu, store.transactionDetails?.length]);
+  }, [activeFile?.id_ho_so_dich_vu, store.transactionDetails?.length, store.allTransactions?.length]);
 
   useEffect(() => {
     if (form.so_tien_giam > 0 && !showDiscount) {
