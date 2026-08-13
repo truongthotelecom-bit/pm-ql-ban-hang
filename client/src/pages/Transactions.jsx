@@ -1426,7 +1426,7 @@ export default function Transactions() {
       </div>
       {/* Dong wrapper cot 3 cho desktop */}
       </div>
-      ), [showMobileDetail, activeDetail, activeFile, activeHd, activeBank, activeCust, store.selectedService, showCol3Menu, showCol3StatusMenu, globalCalculatedTotal, activeQrUrl, currentUser, isSuperAdminOrOwner, store.isLoadingDetails, store.isLoadingFiles, store.transactionDetails])}
+      ), [showMobileTxDetail, showMobileDetail, activeDetail, activeFile, activeHd, activeBank, activeCust, store.selectedService, showCol3Menu, showCol3StatusMenu, globalCalculatedTotal, activeQrUrl, currentUser, isSuperAdminOrOwner, store.isLoadingDetails, store.isLoadingFiles, store.transactionDetails])}
 
 
 
