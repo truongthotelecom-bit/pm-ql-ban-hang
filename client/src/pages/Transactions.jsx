@@ -21,14 +21,15 @@ import {
   KeyOutlined, 
   CheckCircleOutlined, 
   PhoneOutlined,
-  EllipsisOutlined
+  EllipsisOutlined,
+  DeleteOutlined
 } from '@ant-design/icons';
 import TransactionDrawer from '../components/TransactionDrawer';
 import MoneyTransferForm from '../components/MoneyTransferForm';
 import SearchableDropdown from '../components/SearchableDropdown';
 import { adminCategoriesConfig } from '../config/adminConfig';
 
-const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFallback, onSelectMobile, onSelectDesktop, onAddTx, onEditFile, onViewFile, onCopyFile }) => {
+const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFallback, onSelectMobile, onSelectDesktop, onAddTx, onEditFile, onViewFile, onCopyFile, onDeleteFile }) => {
   const lastDateObj = file._lastTxDate || (file.ngay_tao ? new Date(file.ngay_tao) : new Date());
   const diffDays = (new Date().getTime() - lastDateObj.getTime()) / (1000 * 60 * 60 * 24);
   let dotColorClass = "bg-red-500 shadow-red-500/50";
@@ -45,72 +46,70 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFal
             onSelectDesktop(file);
           }
         }}
-        className={`px-3.5 py-3 rounded-xl border transition-all cursor-pointer hover:scale-[1.01] overflow-hidden ${isSelected ? 'bg-violet-600/10 border-violet-500/50 shadow-lg shadow-violet-600/5' : 'bg-[#131c33]/40 border-white/5 hover:border-white/10'}`}
+        className={`px-3 py-3 rounded-xl border transition-all cursor-pointer overflow-hidden ${isSelected ? 'bg-[#0d1426] border-violet-500/80 shadow-[0_0_15px_rgba(139,92,246,0.15)]' : 'bg-[#131c33]/40 border-white/5 hover:border-white/10 hover:bg-[#131c33]/60'}`}
       >
         {/* Dòng trên cùng: Ngày GD cuối (trái) & Ngày tạo (phải) */}
-        <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-white/5 text-[9px] font-medium">
-          <span className="text-violet-400/80 flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full shadow-sm ${dotColorClass}`}></span>
+        <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/5 text-[10px] font-medium">
+          <span className="text-indigo-400 flex items-center gap-2">
+            <span className={`w-2.5 h-2.5 rounded-full shadow-sm ${dotColorClass}`}></span>
             {file._lastTxDate 
-              ? `GD cuối: ${file._lastTxDate.toLocaleDateString('vi-VN')} ${file._lastTxDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
-              : `GD cuối: ${file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}`}
+              ? `${file._lastTxDate.toLocaleDateString('vi-VN')} ${file._lastTxDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
+              : `${file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}`}
           </span>
           <span className="text-gray-500">
             Ngày tạo: {file.ngay_tao ? new Date(file.ngay_tao).toLocaleDateString('vi-VN') : '—'}
           </span>
         </div>
 
-        {/* Dòng giữa: Logo + Thông tin chia 2 bên */}
-        <div className="flex items-center gap-3">
-          {/* Logo dịch vụ */}
-          <div className="flex-shrink-0 w-10 h-10 bg-white rounded-xl border border-white/20 p-1 flex items-center justify-center overflow-hidden shadow-sm">
-            {bank?.logo ? (
-              <img src={bank.logo} alt={bank?.ten_viet_tat} className="w-full h-full object-contain" />
-            ) : (
-              <span className="text-lg text-violet-600 font-bold">{iconFallback}</span>
-            )}
-          </div>
+        {/* Dòng giữa: Logo + Thông tin Hợp Đồng & Khách hàng */}
+        <div className={`flex ${isSelected ? 'flex-col gap-2' : 'justify-between items-center gap-2'} mb-1`}>
+          {/* Trái (Contract Info) */}
+          <div className="flex items-center gap-3.5 min-w-0">
+            {/* Logo dịch vụ */}
+            <div className={`flex-shrink-0 bg-white rounded-xl flex items-center justify-center overflow-hidden ${isSelected ? 'w-14 h-14 p-1.5' : 'w-10 h-10 p-1'}`}>
+              {bank?.logo ? (
+                <img src={bank.logo} alt={bank?.ten_viet_tat} className="w-full h-full object-contain" />
+              ) : (
+                <span className="text-xl text-violet-600 font-bold">{iconFallback}</span>
+              )}
+            </div>
 
-          {/* Thông tin */}
-          <div className={`flex flex-1 ${isSelected ? 'flex-col gap-2' : 'justify-between items-start gap-2'} min-w-0`}>
-            {/* TRÁI (hoặc dòng trên): Mã HĐ + Chủ HĐ */}
-            <div className={`flex flex-col min-w-0 ${isSelected ? 'items-center text-center' : ''}`}>
+            {/* Thông tin HĐ */}
+            <div className="flex flex-col min-w-0 justify-center">
               {isSelected && (
-                <span className="text-[15px] font-bold text-violet-400 uppercase tracking-widest mb-0.5">
-                  {bank?.ten_danh_muc || bank?.ten_viet_tat || 'DỊCH VỤ'}
+                <span className="text-violet-400 font-bold text-[10px] tracking-wider uppercase mb-0.5">
+                  {bank?.ten_viet_tat || 'DỊCH VỤ'}
                 </span>
               )}
-              <h4 className={`font-extrabold leading-tight uppercase tracking-wide truncate text-red-400 ${isSelected ? 'text-2xl mb-1' : 'text-sm'}`}>
-                {hd?.ma_hop_dong || 'CHƯA CÓ HĐ'}
-              </h4>
-              <span className={`font-semibold truncate mt-0.5 text-gray-300 ${isSelected ? 'text-base' : 'text-[11px]'}`}>
+              <span className={`text-red-500 font-black tracking-wider uppercase truncate leading-none ${isSelected ? 'text-xl mb-1' : 'text-sm mb-0.5'}`}>
+                {hd?.ma_hop_dong || 'CHƯA CÓ HỢP ĐỒNG'}
+              </span>
+              <span className={`text-gray-200 font-medium truncate ${isSelected ? 'text-sm' : 'text-xs'}`}>
                 {hd?.chu_hop_dong || '—'}
               </span>
             </div>
+          </div>
 
-            {/* PHẢI (hoặc dòng dưới): Tên người TT + SĐT */}
-            <div className={`flex ${isSelected ? 'flex-col items-start gap-1 bg-white/[0.03] p-3 rounded-lg border border-white/5 mt-2' : 'flex-col items-end text-right flex-shrink-0'}`}>
-              <span className={`font-bold truncate text-gray-200 flex items-baseline gap-1.5 ${isSelected ? 'text-xl w-full' : 'text-[11px] max-w-[110px]'}`}>
-                {isSelected && <span className="text-gray-500 font-medium text-sm">KH:</span>}
-                <span className="truncate">{cust?.ho_va_ten || 'Khách lẻ'}</span>
-              </span>
-              {cust?.so_dien_thoai ? (
-                <span className={`font-semibold text-violet-400/90 flex items-baseline gap-1.5 ${isSelected ? 'text-base' : 'text-[10px] mt-0.5'}`}>
-                  {isSelected && <span className="text-gray-500 font-medium text-sm">SĐT:</span>}
-                  {cust.so_dien_thoai}
-                </span>
-              ) : (
-                <span className={`text-gray-600 flex items-baseline gap-1.5 ${isSelected ? 'text-base' : 'text-[10px] mt-0.5'}`}>
-                  {isSelected && <span className="text-gray-500 font-medium text-sm">SĐT:</span>}
-                  —
-                </span>
-              )}
+          {/* Phải (Customer Info) */}
+          <div className={`flex flex-shrink-0 ${isSelected ? 'items-center justify-between border-t border-white/5 pt-3 mt-1' : 'flex-col items-end justify-center'}`}>
+            <div className={`flex ${isSelected ? 'items-center gap-3' : 'flex-col items-end gap-1'}`}>
+              <div className="flex items-center gap-1.5 text-gray-300">
+                {isSelected && <UserOutlined className="text-violet-400" />}
+                <span className={`font-bold uppercase truncate max-w-[120px] ${isSelected ? 'text-[11px]' : 'text-[10px]'}`}>{cust?.ho_va_ten || 'Khách lẻ'}</span>
+              </div>
+              {isSelected && <div className="w-[1px] h-3 bg-white/10"></div>}
+              <div className="flex items-center gap-1.5 text-violet-400/90">
+                {isSelected && <PhoneOutlined />}
+                <span className={`font-medium ${isSelected ? 'text-[11px]' : 'text-[9px]'}`}>{cust?.so_dien_thoai || '—'}</span>
+              </div>
             </div>
+            {/* Tùy chọn tag cho desktop selected */}
+            {isSelected && <div className="opacity-0 w-16 h-4 bg-green-500/20 blur-sm"></div>}
           </div>
         </div>
 
         {file.noi_dung && (
-          <div className="mt-2 flex items-center gap-1.5">
+          <div className="mt-2 mb-1 flex items-center gap-1.5">
             <span className="text-[10px] text-gray-400/80 font-medium italic truncate">
               📝 {file.noi_dung}
             </span>
@@ -119,37 +118,48 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, iconFal
 
         {/* ACTION BAR (Chỉ hiện khi Card đang được chọn) */}
         {isSelected && (
-          <div className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
-            <button 
-              onClick={(e) => { e.stopPropagation(); onAddTx(); }}
-              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-violet-400 transition-colors"
-            >
-              <PlusOutlined className="text-sm" />
-              <span className="text-[8px] font-bold uppercase tracking-wider">Thêm GD</span>
-            </button>
-            <div className="w-[1px] h-6 bg-white/10"></div>
-            <button 
-              onClick={(e) => { e.stopPropagation(); onEditFile(); }}
-              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-blue-400 transition-colors"
-            >
-              <EditOutlined className="text-sm" />
-              <span className="text-[8px] font-bold uppercase tracking-wider">Sửa HS</span>
-            </button>
-            <div className="w-[1px] h-6 bg-white/10"></div>
+          <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between animate-in fade-in slide-in-from-top-2 px-1">
             <button 
               onClick={(e) => { e.stopPropagation(); onViewFile(); }}
               className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-green-400 transition-colors"
             >
-              <InfoCircleOutlined className="text-sm" />
-              <span className="text-[8px] font-bold uppercase tracking-wider">Xem HS</span>
+              <InfoCircleOutlined className="text-lg" />
+              <span className="text-[9px] font-medium tracking-wide">Xem</span>
             </button>
-            <div className="w-[1px] h-6 bg-white/10"></div>
+            <div className="w-[1px] h-6 bg-white/5"></div>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onEditFile(); }}
+              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-blue-400 transition-colors"
+            >
+              <EditOutlined className="text-lg" />
+              <span className="text-[9px] font-medium tracking-wide">Sửa</span>
+            </button>
+            <div className="w-[1px] h-6 bg-white/5"></div>
             <button 
               onClick={(e) => { e.stopPropagation(); onCopyFile(); }}
-              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-orange-400 transition-colors"
+              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-teal-400 transition-colors"
             >
-              <CopyOutlined className="text-sm" />
-              <span className="text-[8px] font-bold uppercase tracking-wider">Copy</span>
+              <CopyOutlined className="text-lg" />
+              <span className="text-[9px] font-medium tracking-wide">Copy</span>
+            </button>
+            <div className="w-[1px] h-6 bg-white/5"></div>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onAddTx(); }}
+              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-green-500 transition-colors"
+            >
+              <PlusOutlined className="text-lg" />
+              <span className="text-[9px] font-medium tracking-wide text-green-500">Giao dịch</span>
+            </button>
+            <div className="w-[1px] h-6 bg-white/5"></div>
+            <button 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                if (onDeleteFile) onDeleteFile(file); 
+              }}
+              className="flex flex-col items-center gap-1 flex-1 text-gray-400 hover:text-red-400 transition-colors"
+            >
+              <DeleteOutlined className="text-lg" />
+              <span className="text-[9px] font-medium tracking-wide text-red-400">Xóa</span>
             </button>
           </div>
         )}
