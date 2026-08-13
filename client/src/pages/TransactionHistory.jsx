@@ -1438,13 +1438,15 @@ export default function TransactionHistory() {
               </div>
 
               {/* MOBILE ACTIONS */}
-              <div className="grid grid-cols-5 gap-1.5 px-3 pb-3 pt-0" onClick={e => e.stopPropagation()}>
-                <Button block size="small" type="primary" ghost icon={<QrcodeOutlined />} onClick={() => handleShowQR(item)} disabled={!item.contract?.ma_hop_dong}>QR</Button>
-                <Button block size="small" className="bg-transparent border border-blue-500/30 text-blue-400 hover:text-white hover:bg-blue-500 hover:border-blue-500" icon={<EditOutlined />} onClick={() => handleEdit(item)}>Sửa</Button>
-                <Button block size="small" className="bg-transparent border border-green-500/30 text-green-400 hover:text-white hover:bg-green-500 hover:border-green-500" icon={<FolderOpenOutlined />} onClick={() => handleOpenFile(item)}>Mở</Button>
-                <Button block size="small" className="bg-transparent border border-orange-500/30 text-orange-400 hover:text-white hover:bg-orange-500 hover:border-orange-500" icon={<StopOutlined />} onClick={() => handleCancel(item)}>Hủy</Button>
-                <Button block size="small" className="bg-transparent border border-red-500/30 text-red-400 hover:text-white hover:bg-red-500 hover:border-red-500" icon={<DeleteOutlined />} onClick={() => handleDelete(item)}>Xóa</Button>
-              </div>
+              {selectedRowKeys.includes(item.tx.id_chi_tiet_giao_dich || item.tx.ngay_tao) && (
+                <div className="grid grid-cols-5 gap-1.5 px-3 pb-3 pt-0 animate-fadeIn" onClick={e => e.stopPropagation()}>
+                  <Button block size="small" type="primary" ghost icon={<QrcodeOutlined />} onClick={() => handleShowQR(item)} disabled={!item.contract?.ma_hop_dong}>QR</Button>
+                  <Button block size="small" className="bg-transparent border border-blue-500/30 text-blue-400 hover:text-white hover:bg-blue-500 hover:border-blue-500" icon={<EditOutlined />} onClick={() => handleEdit(item)}>Sửa</Button>
+                  <Button block size="small" className="bg-transparent border border-green-500/30 text-green-400 hover:text-white hover:bg-green-500 hover:border-green-500" icon={<FolderOpenOutlined />} onClick={() => handleOpenFile(item)}>Mở</Button>
+                  <Button block size="small" className="bg-transparent border border-orange-500/30 text-orange-400 hover:text-white hover:bg-orange-500 hover:border-orange-500" icon={<StopOutlined />} onClick={() => handleCancel(item)}>Hủy</Button>
+                  <Button block size="small" className="bg-transparent border border-red-500/30 text-red-400 hover:text-white hover:bg-red-500 hover:border-red-500" icon={<DeleteOutlined />} onClick={() => handleDelete(item)}>Xóa</Button>
+                </div>
+              )}
             </div>
             ))}
             {displayCount < filteredTransactions.length && (
