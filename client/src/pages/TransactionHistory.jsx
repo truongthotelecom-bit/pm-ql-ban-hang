@@ -203,7 +203,7 @@ export default function TransactionHistory() {
 
   useEffect(() => {
     fetchHistory();
-  }, [filters.dateRangeType, filters.customDateRange]);
+  }, [filters.dateRangeType, filters.customDateRange, store.refetchTrigger]);
 
   // Handlers cho chức năng Quản lý
   const handleStatusChange = async (record, newStatusId) => {
