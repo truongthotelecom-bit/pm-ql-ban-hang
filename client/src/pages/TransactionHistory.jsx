@@ -140,6 +140,7 @@ export default function TransactionHistory() {
   // Máy tính tổng & Xuất Excel
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [expandedCardId, setExpandedCardId] = useState(null);
 
   // Khóa cuộn body toàn trang để dùng cuộn nội bộ
   useEffect(() => {
@@ -1341,8 +1342,12 @@ export default function TransactionHistory() {
             <div
               key={item.tx.id_chi_tiet_giao_dich || index}
               className="bg-[#0d1426] border border-white/10 rounded-2xl shadow-lg transition-all hover:border-violet-500/50 hover:shadow-violet-500/20 overflow-hidden relative"
+              onClick={() => {
+                const key = item.tx.id_chi_tiet_giao_dich || item.tx.ngay_tao;
+                setExpandedCardId(expandedCardId === key ? null : key);
+              }}
             >
-              <div className="absolute top-[10px] left-3 z-10">
+              <div className="absolute top-[10px] left-3 z-10" onClick={e => e.stopPropagation()}>
                 <input 
                   type="checkbox"
                   className="w-4 h-4 accent-violet-500 cursor-pointer"
@@ -1438,7 +1443,7 @@ export default function TransactionHistory() {
               </div>
 
               {/* MOBILE ACTIONS */}
-              {selectedRowKeys.includes(item.tx.id_chi_tiet_giao_dich || item.tx.ngay_tao) && (
+              {expandedCardId === (item.tx.id_chi_tiet_giao_dich || item.tx.ngay_tao) && (
                 <div className="grid grid-cols-5 gap-1.5 px-3 pb-3 pt-0 animate-fadeIn" onClick={e => e.stopPropagation()}>
                   <Button block size="small" type="primary" ghost icon={<QrcodeOutlined />} onClick={() => handleShowQR(item)} disabled={!item.contract?.ma_hop_dong}>QR</Button>
                   <Button block size="small" className="bg-transparent border border-blue-500/30 text-blue-400 hover:text-white hover:bg-blue-500 hover:border-blue-500" icon={<EditOutlined />} onClick={() => handleEdit(item)}>Sửa</Button>
