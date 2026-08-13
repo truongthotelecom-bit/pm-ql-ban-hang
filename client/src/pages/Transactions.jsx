@@ -1210,6 +1210,21 @@ export default function Transactions() {
                               <span className="text-xs text-gray-200 font-bold mt-1 block max-w-[220px] truncate">
                                 {detail.noi_dung}
                               </span>
+                              {(() => {
+                                const statusObj = store.categories.find(c => c.id_danh_muc === detail.id_trang_thai);
+                                if (!statusObj) return null;
+                                const name = statusObj.ten_danh_muc.toLowerCase();
+                                let bg = 'bg-black/40 text-gray-300 border-white/10';
+                                if (name.includes('hoàn thành')) bg = 'bg-green-500/20 text-green-400 border-green-500/30';
+                                else if (name.includes('xử lý')) bg = 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+                                else if (name.includes('lỗi') || name.includes('hủy')) bg = 'bg-red-500/20 text-red-400 border-red-500/30';
+                                return (
+                                  <span className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded border ${bg} mt-1.5 inline-flex items-center gap-1`}>
+                                    {statusObj.icon && <span>{statusObj.icon}</span>}
+                                    {statusObj.ten_danh_muc}
+                                  </span>
+                                );
+                              })()}
                             </div>
                             
                             <div className="text-right flex flex-col items-end">
