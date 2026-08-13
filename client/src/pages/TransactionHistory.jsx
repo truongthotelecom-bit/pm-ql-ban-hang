@@ -731,7 +731,13 @@ export default function TransactionHistory() {
         record.tx.so_tien_di || 0,
         record.tx.phi_dich_vu || 0,
         trangThai
-      ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(',');
+      ].map((field, idx) => {
+        // Convert 'Mã HĐ' (idx 1) and 'SĐT' (idx 5) to Excel formula format to preserve leading zeros
+        if ((idx === 1 || idx === 5) && field) {
+          return `="${String(field).replace(/"/g, '""')}"`;
+        }
+        return `"${String(field).replace(/"/g, '""')}"`;
+      }).join(',');
     });
     
     const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
