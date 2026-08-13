@@ -202,6 +202,8 @@ export default function Transactions() {
   const [showEditContractModal, setShowEditContractModal] = useState(false);
   const [showEditDetailModal, setShowEditDetailModal] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showEditBankModal, setShowEditBankModal] = useState(false);
+  const [editBankPayload, setEditBankPayload] = useState({});
 
   // Mobile state
   const [showMobileDetail, setShowMobileDetail] = useState(false); // Hien thi modal chi tiet tren mobile
@@ -575,6 +577,44 @@ export default function Transactions() {
     }
   };
 
+  const openEditBankModal = () => {
+    if (!activeBank) return;
+    setEditBankPayload({
+      ten_dich_vu: activeBank.ten_dich_vu || '',
+      ten_viet_tat: activeBank.ten_viet_tat || '',
+      ma_bin: activeBank.ma_bin || '',
+      logo: activeBank.logo || ''
+    });
+    setShowEditBankModal(true);
+  };
+
+  const handleSaveBank = async () => {
+    if (!editBankPayload.ten_dich_vu) {
+      message.error('Vui lòng nhập tên dịch vụ/ngân hàng!');
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('sys_danh_muc_dich_vu')
+        .update({
+          ten_dich_vu: editBankPayload.ten_dich_vu,
+          ten_viet_tat: editBankPayload.ten_viet_tat,
+          ma_bin: editBankPayload.ma_bin,
+          logo: editBankPayload.logo,
+          ngay_sua: new Date().toISOString()
+        })
+        .eq('id_danh_muc_dich_vu', activeBank.id_danh_muc_dich_vu);
+        
+      if (error) throw error;
+      
+      message.success('Cập nhật danh mục dịch vụ thành công!');
+      setShowEditBankModal(false);
+      store.fetchSystemConfig(); // Reload to update logo and names
+    } catch (error) {
+      message.error('Lỗi khi cập nhật danh mục: ' + error.message);
+    }
+  };
 
   const openEditContractModal = () => {
     const activeFile = store.selectedServiceFile;
@@ -1314,7 +1354,7 @@ export default function Transactions() {
                     <Button onClick={() => openEditCustModal(activeCust)} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><UserOutlined className="text-lg" /> Sửa khách</Button>
                     <Button onClick={() => openEditContractModal()} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><EditOutlined className="text-lg" /> Sửa HĐ</Button>
                     {isSuperAdminOrOwner && (
-                      <Button onClick={() => window.open('/admin/danh-muc/sys_danh_muc_dich_vu', '_blank')} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><AppstoreOutlined className="text-lg" /> Sửa danh mục DV</Button>
+                      <Button onClick={openEditBankModal} disabled={!activeBank} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><AppstoreOutlined className="text-lg" /> Sửa danh mục DV</Button>
                     )}
                   </div>
                 }
@@ -2279,6 +2319,86 @@ export default function Transactions() {
           </Button>
         </div>
       </Modal>
+      {/* MODAL SỬA DANH MỤC DỊCH VỤ (ADMIN) */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2">
+            <AppstoreOutlined className="text-violet-500 text-xl" />
+            <span className="font-black text-gray-100 text-lg uppercase">Sửa Danh Mục Dịch Vụ</span>
+          </div>
+        }
+        open={showEditBankModal}
+        onCancel={() => setShowEditBankModal(false)}
+        footer={null}
+        width={500}
+        styles={{
+          mask: { backdropFilter: 'blur(8px)', backgroundColor: 'rgba(0,0,0,0.6)' },
+          content: { 
+            backgroundColor: '#0d1426', 
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '16px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+          },
+          header: { backgroundColor: 'transparent', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '16px', marginBottom: '24px' }
+        }}
+        closeIcon={<span className="text-gray-400 hover:text-white transition-colors text-xl">&times;</span>}
+      >
+        <div className="flex flex-col gap-4">
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase mb-1.5 ml-1">Tên dịch vụ/Ngân hàng <span className="text-red-500">*</span></label>
+            <Input 
+              value={editBankPayload.ten_dich_vu}
+              onChange={e => setEditBankPayload(p => ({...p, ten_dich_vu: e.target.value}))}
+              className="bg-[#131c33] border-white/10 text-white font-medium h-12 rounded-xl focus:border-violet-500 hover:border-white/20"
+              placeholder="VD: VIETCOMBANK"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase mb-1.5 ml-1">Tên viết tắt</label>
+            <Input 
+              value={editBankPayload.ten_viet_tat}
+              onChange={e => setEditBankPayload(p => ({...p, ten_viet_tat: e.target.value}))}
+              className="bg-[#131c33] border-white/10 text-white font-medium h-12 rounded-xl focus:border-violet-500 hover:border-white/20"
+              placeholder="VD: VCB"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase mb-1.5 ml-1">Mã BIN (Để tạo QR)</label>
+            <Input 
+              value={editBankPayload.ma_bin}
+              onChange={e => setEditBankPayload(p => ({...p, ma_bin: e.target.value}))}
+              className="bg-[#131c33] border-white/10 text-white font-medium h-12 rounded-xl focus:border-violet-500 hover:border-white/20"
+              placeholder="VD: 970436"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase mb-1.5 ml-1">Link Logo</label>
+            <Input 
+              value={editBankPayload.logo}
+              onChange={e => setEditBankPayload(p => ({...p, logo: e.target.value}))}
+              className="bg-[#131c33] border-white/10 text-white font-medium h-12 rounded-xl focus:border-violet-500 hover:border-white/20"
+              placeholder="https://..."
+            />
+          </div>
+          
+          <div className="flex gap-3 mt-6 pt-4 border-t border-white/5">
+            <Button 
+              className="flex-1 h-12 bg-transparent border border-white/10 text-gray-300 font-bold hover:bg-white/5 hover:text-white rounded-xl"
+              onClick={() => setShowEditBankModal(false)}
+            >
+              HỦY BỎ
+            </Button>
+            <Button 
+              type="primary" 
+              className="flex-1 h-12 bg-violet-600 hover:bg-violet-500 border-none font-bold rounded-xl shadow-[0_4px_12px_rgba(124,58,237,0.4)]"
+              onClick={handleSaveBank}
+            >
+              LƯU THAY ĐỔI
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
     </div>
   );
 }
