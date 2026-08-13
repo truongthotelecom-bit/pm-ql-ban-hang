@@ -894,7 +894,7 @@ export default function Transactions() {
               type="primary" 
               icon={<HistoryOutlined />} 
               onClick={() => navigate(`/lich-su?id_dich_vu=${store.selectedService?.id_loai_dich_vu || ''}`)} 
-              className="bg-violet-600 border-none shadow-md shadow-violet-900/50 hover:bg-violet-500"
+              className="bg-violet-600 border-none shadow-md shadow-violet-900/50 hover:bg-violet-500 !rounded-lg"
             >
               Lịch sử
             </Button>
@@ -1080,7 +1080,7 @@ export default function Transactions() {
                   navigate(`/transaction-history?id_khach_hang=${activeCust.id_khach_hang}`);
                 }
               }}
-              className="bg-violet-600 hover:bg-violet-500 border-none font-bold text-[10px] xl:text-xs h-7 xl:h-8 px-2 xl:px-4 rounded-xl shadow-[0_0_15px_rgba(124,58,237,0.3)] flex items-center gap-1.5"
+              className="bg-violet-600 hover:bg-violet-500 border-none font-bold text-[10px] xl:text-xs h-7 xl:h-8 px-2 xl:px-4 !rounded-lg shadow-[0_0_15px_rgba(124,58,237,0.3)] flex items-center gap-1.5"
               title="Lịch sử giao dịch khách hàng"
             >
               <HistoryOutlined /> Lịch sử
