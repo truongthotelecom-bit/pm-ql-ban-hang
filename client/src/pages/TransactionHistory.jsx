@@ -1,5 +1,5 @@
 // Force HMR
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, Drawer, App as AntdApp, Dropdown, FloatButton } from 'antd';
 import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined, DownloadOutlined, FileExcelOutlined, CheckSquareOutlined, SearchOutlined } from '@ant-design/icons';
@@ -7,7 +7,7 @@ import { numberToWords } from '../utils/stringUtils';
 import useAppStore from '../store/useAppStore';
 import { supabase } from '../lib/supabaseClient';
 import MoneyTransferForm from '../components/MoneyTransferForm';
-
+import html2canvas from 'html2canvas';
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
@@ -124,6 +124,7 @@ export default function TransactionHistory() {
 
   const [displayCount, setDisplayCount] = useState(20);
   const { message } = AntdApp.useApp();
+  const qrRef = useRef(null);
 
   // States cho các chức năng quản lý
   const [showQrModal, setShowQrModal] = useState(false);
@@ -1500,11 +1501,28 @@ export default function TransactionHistory() {
         title={<span className="font-extrabold text-white text-base">📲 QUÉT MÃ QR VIETQR CHUYỂN TIỀN</span>}
         open={showQrModal}
         onCancel={() => setShowQrModal(false)}
-        footer={[<Button key="close" onClick={() => setShowQrModal(false)}>Đóng</Button>]}
+        footer={[
+          <Button key="download" type="primary" className="bg-violet-600 hover:bg-violet-500 border-none mr-2 font-bold shadow-[0_4px_12px_rgba(124,58,237,0.4)]" icon={<DownloadOutlined />} onClick={async () => {
+             if (!qrRef.current) return;
+             try {
+               const canvas = await html2canvas(qrRef.current, { backgroundColor: '#0d1426', scale: 2 });
+               canvas.toBlob(async (blob) => {
+                 if (!blob) return;
+                 const file = new File([blob], `QR_${activeDetail?.contract?.ma_hop_dong || 'ThanhToan'}.png`, { type: 'image/png' });
+                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                   try { await navigator.share({ files: [file], title: 'Mã QR VietQR', text: 'Sử dụng App Ngân hàng bất kỳ để quét mã này' }); return; } catch (err) { console.log('Share error', err); }
+                 }
+                 const url = URL.createObjectURL(blob);
+                 const link = document.createElement('a'); link.download = file.name; link.href = url; link.click(); URL.revokeObjectURL(url);
+               }, 'image/png');
+             } catch (err) { message.error('Lỗi khi tải ảnh QR'); }
+          }}>Tải & Chuyển tiền</Button>,
+          <Button key="close" className="border-white/20 text-gray-300 hover:text-white" onClick={() => setShowQrModal(false)}>Đóng</Button>
+        ]}
         className="glass-modal"
       >
         {activeDetail && activeQrUrl && (
-          <div className="flex flex-col items-center justify-center p-6 text-center">
+          <div className="flex flex-col items-center justify-center p-6 text-center rounded-2xl bg-[#0d1426] border border-white/5" ref={qrRef}>
             <p className="text-sm font-semibold text-gray-300 mb-4">Sử dụng App Ngân hàng bất kỳ để quét mã thanh toán tự động</p>
             <div className="p-4 bg-white rounded-2xl shadow-xl border border-gray-100 max-w-[280px]">
               <img 
