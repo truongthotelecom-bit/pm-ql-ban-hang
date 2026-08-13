@@ -847,7 +847,7 @@ export default function TransactionHistory() {
             {/* Vị trí 6: Trạng thái GD */}
             <Select
               allowClear
-              placeholder="Trạng thái"
+              placeholder="Tất cả"
               className="flex-1 min-w-[110px]"
               value={filters.trangThaiId}
               onChange={v => setFilters({ ...filters, trangThaiId: v })}
