@@ -23,7 +23,8 @@ import {
   PhoneOutlined,
   EllipsisOutlined,
   DeleteOutlined,
-  DownloadOutlined
+  DownloadOutlined,
+  AppstoreOutlined
 } from '@ant-design/icons';
 import TransactionDrawer from '../components/TransactionDrawer';
 import MoneyTransferForm from '../components/MoneyTransferForm';
@@ -1312,6 +1313,9 @@ export default function Transactions() {
                     <Button onClick={() => openEditFileModal()} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><EditOutlined className="text-lg" /> Sửa hồ sơ</Button>
                     <Button onClick={() => openEditCustModal(activeCust)} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><UserOutlined className="text-lg" /> Sửa khách</Button>
                     <Button onClick={() => openEditContractModal()} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><EditOutlined className="text-lg" /> Sửa HĐ</Button>
+                    {isSuperAdminOrOwner && (
+                      <Button onClick={() => window.open('/admin/danh-muc/sys_danh_muc_dich_vu', '_blank')} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><AppstoreOutlined className="text-lg" /> Sửa danh mục DV</Button>
+                    )}
                   </div>
                 }
                 trigger="click" 
