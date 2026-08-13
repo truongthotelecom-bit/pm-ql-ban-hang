@@ -1240,7 +1240,7 @@ export default function TransactionHistory() {
               <div className="h-10 w-[1px] bg-white/10 hidden md:block"></div>
               <div className="text-center">
                 <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Tiền Giao Dịch</div>
-                <div className="text-lg font-black text-white">{formatCurrency(selectedRows.reduce((sum, r) => sum + (r.tx.so_tien || 0), 0))}</div>
+                <div className="text-lg font-black text-white">{formatCurrency(selectedRows.reduce((sum, r) => sum + (r.tx.so_tien_di || 0), 0))}</div>
               </div>
               <div className="h-10 w-[1px] bg-white/10 hidden md:block"></div>
               <div className="text-center">
@@ -1250,7 +1250,7 @@ export default function TransactionHistory() {
               <div className="h-10 w-[1px] bg-white/10 hidden md:block"></div>
               <div className="text-center">
                 <div className="text-[10px] text-emerald-400/80 font-bold uppercase tracking-wider mb-1">Tổng Khách Đưa</div>
-                <div className="text-xl font-black text-emerald-400">{formatCurrency(selectedRows.reduce((sum, r) => sum + (r.tx.so_tien_di || 0), 0))}</div>
+                <div className="text-xl font-black text-emerald-400">{formatCurrency(selectedRows.reduce((sum, r) => sum + (r.tx.so_tien_di || 0) + (r.tx.phi_dich_vu || 0), 0))}</div>
               </div>
             </div>
             
