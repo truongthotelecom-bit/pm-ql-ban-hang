@@ -267,18 +267,16 @@ export default function TransactionHistory() {
       const service = r.service || {};
       const contract = r.contract || {};
       
-      const ngayGD = new Date(tx.thoi_gian_giao_dich || tx.ngay_tao).toLocaleString('vi-VN', {
-        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-      });
-      const dichVu = service.ten_danh_muc || '';
+      const d = new Date(tx.thoi_gian_giao_dich || tx.ngay_tao);
+      const ngayGD = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}<br>${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+      
+      const tenVietTat = r.bank?.ten_viet_tat || service.ten_danh_muc || '';
       const maHD = contract.ma_hop_dong || '---';
       const chuHD = contract.chu_hop_dong || '---';
-      const tenVietTat = r.bank?.ten_viet_tat || '';
       
       const hopDongHtml = `
         <div style="font-weight: bold; color: #dc2626;">${maHD}</div>
-        <div style="font-weight: bold;">${chuHD}</div>
-        ${tenVietTat ? `<div style="font-size: 11px; color: #666;">${tenVietTat}</div>` : ''}
+        <div style="font-weight: bold; font-size: 13px;">${chuHD}</div>
       `;
 
       const tienGD = parseFloat(tx.so_tien || 0);
@@ -292,7 +290,7 @@ export default function TransactionHistory() {
         <tr>
           <td class="col-stt">${index + 1}</td>
           <td>${ngayGD}</td>
-          <td>${dichVu}</td>
+          <td style="font-size: 12px; font-weight: bold;">${tenVietTat}</td>
           <td>${hopDongHtml}</td>
           <td class="col-money">${fmtVND(tx.so_tien_di)}</td>
           <td class="col-money">${fmtVND(phiDV)}</td>
@@ -345,10 +343,10 @@ export default function TransactionHistory() {
               .customer-row { display: flex; margin-bottom: 5px; }
               .customer-label { width: 150px; font-weight: bold; }
               
-              table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-              th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+              table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+              th, td { border: 1px solid #000; padding: 6px 4px; text-align: left; }
               th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
-              .col-stt { width: 40px; text-align: center; }
+              .col-stt { width: 30px; text-align: center; }
               .col-money { text-align: right; }
               
               .summary {
@@ -396,7 +394,7 @@ export default function TransactionHistory() {
                   <tr>
                       <th class="col-stt">STT</th>
                       <th>Ngày GD</th>
-                      <th>Dịch vụ</th>
+                      <th>Loại DV</th>
                       <th>Mã HĐ / Tài khoản</th>
                       <th class="col-money">Tiền GD</th>
                       <th class="col-money">Phí DV</th>
