@@ -1300,98 +1300,106 @@ export default function TransactionHistory() {
             {visibleTransactions.map((item, index) => (
             <div
               key={item.tx.id_chi_tiet_giao_dich || index}
-              className="bg-[#0d1426] border border-white/10 rounded-2xl shadow-lg transition-all hover:border-violet-500/50 hover:shadow-violet-500/20"
+              className="bg-[#0d1426] border border-white/10 rounded-2xl shadow-lg transition-all hover:border-violet-500/50 hover:shadow-violet-500/20 overflow-hidden relative"
             >
-              <div className="flex flex-col md:flex-row p-4 gap-4">
+              <div className="absolute top-[10px] left-3 z-10">
+                <input 
+                  type="checkbox"
+                  className="w-4 h-4 accent-violet-500 cursor-pointer"
+                  checked={selectedRowKeys.includes(item.tx.id_chi_tiet_giao_dich || item.tx.ngay_tao)}
+                  onChange={(e) => {
+                    const key = item.tx.id_chi_tiet_giao_dich || item.tx.ngay_tao;
+                    if (e.target.checked) {
+                      setSelectedRowKeys([...selectedRowKeys, key]);
+                      setSelectedRows([...selectedRows, item]);
+                    } else {
+                      setSelectedRowKeys(selectedRowKeys.filter(k => k !== key));
+                      setSelectedRows(selectedRows.filter(r => (r.tx.id_chi_tiet_giao_dich || r.tx.ngay_tao) !== key));
+                    }
+                  }}
+                />
+              </div>
 
-                {/* Trái: Checkbox + Logo + Mã HĐ + Chủ TK + KH */}
-                <div className="flex-1 border-b md:border-b-0 md:border-r border-white/5 pb-4 md:pb-0 md:pr-4 flex gap-3 items-start">
-                  <div className="pt-4 shrink-0">
-                    <input 
-                      type="checkbox"
-                      className="w-4 h-4 accent-violet-500 cursor-pointer"
-                      checked={selectedRowKeys.includes(item.tx.id_chi_tiet_giao_dich || item.tx.ngay_tao)}
-                      onChange={(e) => {
-                        const key = item.tx.id_chi_tiet_giao_dich || item.tx.ngay_tao;
-                        if (e.target.checked) {
-                          setSelectedRowKeys([...selectedRowKeys, key]);
-                          setSelectedRows([...selectedRows, item]);
-                        } else {
-                          setSelectedRowKeys(selectedRowKeys.filter(k => k !== key));
-                          setSelectedRows(selectedRows.filter(r => (r.tx.id_chi_tiet_giao_dich || r.tx.ngay_tao) !== key));
-                        }
-                      }}
-                    />
-                  </div>
-                  <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 p-2 flex items-center justify-center shrink-0">
+              {/* TOP BAR */}
+              <div className="flex justify-between items-center bg-white/[0.02] px-4 py-2.5 text-[10px] text-gray-400 border-b border-white/5">
+                <div className="flex items-center gap-2 pl-6">
+                   <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+                   <span className="font-medium tracking-wide">{fmtDate(item.tx.thoi_gian_giao_dich || item.tx.ngay_tao)}</span>
+                </div>
+              </div>
+
+              <div className="p-4 flex flex-col gap-4">
+                {/* Hợp đồng & Bank */}
+                <div className="flex items-start gap-3">
+                  <div className="w-[60px] h-[60px] rounded-[14px] bg-white p-1.5 flex items-center justify-center shrink-0 shadow-inner">
                     {item.bank?.logo
                       ? <img src={item.bank.logo} alt="bank" className="w-full h-full object-contain" />
-                      : <CreditCardOutlined className="text-2xl text-gray-500" />
+                      : <CreditCardOutlined className="text-2xl text-gray-400" />
                     }
                   </div>
-                  <div className="flex-1 flex flex-col justify-center">
-                    <div className="flex justify-between items-start gap-2">
-                      <div>
-                        <div className="text-base font-black text-red-400 tracking-wide">{item.contract?.ma_hop_dong || '---'}</div>
-                        <div className="text-sm text-gray-100 font-bold uppercase">{item.contract?.chu_hop_dong || '---'}</div>
-                        <div className="text-xs text-emerald-400 font-bold uppercase mt-0.5">{item.service?.ten_danh_muc || '---'}</div>
-                        {item.bank?.ten_viet_tat && (
-                          <div className="text-xs text-gray-400 mt-0.5">{item.bank.ten_viet_tat} - {item.bank.ten_dich_vu}</div>
-                        )}
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="text-sm font-bold text-gray-200">{item.customer?.ho_va_ten || 'Khách lẻ'}</div>
-                        <div className="text-xs text-violet-400">{item.customer?.so_dien_thoai || ''}</div>
-                      </div>
-                    </div>
+                  <div className="flex-1 min-w-0 flex flex-col justify-center h-[60px] pt-0.5">
+                     <div className="text-[10px] font-bold text-violet-400 uppercase tracking-widest">{item.bank?.ten_viet_tat ? `${item.bank.ten_viet_tat}` : item.service?.ten_danh_muc || '---'}</div>
+                     <div className="text-[22px] font-black text-red-500 tracking-wider truncate leading-tight mt-0.5">{item.contract?.ma_hop_dong || '---'}</div>
+                     <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                        <span className="text-xs text-gray-100 font-bold uppercase truncate max-w-[150px]">{item.contract?.chu_hop_dong || '---'}</span>
+                        <span className="text-[8px] font-bold uppercase px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 shrink-0">TIÊU CHUẨN</span>
+                     </div>
                   </div>
                 </div>
 
-                {/* Phải: Số tiền + Trạng thái + Nội dung */}
-                <div className="flex-1 flex flex-col justify-between pl-0 md:pl-2">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="text-xs text-gray-400">{fmtDate(item.tx.thoi_gian_giao_dich || item.tx.ngay_tao)}</div>
-                    <div className="text-right">
-                      <div className="text-xl font-black text-violet-400">{formatCurrency(item.tx.so_tien_di)}</div>
-                      {item.tx.phi_dich_vu > 0 && (
-                        <div className="text-[10px] text-orange-400 font-medium">+ Phí: {formatCurrency(item.tx.phi_dich_vu)}</div>
-                      )}
-                    </div>
+                <div className="h-px bg-white/5 w-full"></div>
+
+                {/* Khách hàng & Số tiền */}
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1 space-y-2 min-w-0 pt-1">
+                     <div className="flex items-center gap-1.5 text-xs text-gray-300">
+                        <span className="text-violet-400 shrink-0">👤</span>
+                        <span className="font-bold uppercase truncate max-w-[100px]">{item.customer?.ho_va_ten || 'Khách lẻ'}</span>
+                        <span className="text-gray-600 shrink-0">|</span>
+                        <span className="text-violet-400 shrink-0">📞</span>
+                        <span className="truncate">{item.customer?.so_dien_thoai || '---'}</span>
+                     </div>
+                     <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                        <span className="shrink-0">📝</span>
+                        <span className="uppercase truncate italic" title={item.tx.noi_dung}>{item.tx.noi_dung || '---'}</span>
+                     </div>
                   </div>
-                  <div className="flex justify-between items-end">
-                    <div className="text-xs text-gray-300 flex items-center gap-1.5 flex-1 pr-4 truncate">
-                      <span>📝</span>
-                      <span className="uppercase truncate" title={item.tx.noi_dung}>{item.tx.noi_dung || '---'}</span>
-                    </div>
-                    <div className="shrink-0 rounded-lg bg-black/40 border border-white/5" onClick={e => e.stopPropagation()}>
-                      <Select
-                        value={item.tx.id_trang_thai}
-                        onChange={(val) => handleStatusChange(item, val)}
-                        className="min-w-[130px]"
-                        variant="borderless"
-                        popupClassName="min-w-[150px]"
-                      >
-                        {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
-                          <Option key={s.id_danh_muc} value={s.id_danh_muc}>
-                            <div className="flex items-center gap-1.5 font-bold uppercase text-[10px]">
-                              <span>{s.icon}</span>
-                              <span>{s.ten_danh_muc}</span>
-                            </div>
-                          </Option>
-                        ))}
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  {/* MOBILE ACTIONS */}
-                  <div className="grid grid-cols-5 gap-1.5 mt-2 pt-2 border-t border-white/5" onClick={e => e.stopPropagation()}>
-                    <Button block size="small" type="primary" ghost icon={<QrcodeOutlined />} onClick={() => handleShowQR(item)} disabled={!item.contract?.ma_hop_dong}>QR</Button>
-                    <Button block size="small" className="bg-transparent border border-blue-500/30 text-blue-400 hover:text-white hover:bg-blue-500 hover:border-blue-500" icon={<EditOutlined />} onClick={() => handleEdit(item)}>Sửa</Button>
-                    <Button block size="small" className="bg-transparent border border-green-500/30 text-green-400 hover:text-white hover:bg-green-500 hover:border-green-500" icon={<FolderOpenOutlined />} onClick={() => handleOpenFile(item)}>Mở</Button>
-                    <Button block size="small" danger ghost icon={<StopOutlined />} onClick={() => handleCancel(item)}>Hủy</Button>
-                    <Button block size="small" danger icon={<DeleteOutlined />} onClick={() => handleDelete(item)} />
+                  <div className="text-right shrink-0">
+                     <div className="text-[18px] font-black text-violet-400 tracking-wide">{formatCurrency(item.tx.so_tien_di)}</div>
+                     {item.tx.phi_dich_vu > 0 && (
+                       <div className="text-[9px] text-orange-400 font-medium tracking-wide">+ Phí: {formatCurrency(item.tx.phi_dich_vu)}</div>
+                     )}
+                     <div className="mt-2 flex justify-end" onClick={e => e.stopPropagation()}>
+                        <div className="shrink-0 rounded-lg bg-black/40 border border-white/5">
+                          <Select
+                            value={item.tx.id_trang_thai}
+                            onChange={(val) => handleStatusChange(item, val)}
+                            className="min-w-[120px]"
+                            variant="borderless"
+                            popupClassName="min-w-[150px]"
+                          >
+                            {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
+                              <Option key={s.id_danh_muc} value={s.id_danh_muc}>
+                                <div className="flex items-center gap-1.5 font-bold uppercase text-[10px]">
+                                  <span>{s.icon}</span>
+                                  <span>{s.ten_danh_muc}</span>
+                                </div>
+                              </Option>
+                            ))}
+                          </Select>
+                        </div>
+                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* MOBILE ACTIONS */}
+              <div className="grid grid-cols-5 gap-1.5 px-3 pb-3 pt-0" onClick={e => e.stopPropagation()}>
+                <Button block size="small" type="primary" ghost icon={<QrcodeOutlined />} onClick={() => handleShowQR(item)} disabled={!item.contract?.ma_hop_dong}>QR</Button>
+                <Button block size="small" className="bg-transparent border border-blue-500/30 text-blue-400 hover:text-white hover:bg-blue-500 hover:border-blue-500" icon={<EditOutlined />} onClick={() => handleEdit(item)}>Sửa</Button>
+                <Button block size="small" className="bg-transparent border border-green-500/30 text-green-400 hover:text-white hover:bg-green-500 hover:border-green-500" icon={<FolderOpenOutlined />} onClick={() => handleOpenFile(item)}>Mở</Button>
+                <Button block size="small" className="bg-transparent border border-orange-500/30 text-orange-400 hover:text-white hover:bg-orange-500 hover:border-orange-500" icon={<StopOutlined />} onClick={() => handleCancel(item)}>Hủy</Button>
+                <Button block size="small" className="bg-transparent border border-red-500/30 text-red-400 hover:text-white hover:bg-red-500 hover:border-red-500" icon={<DeleteOutlined />} onClick={() => handleDelete(item)}>Xóa</Button>
               </div>
             </div>
             ))}
