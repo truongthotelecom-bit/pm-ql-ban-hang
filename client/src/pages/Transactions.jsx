@@ -1054,33 +1054,30 @@ export default function Transactions() {
       {React.useMemo(() => (
       <div className={`${showMobileDetail ? 'fixed inset-0 z-[100] bg-[#0d1426] flex flex-col gap-2 p-1 pt-4 animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
         
-        {/* Nút đóng trên Mobile cho Cột 2 */}
-        <div className="xl:hidden flex justify-between items-center mb-2 flex-shrink-0">
-          <span className="font-extrabold text-white text-lg">HỒ SƠ GIAO DỊCH</span>
-          <button 
-            onClick={() => setShowMobileDetail(false)}
-            className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white font-bold active:scale-95"
-          >
-            ✕
-          </button>
-        </div>
-
       <div className={`relative w-full p-2 xl:p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 xl:h-full transition-all duration-300 ${!activeFile ? 'xl:hidden' : (!activeDetail ? 'xl:w-[60%]' : 'xl:w-[40%]')}`}>
         <div className="flex-1 flex flex-col min-h-0 space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
-            <span className="font-extrabold text-white text-xs tracking-wider uppercase">THÔNG TIN HỒ SƠ</span>
-            <Button 
-              type="primary"
-              onClick={() => {
-                if (activeCust?.id_khach_hang) {
-                  navigate(`/lich-su?id_khach_hang=${activeCust.id_khach_hang}`);
-                }
-              }}
-              className="bg-violet-600 hover:bg-violet-500 border-none font-bold text-[10px] xl:text-xs h-7 xl:h-8 px-2 xl:px-4 !rounded-lg shadow-[0_0_15px_rgba(124,58,237,0.3)] flex items-center gap-1.5"
-              title="Lịch sử giao dịch khách hàng"
-            >
-              <HistoryOutlined /> Lịch sử
-            </Button>
+            <span className="font-extrabold text-white text-base xl:text-xs tracking-wider uppercase">THÔNG TIN HỒ SƠ</span>
+            <div className="flex items-center gap-2">
+              <Button 
+                type="primary"
+                onClick={() => {
+                  if (activeCust?.id_khach_hang) {
+                    navigate(`/lich-su?id_khach_hang=${activeCust.id_khach_hang}`);
+                  }
+                }}
+                className="bg-violet-600 hover:bg-violet-500 border-none font-bold text-[10px] xl:text-xs h-7 xl:h-8 px-2 xl:px-4 !rounded-lg shadow-[0_0_15px_rgba(124,58,237,0.3)] flex items-center gap-1.5"
+                title="Lịch sử giao dịch khách hàng"
+              >
+                <HistoryOutlined /> Lịch sử
+              </Button>
+              <button 
+                onClick={() => setShowMobileDetail(false)}
+                className="xl:hidden w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white font-bold active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
           {store.isLoadingFiles || store.isLoadingDetails ? (
@@ -1280,28 +1277,25 @@ export default function Transactions() {
       {React.useMemo(() => (
       <div className={`${showMobileTxDetail ? 'fixed inset-0 z-[110] bg-[#0d1426] flex flex-col gap-2 p-1 pt-4 animate-in slide-in-from-bottom' : 'hidden'} xl:contents`}>
         
-        {/* Nút đóng trên Mobile cho Cột 3 */}
-        <div className="xl:hidden flex justify-between items-center mb-2 flex-shrink-0">
-          <span className="font-extrabold text-white text-lg">CHI TIẾT GIAO DỊCH</span>
-          <button 
-            onClick={() => setShowMobileTxDetail(false)}
-            className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white font-bold active:scale-95"
-          >
-            ✕
-          </button>
-        </div>
-
       <div className={`w-full p-2 xl:p-4 rounded-2xl bg-[#0d1426]/70 border border-white/5 flex flex-col gap-4 shadow-xl backdrop-blur-md justify-between flex-1 min-h-0 overflow-y-auto scrollbar-thin xl:h-full transition-all duration-300 ${!activeDetail ? 'xl:hidden' : 'xl:w-[28%]'}`}>
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b border-white/5 pb-3">
-            <span className="font-extrabold text-white text-xs tracking-wider uppercase">CHI TIẾT GIAO DỊCH</span>
-            <button 
-              onClick={() => setShowCopyModal(true)}
-              className="text-gray-400 hover:text-white transition-colors"
-              title="Copy thông tin"
-            >
-              <CopyOutlined />
-            </button>
+            <span className="font-extrabold text-white text-base xl:text-xs tracking-wider uppercase">CHI TIẾT GIAO DỊCH</span>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setShowCopyModal(true)}
+                className="text-gray-400 hover:text-white transition-colors"
+                title="Copy thông tin"
+              >
+                <CopyOutlined />
+              </button>
+              <button 
+                onClick={() => setShowMobileTxDetail(false)}
+                className="xl:hidden w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white font-bold active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
           {store.isLoadingDetails ? (
