@@ -1505,7 +1505,7 @@ export default function TransactionHistory() {
           <Button key="download" type="primary" className="bg-violet-600 hover:bg-violet-500 border-none mr-2 font-bold shadow-[0_4px_12px_rgba(124,58,237,0.4)]" icon={<DownloadOutlined />} onClick={async () => {
              if (!qrRef.current) return;
              try {
-               const canvas = await html2canvas(qrRef.current, { backgroundColor: '#0d1426', scale: 2 });
+               const canvas = await html2canvas(qrRef.current, { backgroundColor: '#0d1426', scale: 2, useCORS: true, allowTaint: true });
                canvas.toBlob(async (blob) => {
                  if (!blob) return;
                  const file = new File([blob], `QR_${activeDetail?.contract?.ma_hop_dong || 'ThanhToan'}.png`, { type: 'image/png' });
