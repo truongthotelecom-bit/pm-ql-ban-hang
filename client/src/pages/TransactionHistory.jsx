@@ -1107,9 +1107,12 @@ export default function TransactionHistory() {
                 <div className="flex flex-col gap-0.5">
                   <span className="text-red-400 font-black tracking-wide whitespace-nowrap">{record.contract?.ma_hop_dong || '---'}</span>
                   <span className="text-gray-100 font-bold uppercase">{record.contract?.chu_hop_dong || '---'}</span>
-                  <span className="text-gray-400 text-[10px] whitespace-nowrap truncate max-w-[200px]" title={record.bank?.ten_viet_tat ? `${record.bank.ten_viet_tat} - ${record.bank.ten_dich_vu}` : record.service?.ten_danh_muc || '---'}>
-                    {record.bank?.ten_viet_tat ? `${record.bank.ten_viet_tat} - ${record.bank.ten_dich_vu}` : record.service?.ten_danh_muc || '---'}
-                  </span>
+                  <span className="text-emerald-400 text-[10px] font-bold uppercase">{record.service?.ten_danh_muc || '---'}</span>
+                  {record.bank?.ten_viet_tat && (
+                    <span className="text-gray-400 text-[10px] whitespace-nowrap truncate max-w-[200px]" title={`${record.bank.ten_viet_tat} - ${record.bank.ten_dich_vu}`}>
+                      {record.bank.ten_viet_tat} - {record.bank.ten_dich_vu}
+                    </span>
+                  )}
                 </div>
               ),
               width: 200,
@@ -1288,7 +1291,10 @@ export default function TransactionHistory() {
                       <div>
                         <div className="text-base font-black text-red-400 tracking-wide">{item.contract?.ma_hop_dong || '---'}</div>
                         <div className="text-sm text-gray-100 font-bold uppercase">{item.contract?.chu_hop_dong || '---'}</div>
-                        <div className="text-xs text-gray-400 mt-0.5">{item.bank?.ten_viet_tat ? `${item.bank.ten_viet_tat} - ${item.bank.ten_dich_vu}` : item.service?.ten_danh_muc || '---'}</div>
+                        <div className="text-xs text-emerald-400 font-bold uppercase mt-0.5">{item.service?.ten_danh_muc || '---'}</div>
+                        {item.bank?.ten_viet_tat && (
+                          <div className="text-xs text-gray-400 mt-0.5">{item.bank.ten_viet_tat} - {item.bank.ten_dich_vu}</div>
+                        )}
                       </div>
                       <div className="text-right shrink-0">
                         <div className="text-sm font-bold text-gray-200">{item.customer?.ho_va_ten || 'Khách lẻ'}</div>
