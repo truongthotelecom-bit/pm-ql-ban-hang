@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
 import { Drawer, Tabs, Button, Select, Input, InputNumber, Upload, message, Alert } from 'antd';
 import { 
   UploadOutlined, UserOutlined, DollarOutlined, 
@@ -21,31 +22,63 @@ export default function TransactionDrawer({ open, onClose }) {
   const activeHd = activeFile ? (store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile.id_ma_hop_dong) || activeFile.ma_hop_dong) : null;
   const activeBank = activeHd ? store.banks.find(b => b.id_danh_muc_dich_vu === activeHd.id_danh_muc_dich_vu) : null;
 
-  // Tự động gán thông minh (Nội dung) khi mở drawer
+  // Tự động gán thông minh (Nội dung + Loại phí) khi mở drawer
   useEffect(() => {
-    if (open) {
-      let defaultNoiDung = '';
-      if (activeFile?.noi_dung && activeFile.noi_dung.trim() !== '') {
-        defaultNoiDung = activeFile.noi_dung;
+    if (!open) return;
+
+    let defaultNoiDung = '';
+    if (activeFile?.noi_dung && activeFile.noi_dung.trim() !== '') {
+      defaultNoiDung = activeFile.noi_dung;
+    } else {
+      const isChuyenKhoan = store.selectedService?.ten_danh_muc?.toLowerCase().includes('chuyển khoản') || store.selectedService?.ma_viet_tat === 'CK';
+      if (isChuyenKhoan) {
+        defaultNoiDung = 'Chuyển tiền';
       } else {
-        const isChuyenKhoan = store.selectedService?.ten_danh_muc?.toLowerCase().includes('chuyển khoản') || store.selectedService?.ma_viet_tat === 'CK';
-        if (isChuyenKhoan) {
-          defaultNoiDung = 'Chuyển tiền';
-        } else {
-          const getLoaiDichVuId = (tx) => {
-            const file = store.allServiceFiles?.find(f => f.id_ho_so_dich_vu === tx.id_ho_so_dich_vu);
-            const hd = store.ma_hop_dong?.find(h => h.id_ma_hop_dong === file?.id_ma_hop_dong);
-            const dm = store.banks?.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
-            return dm?.id_loai_dich_vu;
-          };
-          const lastSameCategoryTx = store.allTransactions?.find(t => getLoaiDichVuId(t) === store.selectedService?.id_loai_dich_vu && t.noi_dung);
-          if (lastSameCategoryTx) {
-            defaultNoiDung = lastSameCategoryTx.noi_dung;
-          }
+        const getLoaiDichVuId = (tx) => {
+          const file = store.allServiceFiles?.find(f => f.id_ho_so_dich_vu === tx.id_ho_so_dich_vu);
+          const hd = store.ma_hop_dong?.find(h => h.id_ma_hop_dong === file?.id_ma_hop_dong);
+          const dm = store.banks?.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
+          return dm?.id_loai_dich_vu;
+        };
+        const lastSameCategoryTx = store.allTransactions?.find(t => getLoaiDichVuId(t) === store.selectedService?.id_loai_dich_vu && t.noi_dung);
+        if (lastSameCategoryTx) {
+          defaultNoiDung = lastSameCategoryTx.noi_dung;
         }
       }
-      setGdPayload({ noi_dung: defaultNoiDung });
     }
+
+    // Query Supabase lấy giao dịch gần nhất của hồ sơ này
+    const fetchLastTxFeeType = async () => {
+      const basePayload = { noi_dung: defaultNoiDung };
+      if (!activeFile?.id_ho_so_dich_vu) {
+        setGdPayload(basePayload);
+        return;
+      }
+      const { data } = await supabase
+        .from('chi_tiet_giao_dich')
+        .select('phi_dich_vu, is_cuoc_trong, id_pttt_nguon, id_pttt_di, id_pttt_phi')
+        .eq('id_ho_so_dich_vu', activeFile.id_ho_so_dich_vu)
+        .order('thoi_gian_giao_dich', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (data) {
+        const isMienPhi = !data.phi_dich_vu || Number(data.phi_dich_vu) === 0;
+        const loai_cuoc_phi = isMienPhi ? 'mien_phi' : (data.is_cuoc_trong ? 'trong' : 'ngoai');
+        setGdPayload({
+          noi_dung: defaultNoiDung,
+          loai_cuoc_phi,
+          is_cuoc_trong: data.is_cuoc_trong || false,
+          id_pttt_nguon: data.id_pttt_nguon || undefined,
+          id_pttt_di: data.id_pttt_di || undefined,
+          id_pttt_phi: data.id_pttt_phi || undefined,
+        });
+      } else {
+        setGdPayload(basePayload);
+      }
+    };
+
+    fetchLastTxFeeType();
   }, [open]);
 
   // QR State (Kế thừa từ danh mục ngân hàng & hợp đồng)
