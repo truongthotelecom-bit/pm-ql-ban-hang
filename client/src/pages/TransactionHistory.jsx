@@ -1501,6 +1501,8 @@ export default function TransactionHistory() {
         title={<span className="font-extrabold text-white text-base">📲 QUÉT MÃ QR VIETQR CHUYỂN TIỀN</span>}
         open={showQrModal}
         onCancel={() => setShowQrModal(false)}
+        centered
+        styles={{ body: { overflowY: 'auto', maxHeight: 'calc(100vh - 160px)' } }}
         footer={[
           <Button key="download" type="primary" className="bg-violet-600 hover:bg-violet-500 border-none mr-2 font-bold shadow-[0_4px_12px_rgba(124,58,237,0.4)]" icon={<DownloadOutlined />} onClick={async () => {
              if (!qrRef.current) return;
@@ -1522,24 +1524,24 @@ export default function TransactionHistory() {
         className="glass-modal"
       >
         {activeDetail && activeQrUrl && (
-          <div className="bg-transparent p-2 md:p-4" ref={qrRef}>
-            <div className="flex flex-col items-center justify-center p-6 text-center rounded-2xl bg-[#0d1426] border border-white/5">
-              <p className="text-sm font-semibold text-gray-300 mb-4">Sử dụng App Ngân hàng bất kỳ để quét mã thanh toán tự động</p>
-              <div className="p-4 bg-white rounded-2xl shadow-xl border border-gray-100 max-w-[280px]">
+          <div className="bg-transparent p-1 md:p-4" ref={qrRef}>
+            <div className="flex flex-col items-center justify-center p-4 md:p-6 text-center rounded-2xl bg-[#0d1426] border border-white/5">
+              <p className="text-xs md:text-sm font-semibold text-gray-300 mb-3 md:mb-4">Sử dụng App Ngân hàng bất kỳ để quét mã thanh toán tự động</p>
+              <div className="p-3 md:p-4 bg-white rounded-2xl shadow-xl border border-gray-100 max-w-[200px] md:max-w-[280px]">
                 <img 
                   src={activeQrUrl} 
-                  className="w-[240px] h-[240px] object-contain bg-white" 
+                  className="w-[180px] h-[180px] md:w-[240px] md:h-[240px] object-contain bg-white mx-auto" 
                   alt="VietQR code large" 
                 />
               </div>
-              <h3 className="text-2xl font-black text-violet-400 mt-6 tracking-wide">
+              <h3 className="text-xl md:text-2xl font-black text-violet-400 mt-4 md:mt-6 tracking-wide">
                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.tx.so_tien_di)}
               </h3>
-              <div className="flex flex-col gap-1.5 mt-4 text-center w-full bg-white/5 p-3 rounded-xl border border-white/5">
-                <p className="text-[13px] text-gray-100 font-bold">{activeDetail.bank?.ten_dich_vu || '—'}</p>
-                <p className="text-[14px] text-violet-300 font-black tracking-wide">{activeDetail.contract?.ma_hop_dong || '—'}</p>
-                <p className="text-[13px] text-gray-100 font-bold">{activeDetail.contract?.chu_hop_dong || '—'}</p>
-                <p className="text-[12px] text-gray-300 font-semibold"><span className="text-[10px] text-gray-500 mr-1">NỘI DUNG:</span>{activeDetail.tx.noi_dung || '—'}</p>
+              <div className="flex flex-col gap-1 md:gap-1.5 mt-3 md:mt-4 text-center w-full bg-white/5 p-2 md:p-3 rounded-xl border border-white/5">
+                <p className="text-[11px] md:text-[13px] text-gray-100 font-bold">{activeDetail.bank?.ten_dich_vu || '—'}</p>
+                <p className="text-[12px] md:text-[14px] text-violet-300 font-black tracking-wide">{activeDetail.contract?.ma_hop_dong || '—'}</p>
+                <p className="text-[11px] md:text-[13px] text-gray-100 font-bold">{activeDetail.contract?.chu_hop_dong || '—'}</p>
+                <p className="text-[10px] md:text-[12px] text-gray-300 font-semibold"><span className="text-[8px] md:text-[10px] text-gray-500 mr-1">NỘI DUNG:</span>{activeDetail.tx.noi_dung || '—'}</p>
               </div>
             </div>
           </div>
