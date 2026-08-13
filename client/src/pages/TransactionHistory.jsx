@@ -123,7 +123,7 @@ export default function TransactionHistory() {
   });
 
   const [displayCount, setDisplayCount] = useState(20);
-  const { message } = AntdApp.useApp();
+  const { message, modal } = AntdApp.useApp();
   const qrRef = useRef(null);
 
   const getStatusStyle = (statusId) => {
@@ -156,6 +156,25 @@ export default function TransactionHistory() {
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = 'auto';
+    };
+  }, []);
+
+  // Lắng nghe thay đổi từ cơ sở dữ liệu (Realtime) để auto-reload qua nhiều máy khác nhau
+  useEffect(() => {
+    const channel = supabase
+      .channel('realtime:chi_tiet_giao_dich_history')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'chi_tiet_giao_dich' },
+        (payload) => {
+          console.log('Realtime change received (History):', payload);
+          store.triggerRefetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
     };
   }, []);
 
@@ -1261,7 +1280,7 @@ export default function TransactionHistory() {
                       className="w-[120px]"
                       onClick={(e) => e.stopPropagation()}
                       variant="borderless"
-                      popupClassName="min-w-[150px]"
+                      dropdownStyle={{ minWidth: 150 }}
                     >
                       {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
                         <Option key={s.id_danh_muc} value={s.id_danh_muc}>
@@ -1447,7 +1466,7 @@ export default function TransactionHistory() {
                             onChange={(val) => handleStatusChange(item, val)}
                             className="min-w-[120px]"
                             variant="borderless"
-                            popupClassName="min-w-[150px]"
+                            dropdownStyle={{ minWidth: 150 }}
                           >
                             {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
                               <Option key={s.id_danh_muc} value={s.id_danh_muc}>
