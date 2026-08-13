@@ -701,7 +701,23 @@ export default function TransactionHistory() {
 
   const fmtDate = (d) => {
     if (!d) return '---';
-    return new Date(d).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+    if (typeof d === 'string' && d.includes('/')) {
+      const parts = d.split(' ');
+      if (parts.length === 2) {
+         const hasTimeFirst = parts[0].includes(':');
+         if (hasTimeFirst) return d;
+         const timeStr = parts[1].split(':').length === 2 ? parts[1] + ':00' : parts[1];
+         return `${timeStr} ${parts[0]}`;
+      }
+      return d;
+    }
+    try {
+      const dateObj = new Date(d);
+      if (isNaN(dateObj.getTime())) return d;
+      return dateObj.toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch {
+      return d;
+    }
   };
 
   const handleScroll = (e) => {
@@ -736,8 +752,8 @@ export default function TransactionHistory() {
         record.tx.phi_dich_vu || 0,
         trangThai
       ].map((field, idx) => {
-        // Convert 'Mã HĐ' (idx 1) and 'SĐT' (idx 5) to Excel formula format to preserve leading zeros
-        if ((idx === 1 || idx === 5) && field) {
+        // Convert 'Thời gian' (idx 0), 'Mã HĐ' (idx 1) and 'SĐT' (idx 5) to Excel formula format to preserve exact string and leading zeros
+        if ((idx === 0 || idx === 1 || idx === 5) && field) {
           return `="${String(field).replace(/"/g, '""')}"`;
         }
         return `"${String(field).replace(/"/g, '""')}"`;
