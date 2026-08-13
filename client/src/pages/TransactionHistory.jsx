@@ -939,7 +939,11 @@ export default function TransactionHistory() {
                   className="w-full h-10"
                   value={filters.khachHangId}
                   onChange={v => setFilters({ ...filters, khachHangId: v })}
-                  filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
+                  filterOption={(input, option) => {
+                    const children = option?.children;
+                    const text = Array.isArray(children) ? children.join('') : (children || '');
+                    return String(text).toLowerCase().includes(input.toLowerCase());
+                  }}
                 >
                   {(store.customers || []).map(c => (
                     <Option key={c.id_khach_hang} value={c.id_khach_hang}>{c.ho_va_ten} ({c.so_dien_thoai})</Option>
@@ -955,7 +959,11 @@ export default function TransactionHistory() {
                   className="w-full h-10"
                   value={filters.loaiDichVuId}
                   onChange={v => setFilters({ ...filters, loaiDichVuId: v })}
-                  filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
+                  filterOption={(input, option) => {
+                    const children = option?.children;
+                    const text = Array.isArray(children) ? children.join('') : (children || '');
+                    return String(text).toLowerCase().includes(input.toLowerCase());
+                  }}
                 >
                   {(store.services || []).map(s => (
                     <Option key={s.id_loai_dich_vu} value={s.id_loai_dich_vu}>{s.ten_danh_muc}</Option>
@@ -992,7 +1000,11 @@ export default function TransactionHistory() {
               className="w-full"
               value={filters.khachHangId}
               onChange={v => setFilters({ ...filters, khachHangId: v })}
-              filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
+              filterOption={(input, option) => {
+                const children = option?.children;
+                const text = Array.isArray(children) ? children.join('') : (children || '');
+                return String(text).toLowerCase().includes(input.toLowerCase());
+              }}
             >
               {(store.customers || []).map(c => (
                 <Option key={c.id_khach_hang} value={c.id_khach_hang}>{c.ho_va_ten} ({c.so_dien_thoai})</Option>
@@ -1042,7 +1054,11 @@ export default function TransactionHistory() {
               className="w-full"
               value={filters.danhMucId}
               onChange={v => setFilters({ ...filters, danhMucId: v })}
-              filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
+              filterOption={(input, option) => {
+                const children = option?.children;
+                const text = Array.isArray(children) ? children.join('') : (children || '');
+                return String(text).toLowerCase().includes(input.toLowerCase());
+              }}
             >
               {filteredBanks.map(b => (
                 <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>
