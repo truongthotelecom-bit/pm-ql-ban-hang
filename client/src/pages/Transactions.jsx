@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAppStore from '../store/useAppStore';
 import useAuthStore from '../store/useAuthStore';
@@ -22,10 +22,12 @@ import {
   CheckCircleOutlined, 
   PhoneOutlined,
   EllipsisOutlined,
-  DeleteOutlined
+  DeleteOutlined,
+  DownloadOutlined
 } from '@ant-design/icons';
 import TransactionDrawer from '../components/TransactionDrawer';
 import MoneyTransferForm from '../components/MoneyTransferForm';
+import html2canvas from 'html2canvas';
 import SearchableDropdown from '../components/SearchableDropdown';
 import { adminCategoriesConfig } from '../config/adminConfig';
 
@@ -178,6 +180,8 @@ export default function Transactions() {
   const navigate = useNavigate();
   const store = useAppStore();
   const { message, modal: modalInstance } = AntdApp.useApp();
+  const col3QrRef = useRef(null);
+  const modalQrRef = useRef(null);
   const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -775,6 +779,22 @@ export default function Transactions() {
   const activeBank = store.banks.find(b => b.id_danh_muc_dich_vu === activeHd?.id_danh_muc_dich_vu);
   const activeDetail = store.selectedDetail;
   
+  const handleDownloadQR = async (refToUse) => {
+    if (!refToUse.current) return;
+    try {
+      const canvas = await html2canvas(refToUse.current, { backgroundColor: '#0d1426', scale: 2, useCORS: true, allowTaint: true });
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], `QR_${activeHd?.ma_hop_dong || 'ThanhToan'}.png`, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try { await navigator.share({ files: [file], title: 'Mã QR VietQR', text: 'Sử dụng App Ngân hàng bất kỳ để quét mã này' }); return; } catch (err) { console.log('Share error', err); }
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a'); link.download = file.name; link.href = url; link.click(); URL.revokeObjectURL(url);
+      }, 'image/png');
+    } catch (err) { message.error('Lỗi khi tải ảnh QR'); }
+  };
+
   // Tính tổng tự động
   const calcAmt = activeDetail ? parseFloat(activeDetail.so_tien || 0) : 0;
   const calcFee = activeDetail ? parseFloat(activeDetail.phi_dich_vu || 0) : 0;
@@ -1386,25 +1406,31 @@ export default function Transactions() {
               </div>
 
               {activeQrUrl && (
-                <div className="flex flex-col items-center gap-3 w-full">
-                  <div 
-                    onClick={() => setShowQrModal(true)}
-                    className="p-3 bg-white rounded-xl shadow-lg flex flex-col items-center max-w-[200px] mx-auto border border-gray-200 cursor-pointer hover:scale-[1.02] transition-all"
-                  >
-                    <img 
-                      src={activeQrUrl}
-                      className="w-[140px] h-[140px] object-contain" 
-                      alt="VietQR code preview" 
-                    />
-                    <span className="text-[8px] text-gray-500 font-extrabold mt-1.5 uppercase tracking-wide">Quét chuyển tiền realtime</span>
+                <div className="flex flex-col items-center gap-3 w-full mt-4">
+                  <div className="bg-transparent p-2 w-full max-w-[240px] mx-auto" ref={col3QrRef}>
+                    <div className="flex flex-col items-center gap-3 w-full bg-[#0d1426] p-4 rounded-xl border border-white/5">
+                      <div 
+                        onClick={() => setShowQrModal(true)}
+                        className="p-3 bg-white rounded-xl shadow-lg flex flex-col items-center w-full border border-gray-200 cursor-pointer hover:scale-[1.02] transition-all"
+                      >
+                        <img 
+                          src={activeQrUrl}
+                          className="w-[140px] h-[140px] object-contain" 
+                          alt="VietQR code preview" 
+                        />
+                        <span className="text-[8px] text-gray-500 font-extrabold mt-1.5 uppercase tracking-wide">Phóng to</span>
+                      </div>
+                      <div className="flex flex-col gap-1.5 text-center w-full bg-white/5 p-3 rounded-xl border border-white/5">
+                        <p className="text-[12px] text-gray-100 font-bold">{activeBank?.ten_dich_vu || store.selectedService?.ten_danh_muc || '—'}</p>
+                        <p className="text-[12px] text-violet-300 font-black">{activeHd?.ma_hop_dong || '—'}</p>
+                        <p className="text-[12px] text-gray-100 font-bold">{activeHd?.chu_hop_dong || '—'}</p>
+                        <p className="text-[11px] text-gray-300 font-semibold"><span className="text-[9px] text-gray-500 mr-1">NỘI DUNG:</span>{activeDetail?.noi_dung || '—'}</p>
+                      </div>
+                    </div>
                   </div>
-
-                  <div className="flex flex-col gap-1.5 text-center w-full bg-white/5 p-3 rounded-xl border border-white/5">
-                    <p className="text-[12px] text-gray-100 font-bold">{activeBank?.ten_dich_vu || store.selectedService?.ten_danh_muc || '—'}</p>
-                    <p className="text-[12px] text-violet-300 font-black">{activeHd?.ma_hop_dong || '—'}</p>
-                    <p className="text-[12px] text-gray-100 font-bold">{activeHd?.chu_hop_dong || '—'}</p>
-                    <p className="text-[12px] text-gray-300 font-semibold"><span className="text-[10px] text-gray-500 mr-1">NỘI DUNG:</span>{activeDetail?.noi_dung || '—'}</p>
-                  </div>
+                  <Button type="primary" className="bg-violet-600 hover:bg-violet-500 border-none font-bold shadow-[0_4px_12px_rgba(124,58,237,0.4)] w-full max-w-[240px]" icon={<DownloadOutlined />} onClick={() => handleDownloadQR(col3QrRef)}>
+                    Tải & Chuyển tiền
+                  </Button>
                 </div>
               )}
             </div>
@@ -2000,27 +2026,34 @@ export default function Transactions() {
         title={<span className="font-extrabold text-white text-base">📲 QUÉT MÃ QR VIETQR CHUYỂN TIỀN</span>}
         open={showQrModal}
         onCancel={() => setShowQrModal(false)}
-        footer={[<Button key="close" onClick={() => setShowQrModal(false)}>Đóng</Button>]}
+        centered
+        styles={{ body: { overflowY: 'auto', maxHeight: 'calc(100vh - 160px)' } }}
+        footer={[
+          <Button key="download" type="primary" className="bg-violet-600 hover:bg-violet-500 border-none mr-2 font-bold shadow-[0_4px_12px_rgba(124,58,237,0.4)]" icon={<DownloadOutlined />} onClick={() => handleDownloadQR(modalQrRef)}>Tải & Chuyển tiền</Button>,
+          <Button key="close" className="border-white/20 text-gray-300 hover:text-white" onClick={() => setShowQrModal(false)}>Đóng</Button>
+        ]}
         className="glass-modal"
       >
         {activeDetail && activeQrUrl && (
-          <div className="flex flex-col items-center justify-center p-6 text-center">
-            <p className="text-sm font-semibold text-gray-300 mb-4">Sử dụng App Ngân hàng bất kỳ để quét mã thanh toán tự động</p>
-            <div className="p-4 bg-white rounded-2xl shadow-xl border border-gray-100 max-w-[280px]">
-              <img 
-                src={activeQrUrl} 
-                className="w-[240px] h-[240px] object-contain bg-white" 
-                alt="VietQR code large" 
-              />
-            </div>
-            <h3 className="text-2xl font-black text-violet-400 mt-6 tracking-wide">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien_di)}
-            </h3>
-            <div className="flex flex-col gap-1.5 mt-4 text-center w-full bg-white/5 p-3 rounded-xl border border-white/5">
-              <p className="text-[13px] text-gray-100 font-bold">{activeBank?.ten_dich_vu || store.selectedService?.ten_danh_muc || '—'}</p>
-              <p className="text-[14px] text-violet-300 font-black tracking-wide">{activeHd?.ma_hop_dong || '—'}</p>
-              <p className="text-[13px] text-gray-100 font-bold">{activeHd?.chu_hop_dong || '—'}</p>
-              <p className="text-[12px] text-gray-300 font-semibold"><span className="text-[10px] text-gray-500 mr-1">NỘI DUNG:</span>{activeDetail?.noi_dung || '—'}</p>
+          <div className="bg-transparent p-1 md:p-4" ref={modalQrRef}>
+            <div className="flex flex-col items-center justify-center p-4 md:p-6 text-center rounded-2xl bg-[#0d1426] border border-white/5">
+              <p className="text-xs md:text-sm font-semibold text-gray-300 mb-3 md:mb-4">Sử dụng App Ngân hàng bất kỳ để quét mã thanh toán tự động</p>
+              <div className="p-3 md:p-4 bg-white rounded-2xl shadow-xl border border-gray-100 max-w-[200px] md:max-w-[280px]">
+                <img 
+                  src={activeQrUrl} 
+                  className="w-[180px] h-[180px] md:w-[240px] md:h-[240px] object-contain bg-white mx-auto" 
+                  alt="VietQR code large" 
+                />
+              </div>
+              <h3 className="text-xl md:text-2xl font-black text-violet-400 mt-4 md:mt-6 tracking-wide">
+                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.so_tien_di || 0)}
+              </h3>
+              <div className="flex flex-col gap-1 md:gap-1.5 mt-3 md:mt-4 text-center w-full bg-white/5 p-2 md:p-3 rounded-xl border border-white/5">
+                <p className="text-[11px] md:text-[13px] text-gray-100 font-bold">{activeBank?.ten_dich_vu || store.selectedService?.ten_danh_muc || '—'}</p>
+                <p className="text-[12px] md:text-[14px] text-violet-300 font-black tracking-wide">{activeHd?.ma_hop_dong || '—'}</p>
+                <p className="text-[11px] md:text-[13px] text-gray-100 font-bold">{activeHd?.chu_hop_dong || '—'}</p>
+                <p className="text-[10px] md:text-[12px] text-gray-300 font-semibold"><span className="text-[8px] md:text-[10px] text-gray-500 mr-1">NỘI DUNG:</span>{activeDetail?.noi_dung || '—'}</p>
+              </div>
             </div>
           </div>
         )}
