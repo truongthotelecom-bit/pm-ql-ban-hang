@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, Drawer, App as AntdApp } from 'antd';
-import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined } from '@ant-design/icons';
+import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined, DownloadOutlined } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
 import { supabase } from '../lib/supabaseClient';
 import MoneyTransferForm from '../components/MoneyTransferForm';
@@ -135,6 +135,10 @@ export default function TransactionHistory() {
   // Modal bộ lọc nâng cao
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [mobileFilterType, setMobileFilterType] = useState(null); // 'time' | 'status' | 'advanced' | null
+
+  // Máy tính tổng & Xuất Excel
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
 
   // Khóa cuộn body toàn trang để dùng cuộn nội bộ
   useEffect(() => {
@@ -818,6 +822,13 @@ export default function TransactionHistory() {
         <Table
           loading={store.isHistoryLoading}
           dataSource={filteredTransactions}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: (newSelectedRowKeys, newSelectedRows) => {
+              setSelectedRowKeys(newSelectedRowKeys);
+              setSelectedRows(newSelectedRows);
+            },
+          }}
           rowKey={(record) => record.tx.id_chi_tiet_giao_dich || record.tx.ngay_tao || Math.random().toString()}
           pagination={{ pageSize: 10, position: ['bottomCenter'], showSizeChanger: true }}
           className="custom-dark-table"
@@ -989,8 +1000,25 @@ export default function TransactionHistory() {
             >
               <div className="flex flex-col md:flex-row p-4 gap-4">
 
-                {/* Trái: Logo + Mã HĐ + Chủ TK + KH */}
-                <div className="flex-1 border-b md:border-b-0 md:border-r border-white/5 pb-4 md:pb-0 md:pr-4 flex gap-4">
+                {/* Trái: Checkbox + Logo + Mã HĐ + Chủ TK + KH */}
+                <div className="flex-1 border-b md:border-b-0 md:border-r border-white/5 pb-4 md:pb-0 md:pr-4 flex gap-3 items-start">
+                  <div className="pt-4 shrink-0">
+                    <input 
+                      type="checkbox"
+                      className="w-4 h-4 accent-violet-500 cursor-pointer"
+                      checked={selectedRowKeys.includes(item.tx.id_chi_tiet_giao_dich || item.tx.ngay_tao)}
+                      onChange={(e) => {
+                        const key = item.tx.id_chi_tiet_giao_dich || item.tx.ngay_tao;
+                        if (e.target.checked) {
+                          setSelectedRowKeys([...selectedRowKeys, key]);
+                          setSelectedRows([...selectedRows, item]);
+                        } else {
+                          setSelectedRowKeys(selectedRowKeys.filter(k => k !== key));
+                          setSelectedRows(selectedRows.filter(r => (r.tx.id_chi_tiet_giao_dich || r.tx.ngay_tao) !== key));
+                        }
+                      }}
+                    />
+                  </div>
                   <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 p-2 flex items-center justify-center shrink-0">
                     {item.bank?.logo
                       ? <img src={item.bank.logo} alt="bank" className="w-full h-full object-contain" />
@@ -1167,6 +1195,47 @@ export default function TransactionHistory() {
           </Button>
         </div>
       </Modal>
+
+      {/* FLOATING CALCULATOR BAR */}
+      {selectedRows.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[95%] md:w-[700px] animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="glass-panel bg-[#0d1426]/95 backdrop-blur-xl border border-violet-500/50 rounded-2xl shadow-[0_10px_40px_rgba(139,92,246,0.3)] p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex flex-1 justify-between items-center w-full md:w-auto">
+              <div className="text-center">
+                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Đã chọn</div>
+                <div className="text-lg font-black text-white">{selectedRows.length} <span className="text-sm font-medium text-gray-400">GD</span></div>
+              </div>
+              <div className="h-10 w-[1px] bg-white/10 hidden md:block"></div>
+              <div className="text-center">
+                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Tổng Khách Đưa</div>
+                <div className="text-lg font-black text-emerald-400">{formatCurrency(selectedRows.reduce((sum, r) => sum + (r.tx.so_tien_di || 0), 0))}</div>
+              </div>
+              <div className="h-10 w-[1px] bg-white/10 hidden md:block"></div>
+              <div className="text-center">
+                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Hoa hồng</div>
+                <div className="text-lg font-black text-orange-400">{formatCurrency(selectedRows.reduce((sum, r) => sum + (r.tx.phi_dich_vu || 0), 0))}</div>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
+              <Button 
+                onClick={() => { setSelectedRowKeys([]); setSelectedRows([]); }}
+                className="flex-1 md:flex-none border-white/10 bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl font-bold h-10"
+              >
+                Hủy
+              </Button>
+              <Button 
+                type="primary"
+                onClick={handleExportExcel}
+                icon={<DownloadOutlined />}
+                className="flex-1 md:flex-none bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 border-none shadow-lg shadow-emerald-500/20 rounded-xl font-bold h-10"
+              >
+                Xuất Excel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
