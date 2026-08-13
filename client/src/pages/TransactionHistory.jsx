@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, Drawer, App as AntdApp } from 'antd';
 import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined, DownloadOutlined } from '@ant-design/icons';
+import { numberToWords } from '../utils/stringUtils';
 import useAppStore from '../store/useAppStore';
 import { supabase } from '../lib/supabaseClient';
 import MoneyTransferForm from '../components/MoneyTransferForm';
@@ -230,6 +231,215 @@ export default function TransactionHistory() {
     setActiveQrUrl(url);
     setActiveDetail(record);
     setShowQrModal(true);
+  };
+
+  const handlePrintCombinedInvoice = () => {
+    if (!selectedRows || selectedRows.length === 0) return;
+
+    // Check if all selected rows belong to the same customer phone number
+    const firstPhone = selectedRows[0]?.customer?.so_dien_thoai;
+    const sameCustomer = selectedRows.every(r => r.customer?.so_dien_thoai === firstPhone);
+
+    if (!sameCustomer) {
+      modal.error({
+        title: 'Lỗi in gộp',
+        content: 'Chỉ có thể in hóa đơn gộp cho các giao dịch của cùng một khách hàng (cùng số điện thoại).',
+      });
+      return;
+    }
+
+    const fmtVND = (val) => {
+      const num = parseFloat(val || 0);
+      return isNaN(num) ? '0 ₫' : num.toLocaleString('vi-VN') + ' ₫';
+    };
+
+    const sig = store.signature || {};
+    const customer = selectedRows[0]?.customer || {};
+    
+    // Sort transactions by date ascending
+    const sortedRows = [...selectedRows].sort((a, b) => new Date(a.tx.thoi_gian_giao_dich || a.tx.ngay_tao) - new Date(b.tx.thoi_gian_giao_dich || b.tx.ngay_tao));
+
+    let totalTien = 0;
+    let totalPhi = 0;
+
+    const trHtml = sortedRows.map((r, index) => {
+      const tx = r.tx || {};
+      const service = r.service || {};
+      const contract = r.contract || {};
+      
+      const ngayGD = new Date(tx.thoi_gian_giao_dich || tx.ngay_tao).toLocaleString('vi-VN', {
+        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+      });
+      const dichVu = service.ten_danh_muc || '';
+      const maHD = contract.ma_hop_dong || '';
+      const tienGD = parseFloat(tx.so_tien || 0);
+      const phiDV = parseFloat(tx.phi_dich_vu || 0);
+      const thanhTien = parseFloat(tx.so_tien_di || 0) + (parseFloat(tx.phi_dich_vu || 0));
+
+      totalTien += parseFloat(tx.so_tien_di || 0);
+      totalPhi += phiDV;
+
+      return `
+        <tr>
+          <td class="col-stt">${index + 1}</td>
+          <td>${ngayGD}</td>
+          <td>${dichVu}</td>
+          <td>${maHD}</td>
+          <td class="col-money">${fmtVND(tx.so_tien_di)}</td>
+          <td class="col-money">${fmtVND(phiDV)}</td>
+          <td class="col-money">${fmtVND(thanhTien)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    const tongThanhToan = totalTien + totalPhi;
+    const docTien = numberToWords(tongThanhToan);
+
+    const invoiceHtml = `
+      <!DOCTYPE html>
+      <html lang="vi">
+      <head>
+          <meta charset="UTF-8">
+          <title>Hóa đơn thanh toán (Gộp)</title>
+          <style>
+              @page { size: A4 portrait; margin: 15mm; }
+              body {
+                  font-family: 'Times New Roman', Times, serif;
+                  color: #000;
+                  background: #fff;
+                  margin: 0;
+                  padding: 0;
+                  font-size: 14px;
+                  line-height: 1.5;
+              }
+              .header {
+                  text-align: center;
+                  margin-bottom: 20px;
+                  border-bottom: 2px solid #000;
+                  padding-bottom: 10px;
+              }
+              .shop-name { font-size: 20px; font-weight: bold; text-transform: uppercase; }
+              .shop-info { font-size: 13px; font-style: italic; }
+              .invoice-title {
+                  text-align: center;
+                  font-size: 24px;
+                  font-weight: bold;
+                  margin: 20px 0 5px;
+              }
+              .invoice-subtitle {
+                  text-align: center;
+                  font-size: 14px;
+                  font-style: italic;
+                  margin-bottom: 20px;
+              }
+              .customer-info { margin-bottom: 20px; }
+              .customer-row { display: flex; margin-bottom: 5px; }
+              .customer-label { width: 150px; font-weight: bold; }
+              
+              table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+              th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+              th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
+              .col-stt { width: 40px; text-align: center; }
+              .col-money { text-align: right; }
+              
+              .summary {
+                  display: flex;
+                  justify-content: flex-end;
+                  margin-bottom: 30px;
+              }
+              .summary-box { width: 350px; }
+              .summary-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+              .summary-label { font-weight: bold; }
+              .summary-total { font-size: 18px; font-weight: bold; border-top: 2px solid #000; padding-top: 5px; margin-top: 5px; }
+              
+              .footer {
+                  display: flex;
+                  justify-content: space-around;
+                  margin-top: 50px;
+                  text-align: center;
+              }
+              .signature-box { width: 200px; }
+              .signature-title { font-weight: bold; }
+              .signature-sub { font-size: 12px; font-style: italic; margin-bottom: 80px; }
+          </style>
+      </head>
+      <body>
+          <div class="header">
+              <div class="shop-name">${sig.ten_cua_hang || 'CỬA HÀNG ĐẠI LÝ'}</div>
+              ${sig.dia_chi ? `<div class="shop-info">Địa chỉ: ${sig.dia_chi}</div>` : ''}
+              ${sig.sdt1 ? `<div class="shop-info">Điện thoại: ${sig.sdt1}</div>` : ''}
+          </div>
+          
+          <div class="invoice-title">HÓA ĐƠN THANH TOÁN GỘP</div>
+          <div class="invoice-subtitle">Ngày in: ${new Date().toLocaleString('vi-VN')}</div>
+          
+          <div class="customer-info">
+              <div class="customer-row"><div class="customer-label">Khách hàng:</div><div>${customer.ho_va_ten || 'Khách lẻ'}</div></div>
+              <div class="customer-row"><div class="customer-label">Số điện thoại:</div><div>${customer.so_dien_thoai || ''}</div></div>
+              <div class="customer-row"><div class="customer-label">Số lượng GD:</div><div>${String(sortedRows.length).padStart(2, '0')} giao dịch</div></div>
+          </div>
+
+          <table>
+              <thead>
+                  <tr>
+                      <th class="col-stt">STT</th>
+                      <th>Ngày GD</th>
+                      <th>Dịch vụ</th>
+                      <th>Mã HĐ / Tài khoản</th>
+                      <th class="col-money">Tiền GD</th>
+                      <th class="col-money">Phí DV</th>
+                      <th class="col-money">Thành tiền</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  ${trHtml}
+              </tbody>
+          </table>
+          
+          <div class="summary">
+              <div class="summary-box">
+                  <div class="summary-row"><div class="summary-label">Tổng tiền giao dịch:</div><div>${fmtVND(totalTien)}</div></div>
+                  <div class="summary-row"><div class="summary-label">Tổng phí dịch vụ:</div><div>${fmtVND(totalPhi)}</div></div>
+                  <div class="summary-row summary-total"><div class="summary-label">TỔNG THANH TOÁN:</div><div>${fmtVND(tongThanhToan)}</div></div>
+                  <div style="font-style: italic; font-size: 13px; text-align: right; margin-top: 5px;">(${docTien})</div>
+              </div>
+          </div>
+          
+          <div class="footer">
+              <div class="signature-box">
+                  <div class="signature-title">Khách hàng</div>
+                  <div class="signature-sub">(Ký, ghi rõ họ tên)</div>
+                  <div>${customer.ho_va_ten || ''}</div>
+              </div>
+              <div class="signature-box">
+                  <div class="signature-title">Người lập phiếu</div>
+                  <div class="signature-sub">(Ký, ghi rõ họ tên)</div>
+                  <div>${sig.ten_chu_ky || ''}</div>
+              </div>
+          </div>
+      </body>
+      </html>
+    `;
+
+    const printWindow = document.createElement('iframe');
+    printWindow.style.position = 'fixed';
+    printWindow.style.width = '0';
+    printWindow.style.height = '0';
+    printWindow.style.border = 'none';
+    document.body.appendChild(printWindow);
+
+    const doc = printWindow.contentWindow.document;
+    doc.open();
+    doc.write(invoiceHtml);
+    doc.close();
+
+    printWindow.onload = () => {
+      printWindow.contentWindow.focus();
+      printWindow.contentWindow.print();
+      setTimeout(() => {
+        document.body.removeChild(printWindow);
+      }, 500);
+    };
   };
 
   const handlePrintInvoice = (record) => {
@@ -1269,6 +1479,17 @@ export default function TransactionHistory() {
               >
                 Xuất Excel
               </Button>
+              <Tooltip title={!selectedRows.every(r => r.customer?.so_dien_thoai === selectedRows[0]?.customer?.so_dien_thoai) ? 'Chỉ in gộp được các giao dịch của cùng 1 khách hàng' : 'In gộp hóa đơn (A4)'}>
+                <Button 
+                  type="primary"
+                  onClick={handlePrintCombinedInvoice}
+                  disabled={!selectedRows.every(r => r.customer?.so_dien_thoai === selectedRows[0]?.customer?.so_dien_thoai)}
+                  icon={<PrinterOutlined />}
+                  className="flex-1 md:flex-none bg-gradient-to-r from-indigo-600 to-purple-500 hover:from-indigo-500 hover:to-purple-400 border-none shadow-lg shadow-indigo-500/20 rounded-xl font-bold h-10 disabled:opacity-50 disabled:from-gray-600 disabled:to-gray-500 disabled:shadow-none"
+                >
+                  In Gộp A4
+                </Button>
+              </Tooltip>
             </div>
           </div>
         </div>
