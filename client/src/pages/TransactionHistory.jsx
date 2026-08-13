@@ -832,42 +832,30 @@ export default function TransactionHistory() {
               width: 150,
             },
             {
-              title: 'Mã HĐ',
-              key: 'ma_hd',
-              render: (_, record) => <span className="text-red-400 font-black tracking-wide whitespace-nowrap">{record.contract?.ma_hop_dong || '---'}</span>,
-              width: 130,
-            },
-            {
-              title: 'Chủ HĐ',
-              key: 'chu_hd',
-              render: (_, record) => <span className="text-gray-100 font-bold uppercase">{record.contract?.chu_hop_dong || '---'}</span>,
-              width: 160,
-            },
-            {
-              title: 'Dịch vụ',
-              key: 'dich_vu',
-              render: (_, record) => <span className="text-gray-400 text-xs whitespace-nowrap">{record.bank?.ten_viet_tat ? `${record.bank.ten_viet_tat} - ${record.bank.ten_dich_vu}` : record.service?.ten_danh_muc || '---'}</span>,
-              width: 180,
+              title: 'Hợp đồng / Dịch vụ',
+              key: 'hop_dong_dich_vu',
+              render: (_, record) => (
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-red-400 font-black tracking-wide whitespace-nowrap">{record.contract?.ma_hop_dong || '---'}</span>
+                  <span className="text-gray-100 font-bold uppercase">{record.contract?.chu_hop_dong || '---'}</span>
+                  <span className="text-gray-400 text-[10px] whitespace-nowrap truncate max-w-[200px]" title={record.bank?.ten_viet_tat ? `${record.bank.ten_viet_tat} - ${record.bank.ten_dich_vu}` : record.service?.ten_danh_muc || '---'}>
+                    {record.bank?.ten_viet_tat ? `${record.bank.ten_viet_tat} - ${record.bank.ten_dich_vu}` : record.service?.ten_danh_muc || '---'}
+                  </span>
+                </div>
+              ),
+              width: 200,
             },
             {
               title: 'Khách hàng',
               key: 'khach_hang',
               render: (_, record) => (
-                <div className="whitespace-nowrap font-bold text-gray-200">
-                  {record.customer?.ho_va_ten || 'Khách lẻ'}
+                <div className="flex flex-col gap-0.5">
+                  <span className="whitespace-nowrap font-bold text-gray-200">{record.customer?.ho_va_ten || 'Khách lẻ'}</span>
+                  {record.customer?.so_dien_thoai && <span className="whitespace-nowrap text-violet-400 font-semibold">{record.customer.so_dien_thoai}</span>}
+                  {record.customer?.dia_chi && <span className="text-gray-400 text-[10px] truncate max-w-[150px]" title={record.customer.dia_chi}>{record.customer.dia_chi}</span>}
                 </div>
               ),
-              width: 150,
-            },
-            {
-              title: 'SĐT',
-              key: 'sdt',
-              render: (_, record) => (
-                <div className="whitespace-nowrap text-violet-400 font-semibold">
-                  {record.customer?.so_dien_thoai || '---'}
-                </div>
-              ),
-              width: 120,
+              width: 160,
             },
             {
               title: 'Số tiền',
