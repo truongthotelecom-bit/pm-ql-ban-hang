@@ -1522,23 +1522,25 @@ export default function TransactionHistory() {
         className="glass-modal"
       >
         {activeDetail && activeQrUrl && (
-          <div className="flex flex-col items-center justify-center p-6 text-center rounded-2xl bg-[#0d1426] border border-white/5" ref={qrRef}>
-            <p className="text-sm font-semibold text-gray-300 mb-4">Sử dụng App Ngân hàng bất kỳ để quét mã thanh toán tự động</p>
-            <div className="p-4 bg-white rounded-2xl shadow-xl border border-gray-100 max-w-[280px]">
-              <img 
-                src={activeQrUrl} 
-                className="w-[240px] h-[240px] object-contain bg-white" 
-                alt="VietQR code large" 
-              />
-            </div>
-            <h3 className="text-2xl font-black text-violet-400 mt-6 tracking-wide">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.tx.so_tien_di)}
-            </h3>
-            <div className="flex flex-col gap-1.5 mt-4 text-center w-full bg-white/5 p-3 rounded-xl border border-white/5">
-              <p className="text-[13px] text-gray-100 font-bold">{activeDetail.bank?.ten_dich_vu || '—'}</p>
-              <p className="text-[14px] text-violet-300 font-black tracking-wide">{activeDetail.contract?.ma_hop_dong || '—'}</p>
-              <p className="text-[13px] text-gray-100 font-bold">{activeDetail.contract?.chu_hop_dong || '—'}</p>
-              <p className="text-[12px] text-gray-300 font-semibold"><span className="text-[10px] text-gray-500 mr-1">NỘI DUNG:</span>{activeDetail.tx.noi_dung || '—'}</p>
+          <div className="bg-transparent p-2 md:p-4" ref={qrRef}>
+            <div className="flex flex-col items-center justify-center p-6 text-center rounded-2xl bg-[#0d1426] border border-white/5">
+              <p className="text-sm font-semibold text-gray-300 mb-4">Sử dụng App Ngân hàng bất kỳ để quét mã thanh toán tự động</p>
+              <div className="p-4 bg-white rounded-2xl shadow-xl border border-gray-100 max-w-[280px]">
+                <img 
+                  src={activeQrUrl} 
+                  className="w-[240px] h-[240px] object-contain bg-white" 
+                  alt="VietQR code large" 
+                />
+              </div>
+              <h3 className="text-2xl font-black text-violet-400 mt-6 tracking-wide">
+                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeDetail.tx.so_tien_di)}
+              </h3>
+              <div className="flex flex-col gap-1.5 mt-4 text-center w-full bg-white/5 p-3 rounded-xl border border-white/5">
+                <p className="text-[13px] text-gray-100 font-bold">{activeDetail.bank?.ten_dich_vu || '—'}</p>
+                <p className="text-[14px] text-violet-300 font-black tracking-wide">{activeDetail.contract?.ma_hop_dong || '—'}</p>
+                <p className="text-[13px] text-gray-100 font-bold">{activeDetail.contract?.chu_hop_dong || '—'}</p>
+                <p className="text-[12px] text-gray-300 font-semibold"><span className="text-[10px] text-gray-500 mr-1">NỘI DUNG:</span>{activeDetail.tx.noi_dung || '—'}</p>
+              </div>
             </div>
           </div>
         )}
