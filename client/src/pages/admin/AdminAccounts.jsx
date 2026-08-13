@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { createClient } from '@supabase/supabase-js';
 import { Select, message, Modal, Form, Input, Button, Switch } from 'antd';
 
 export default function AdminAccounts() {
@@ -53,7 +54,14 @@ export default function AdminAccounts() {
       const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.username);
       const email = isEmail ? values.username : `${values.username}@aura.local`;
 
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Khởi tạo client tạm thời không lưu session để tránh làm mất phiên đăng nhập của Admin
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || localStorage.getItem('supabase_url');
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || localStorage.getItem('supabase_key');
+      const tempClient = createClient(supabaseUrl, supabaseKey, {
+        auth: { persistSession: false, autoRefreshToken: false }
+      });
+
+      const { data: authData, error: authError } = await tempClient.auth.signUp({
         email: email,
         password: values.password,
       });
