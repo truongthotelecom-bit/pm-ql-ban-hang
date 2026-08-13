@@ -1124,9 +1124,9 @@ export default function TransactionHistory() {
             },
           }}
           rowKey={(record) => record.tx.id_chi_tiet_giao_dich || record.tx.ngay_tao || Math.random().toString()}
-          pagination={{ pageSize: 10, position: ['bottomCenter'], showSizeChanger: true }}
+          pagination={{ pageSize: 15, position: ['bottomCenter'], showSizeChanger: true, pageSizeOptions: ['15', '30', '50', '100'] }}
           className="custom-dark-table"
-          scroll={{ x: 1000 }}
+          scroll={{ x: 1000, y: 'calc(100vh - 450px)' }}
           size="middle"
           columns={[
             {
