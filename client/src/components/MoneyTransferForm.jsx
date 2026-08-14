@@ -3,6 +3,7 @@ import { Input, InputNumber, Select, Switch, Button, Divider, Alert, Radio, Popo
 import { SwapOutlined, CheckCircleOutlined, DollarOutlined, RetweetOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import useAppStore from '../store/useAppStore';
 import PosAmountKeyboard from './PosAmountKeyboard';
+import { supabase } from '../lib/supabaseClient';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -90,78 +91,117 @@ export default function MoneyTransferForm({ value, onChange }) {
     // Nếu value đã có > 2 fields (tức là người dùng đang sửa hoặc đã điền), bỏ qua
     if (Object.keys(value || {}).length > 2) return;
 
-    const idLoaiDV = store.banks?.find(b => b.id_danh_muc_dich_vu === activeContract?.id_danh_muc_dich_vu)?.id_loai_dich_vu;
     const idHoSo = activeFile?.id_ho_so_dich_vu;
     const idDanhMuc = activeContract?.id_danh_muc_dich_vu;
+    const idLoaiDV = store.banks?.find(b => b.id_danh_muc_dich_vu === idDanhMuc)?.id_loai_dich_vu;
 
-    let lastTx = null;
-    
-    const getLoaiDichVuId = (tx) => {
-      const file = store.allServiceFiles?.find(f => f.id_ho_so_dich_vu === tx.id_ho_so_dich_vu);
-      const hd = store.ma_hop_dong?.find(h => h.id_ma_hop_dong === file?.id_ma_hop_dong);
-      const dm = store.banks?.find(b => b.id_danh_muc_dich_vu === hd?.id_danh_muc_dich_vu);
-      return dm?.id_loai_dich_vu;
+
+    const doInherit = async () => {
+      let lastTx = null;
+
+      // Ưu tiên 1: giao dịch gần nhất của chính hồ sơ này (đã load sẵn)
+      const profileTxs = (store.transactionDetails || []).filter(t => t.id_ho_so_dich_vu === idHoSo);
+      if (profileTxs.length > 0) {
+        lastTx = [...profileTxs].sort((a, b) =>
+          new Date(b.thoi_gian_giao_dich || 0) - new Date(a.thoi_gian_giao_dich || 0)
+        )[0];
+      }
+
+      // Ưu tiên 2: query Supabase – giao dịch gần nhất cùng danh mục dịch vụ
+      if (!lastTx && idDanhMuc) {
+        // Tìm các hồ sơ cùng danh mục
+        const { data: hdList } = await supabase
+          .from('ma_hop_dong')
+          .select('id_ma_hop_dong')
+          .eq('id_danh_muc_dich_vu', idDanhMuc);
+
+        if (hdList && hdList.length > 0) {
+          const hdIds = hdList.map(h => h.id_ma_hop_dong);
+          const { data: fileList } = await supabase
+            .from('ho_so_dich_vu')
+            .select('id_ho_so_dich_vu')
+            .in('id_ma_hop_dong', hdIds);
+
+          if (fileList && fileList.length > 0) {
+            const fileIds = fileList.map(f => f.id_ho_so_dich_vu);
+            const { data: dmTxs } = await supabase
+              .from('chi_tiet_giao_dich')
+              .select('*')
+              .in('id_ho_so_dich_vu', fileIds)
+              .order('thoi_gian_giao_dich', { ascending: false })
+              .limit(1);
+            if (dmTxs && dmTxs.length > 0) lastTx = dmTxs[0];
+          }
+        }
+      }
+
+      // Ưu tiên 3: query Supabase – giao dịch gần nhất cùng loại dịch vụ
+      if (!lastTx && idLoaiDV) {
+        const { data: dmList } = await supabase
+          .from('dm_dich_vu')
+          .select('id_danh_muc_dich_vu')
+          .eq('id_loai_dich_vu', idLoaiDV);
+
+        if (dmList && dmList.length > 0) {
+          const dmIds = dmList.map(d => d.id_danh_muc_dich_vu);
+          const { data: hdList2 } = await supabase
+            .from('ma_hop_dong')
+            .select('id_ma_hop_dong')
+            .in('id_danh_muc_dich_vu', dmIds);
+
+          if (hdList2 && hdList2.length > 0) {
+            const hdIds2 = hdList2.map(h => h.id_ma_hop_dong);
+            const { data: fileList2 } = await supabase
+              .from('ho_so_dich_vu')
+              .select('id_ho_so_dich_vu')
+              .in('id_ma_hop_dong', hdIds2);
+
+            if (fileList2 && fileList2.length > 0) {
+              const fileIds2 = fileList2.map(f => f.id_ho_so_dich_vu);
+              const { data: loaiTxs } = await supabase
+                .from('chi_tiet_giao_dich')
+                .select('*')
+                .in('id_ho_so_dich_vu', fileIds2)
+                .order('thoi_gian_giao_dich', { ascending: false })
+                .limit(1);
+              if (loaiTxs && loaiTxs.length > 0) lastTx = loaiTxs[0];
+            }
+          }
+        }
+      }
+
+      if (lastTx) {
+        const isMienPhi = !lastTx.phi_dich_vu || Number(lastTx.phi_dich_vu) === 0;
+        const inheritedLoaiCuoc = isMienPhi ? 'mien_phi' : (lastTx.is_cuoc_trong ? 'trong' : 'ngoai');
+        const inheritedDiscount = lastTx.chiet_khau || 0;
+
+        onChange(prev => ({
+          ...(prev || {}),
+          id_pttt_nguon: (prev || {}).id_pttt_nguon || lastTx.id_pttt_nguon || undefined,
+          id_pttt_di:    (prev || {}).id_pttt_di    || lastTx.id_pttt_di    || undefined,
+          id_pttt_phi:   (prev || {}).id_pttt_phi   || lastTx.id_pttt_phi   || undefined,
+          is_cuoc_trong: lastTx.is_cuoc_trong || false,
+          loai_cuoc_phi: inheritedLoaiCuoc,
+          chiet_khau: inheritedDiscount
+        }));
+
+        if (inheritedDiscount > 0) {
+          setShowDiscount(true);
+        }
+        hasInherited.current = true;
+      } else {
+        // Mặc định miễn phí
+        onChange(prev => ({
+          ...(prev || {}),
+          loai_cuoc_phi: 'mien_phi',
+          is_cuoc_trong: false
+        }));
+        hasInherited.current = true;
+      }
     };
-    
-    const getDanhMucId = (tx) => {
-      const file = store.allServiceFiles?.find(f => f.id_ho_so_dich_vu === tx.id_ho_so_dich_vu);
-      const hd = store.ma_hop_dong?.find(h => h.id_ma_hop_dong === file?.id_ma_hop_dong);
-      return hd?.id_danh_muc_dich_vu;
-    };
 
-    // Ưu tiên 1: Cùng hồ sơ - dùng transactionDetails (đã load từ cột giữa)
-    let profileTxs = (store.transactionDetails || []).filter(t => t.id_ho_so_dich_vu === idHoSo);
-    if (profileTxs.length === 0) {
-      profileTxs = (store.allTransactions || []).filter(t => t.id_ho_so_dich_vu === idHoSo);
-    }
-    if (profileTxs.length > 0) {
-      const sorted = [...profileTxs].sort((a, b) => new Date(b.thoi_gian_giao_dich || b.ngay_tao || 0) - new Date(a.thoi_gian_giao_dich || a.ngay_tao || 0));
-      lastTx = sorted[0];
-    }
-    
-    // Ưu tiên 2: Cùng danh mục dịch vụ
-    if (!lastTx) {
-      const dmTxs = (store.allTransactions || []).filter(t => getDanhMucId(t) === idDanhMuc);
-      if (dmTxs.length > 0) {
-        lastTx = dmTxs.sort((a, b) => new Date(b.thoi_gian_giao_dich || b.ngay_tao || 0) - new Date(a.thoi_gian_giao_dich || a.ngay_tao || 0))[0];
-      }
-    }
-    
-    // Ưu tiên 3: Cùng loại dịch vụ
-    if (!lastTx) {
-      const loaiTxs = (store.allTransactions || []).filter(t => getLoaiDichVuId(t) === idLoaiDV);
-      if (loaiTxs.length > 0) {
-        lastTx = loaiTxs.sort((a, b) => new Date(b.thoi_gian_giao_dich || b.ngay_tao || 0) - new Date(a.thoi_gian_giao_dich || a.ngay_tao || 0))[0];
-      }
-    }
+    doInherit();
 
-    if (lastTx) {
-      const isMienPhi = !lastTx.phi_dich_vu || Number(lastTx.phi_dich_vu) === 0;
-      const inheritedLoaiCuoc = isMienPhi ? 'mien_phi' : (lastTx.is_cuoc_trong ? 'trong' : 'ngoai');
-      const inheritedDiscount = lastTx.chiet_khau || 0;
-      
-      onChange(prev => ({
-        ...(prev || {}),
-        id_pttt_nguon: (prev || {}).id_pttt_nguon || lastTx.id_pttt_nguon || undefined,
-        id_pttt_di:    (prev || {}).id_pttt_di    || lastTx.id_pttt_di    || undefined,
-        id_pttt_phi:   (prev || {}).id_pttt_phi   || lastTx.id_pttt_phi   || undefined,
-        is_cuoc_trong: lastTx.is_cuoc_trong || false,
-        loai_cuoc_phi: inheritedLoaiCuoc,
-        chiet_khau: inheritedDiscount
-      }));
-      
-      if (inheritedDiscount > 0) {
-        setShowDiscount(true);
-      }
-      hasInherited.current = true; // Đánh dấu đã kế thừa xong
-    } else {
-       // Mặc định miễn phí
-       onChange(prev => ({
-        ...(prev || {}),
-        loai_cuoc_phi: 'mien_phi',
-        is_cuoc_trong: false
-      }));
-    }
   }, [activeFile?.id_ho_so_dich_vu, store.transactionDetails?.length, store.allTransactions?.length]);
 
   useEffect(() => {
