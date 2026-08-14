@@ -1657,7 +1657,7 @@ export default function TransactionHistory() {
                 return;
               }
               try {
-                const dataToSave = { ...editDetailPayload };
+                const { loai_cuoc_phi, so_tien_giam_ck, toggle_so_tien_giam, _user_set_fee, ...dataToSave } = editDetailPayload;
                 const { error } = await supabase
                   .from('chi_tiet_giao_dich')
                   .update(dataToSave)
