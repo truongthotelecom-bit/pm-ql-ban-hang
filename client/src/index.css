@@ -158,6 +158,16 @@
   border: none !important;
 }
 
+.search-btn-violet .ant-input-wrapper,
+.search-btn-violet .ant-input-group,
+.search-btn-violet .ant-input-affix-wrapper,
+.search-btn-violet .ant-input-wrapper > .ant-input,
+.search-btn-light-violet .ant-input-wrapper,
+.search-btn-light-violet .ant-input-group,
+.search-btn-light-violet .ant-input-affix-wrapper,
+.search-btn-light-violet .ant-input-wrapper > .ant-input {
+}
+
 .search-btn-violet .ant-input-search-button {
   background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
   border: none !important;

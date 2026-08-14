@@ -226,9 +226,9 @@ export default function TransactionDrawer({ open, onClose }) {
       className="glass-panel"
       classNames={{ body: '!px-2 sm:!px-6 !py-4' }}
       footer={
-        <div className="flex justify-end gap-3 p-3 bg-[#0d1426] border-t border-white/5">
-          <Button onClick={onClose} className="border-gray-700 text-gray-300 bg-white/5 rounded-lg">Hủy bỏ</Button>
-          <Button type="primary" onClick={handleSubmit} className="bg-violet-600 border-none font-bold rounded-lg px-5">TẠO GIAO DỊCH</Button>
+        <div className="flex gap-2 p-2 bg-[#0d1426] border-t border-white/5">
+          <Button onClick={onClose} className="flex-1 h-11 border-gray-700 text-gray-300 bg-white/5 rounded-lg hover:text-white hover:border-gray-500">Hủy bỏ</Button>
+          <Button type="primary" onClick={handleSubmit} className="flex-1 h-11 bg-violet-600 border-none font-bold rounded-lg hover:bg-violet-500 shadow-[0_0_15px_rgba(124,58,237,0.3)]">TẠO GIAO DỊCH</Button>
         </div>
       }
     >

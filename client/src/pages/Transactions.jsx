@@ -51,7 +51,7 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, loaiHop
             onSelectDesktop(file);
           }
         }}
-        className={`px-3 py-3 rounded-xl border transition-all cursor-pointer overflow-hidden ${isSelected ? 'bg-[#0d1426] border-violet-500/80 shadow-[0_0_15px_rgba(139,92,246,0.15)]' : 'bg-[#131c33]/40 border-white/5 hover:border-white/10 hover:bg-[#131c33]/60'}`}
+        className={`px-3 py-3 rounded-xl border transition-all cursor-pointer overflow-hidden ${isSelected ? 'bg-[#0d1426] border-violet-500 shadow-[0_0_15px_rgba(139,92,246,0.3),inset_0_0_40px_rgba(139,92,246,0.4)]' : 'bg-[#131c33]/40 border-white/5 hover:border-white/10 hover:bg-[#131c33]/60'}`}
       >
         {/* Dòng trên cùng: Ngày GD cuối (trái) & Ngày tạo (phải) */}
         <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/5 text-[10px] font-medium">
@@ -134,28 +134,28 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, loaiHop
           <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between gap-1.5 animate-in fade-in slide-in-from-top-2">
             <button 
               onClick={(e) => { e.stopPropagation(); onViewFile(); }}
-              className="flex-1 flex flex-col items-center justify-center gap-1 text-blue-400 bg-blue-900/30 border border-blue-500/30 rounded-xl py-1.5 hover:bg-blue-500/30 hover:border-blue-500/60 transition-all shadow-inner shadow-blue-500/10"
+              className="flex-1 flex flex-col items-center justify-center gap-1 text-blue-400 bg-transparent border border-blue-500/80 rounded-xl py-1.5 hover:bg-blue-500/20 hover:shadow-[inset_0_0_15px_rgba(59,130,246,0.5)] transition-all shadow-[inset_0_0_10px_rgba(59,130,246,0.2)]"
             >
               <InfoCircleOutlined className="text-base" />
               <span className="text-[9px] font-extrabold uppercase tracking-wider">Xem</span>
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); onEditFile(); }}
-              className="flex-1 flex flex-col items-center justify-center gap-1 text-violet-400 bg-violet-900/30 border border-violet-500/30 rounded-xl py-1.5 hover:bg-violet-500/30 hover:border-violet-500/60 transition-all shadow-inner shadow-violet-500/10"
+              className="flex-1 flex flex-col items-center justify-center gap-1 text-violet-400 bg-transparent border border-violet-500/80 rounded-xl py-1.5 hover:bg-violet-500/20 hover:shadow-[inset_0_0_15px_rgba(139,92,246,0.5)] transition-all shadow-[inset_0_0_10px_rgba(139,92,246,0.2)]"
             >
               <EditOutlined className="text-base" />
               <span className="text-[9px] font-extrabold uppercase tracking-wider">Sửa</span>
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); onCopyFile(); }}
-              className="flex-1 flex flex-col items-center justify-center gap-1 text-cyan-400 bg-cyan-900/30 border border-cyan-500/30 rounded-xl py-1.5 hover:bg-cyan-500/30 hover:border-cyan-500/60 transition-all shadow-inner shadow-cyan-500/10"
+              className="flex-1 flex flex-col items-center justify-center gap-1 text-cyan-400 bg-transparent border border-cyan-500/80 rounded-xl py-1.5 hover:bg-cyan-500/20 hover:shadow-[inset_0_0_15px_rgba(6,182,212,0.5)] transition-all shadow-[inset_0_0_10px_rgba(6,182,212,0.2)]"
             >
               <CopyOutlined className="text-base" />
               <span className="text-[9px] font-extrabold uppercase tracking-wider">Copy</span>
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); onAddTx(); }}
-              className="flex-1 flex flex-col items-center justify-center gap-1 text-green-400 bg-green-900/30 border border-green-500/30 rounded-xl py-1.5 hover:bg-green-500/30 hover:border-green-500/60 transition-all shadow-inner shadow-green-500/10"
+              className="flex-1 flex flex-col items-center justify-center gap-1 text-green-400 bg-transparent border border-green-500/80 rounded-xl py-1.5 hover:bg-green-500/20 hover:shadow-[inset_0_0_15px_rgba(34,197,94,0.5)] transition-all shadow-[inset_0_0_10px_rgba(34,197,94,0.2)]"
             >
               <PlusOutlined className="text-base" />
               <span className="text-[9px] font-extrabold uppercase tracking-wider">Giao dịch</span>
@@ -165,7 +165,7 @@ const MemoizedFileCard = React.memo(({ file, cust, hd, bank, isSelected, loaiHop
                 e.stopPropagation(); 
                 if (onDeleteFile) onDeleteFile(file); 
               }}
-              className="flex-1 flex flex-col items-center justify-center gap-1 text-red-400 bg-red-900/30 border border-red-500/30 rounded-xl py-1.5 hover:bg-red-500/30 hover:border-red-500/60 transition-all shadow-inner shadow-red-500/10"
+              className="flex-1 flex flex-col items-center justify-center gap-1 text-red-400 bg-transparent border border-red-500/80 rounded-xl py-1.5 hover:bg-red-500/20 hover:shadow-[inset_0_0_15px_rgba(239,68,68,0.5)] transition-all shadow-[inset_0_0_10px_rgba(239,68,68,0.2)]"
             >
               <DeleteOutlined className="text-base" />
               <span className="text-[9px] font-extrabold uppercase tracking-wider">Xóa</span>
@@ -1077,6 +1077,7 @@ export default function Transactions() {
                     placeholder="Nhập hợp đồng, tên, SĐT..." 
                     value={searchInput}
                     onChange={e => setSearchInput(e.target.value)}
+                    size="large"
                     onSearch={(val) => {
                       if (isResetMode) {
                         setSearchInput('');
@@ -1090,7 +1091,7 @@ export default function Transactions() {
                         {isResetMode ? <ReloadOutlined spin={false} /> : 'TÌM'}
                       </span>
                     }
-                    className={`bg-[#0d1426]/50 border-white/10 text-white flex-1 custom-search-input shadow-inner h-[40px] ${isResetMode ? 'search-btn-light-violet' : 'search-btn-violet'}`}
+                    className={`bg-[#0d1426]/50 border-white/10 text-white flex-1 custom-search-input shadow-inner ${isResetMode ? 'search-btn-light-violet' : 'search-btn-violet'}`}
                     allowClear
                   />
                 );
@@ -1260,7 +1261,7 @@ export default function Transactions() {
           ) : activeFile ? (
             <div className="flex-1 flex flex-col min-h-0 space-y-4">
               {/* Card thông tin Hợp đồng */}
-              <div className="p-4 rounded-2xl bg-[#131c33]/50 border border-white/5 relative overflow-hidden flex flex-col gap-3">
+              <div className="p-4 rounded-2xl bg-gradient-to-b from-[#1e2846] to-transparent border border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3),inset_0_0_20px_rgba(59,130,246,0.2)] relative overflow-hidden flex flex-col gap-3">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-violet-600/5 rounded-full blur-xl pointer-events-none" />
                 
                 <div className="flex items-start justify-between">
@@ -1275,7 +1276,7 @@ export default function Transactions() {
                     </div>
                     {/* Info */}
                     <div className="flex flex-col min-w-0 pt-0.5 justify-center">
-                      <span className="text-violet-400 font-black text-sm tracking-wider uppercase mb-1">
+                      <span className="text-blue-500 font-black text-sm tracking-wider uppercase mb-1">
                         {activeBank?.ten_viet_tat || store.selectedService?.ten_danh_muc || 'CHƯA PHÂN LOẠI'}
                       </span>
                       <span className="text-red-500 font-black text-2xl tracking-wider uppercase truncate leading-none mb-1.5">
@@ -1314,26 +1315,26 @@ export default function Transactions() {
 
               {/* KHU VỰC KHÁCH HÀNG */}
               <div 
-                className="p-4 rounded-2xl bg-[#131c33]/50 border border-white/5 flex flex-col gap-4 cursor-pointer hover:bg-[#131c33]/70 hover:border-white/10 transition-all group lg:hidden"
+                className="p-4 rounded-2xl bg-gradient-to-b from-[#064e3b] to-transparent border border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3),inset_0_0_20px_rgba(34,197,94,0.2)] flex flex-col gap-4 cursor-pointer hover:from-[#064e3b]/80 hover:border-green-400 hover:shadow-[0_0_20px_rgba(34,197,94,0.5),inset_0_0_25px_rgba(34,197,94,0.4)] transition-all group lg:hidden"
                 onClick={() => setShowCustomerModal(true)}
               >
-                <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-                  <UserOutlined className="text-violet-400 text-lg" />
-                  <span className="font-extrabold text-violet-400 text-sm tracking-wider uppercase">KHÁCH HÀNG</span>
+                <div className="flex items-center gap-2 border-b border-green-500/20 pb-3">
+                  <UserOutlined className="text-green-500 text-lg" />
+                  <span className="font-extrabold text-green-500 text-sm tracking-wider uppercase">KHÁCH HÀNG</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <div className="flex gap-8">
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[10px] text-gray-500 font-medium">Loại khách hàng</span>
-                      <span className="text-gray-100 font-bold uppercase text-sm truncate max-w-[150px]">{activeCust?.ho_va_ten || 'KHÁCH LẺ'}</span>
+                      <span className="text-[10px] text-gray-400 font-medium">Loại khách hàng</span>
+                      <span className="text-white font-bold uppercase text-sm truncate max-w-[150px]">{activeCust?.ho_va_ten || 'KHÁCH LẺ'}</span>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[10px] text-gray-500 font-medium">Số điện thoại</span>
-                      <span className="text-violet-400 font-bold text-sm">{activeCust?.so_dien_thoai || '---'}</span>
+                      <span className="text-[10px] text-gray-400 font-medium">Số điện thoại</span>
+                      <span className="text-purple-300 font-bold text-sm">{activeCust?.so_dien_thoai || '---'}</span>
                     </div>
                   </div>
-                  <button className="w-10 h-10 rounded-full bg-violet-600 flex items-center justify-center text-white shadow-[0_4px_15px_rgba(124,58,237,0.3)] hover:scale-105 active:scale-95 transition-all flex-shrink-0 group-hover:bg-violet-500">
+                  <button className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white shadow-[0_4px_15px_rgba(22,163,74,0.3)] hover:scale-105 active:scale-95 transition-all flex-shrink-0 group-hover:bg-green-500">
                     <PhoneOutlined className="text-lg" />
                   </button>
                 </div>
@@ -1369,7 +1370,7 @@ export default function Transactions() {
                             store.setSelectedDetail(detail);
                             if (isMobile) setShowMobileTxDetail(true);
                           }}
-                          className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col gap-3 ${isSelected ? 'bg-violet-600/5 border-violet-500/30' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}
+                          className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col gap-3 ${isSelected ? 'bg-transparent border-violet-500 shadow-[0_0_15px_rgba(139,92,246,0.3),inset_0_0_30px_rgba(139,92,246,0.4)]' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}
                         >
                           <div className="flex justify-between items-center w-full">
                             <div>
@@ -1411,21 +1412,21 @@ export default function Transactions() {
                             <div className="flex gap-2 mt-1 pt-3 border-t border-white/5 w-full">
                               <button 
                                 onClick={(e) => { e.stopPropagation(); setShowQrModal(true); }}
-                                className="flex-1 flex flex-col items-center justify-center gap-1 text-blue-400 bg-blue-900/30 border border-blue-500/30 rounded-xl py-1.5 hover:bg-blue-500/30 hover:border-blue-500/60 transition-all shadow-inner shadow-blue-500/10"
+                                className="flex-1 flex flex-col items-center justify-center gap-1 text-blue-400 bg-transparent border border-blue-500/80 rounded-xl py-1.5 hover:bg-blue-500/20 hover:shadow-[inset_0_0_15px_rgba(59,130,246,0.5)] transition-all shadow-[inset_0_0_10px_rgba(59,130,246,0.2)]"
                               >
                                 <QrcodeOutlined className="text-base" />
                                 <span className="text-[9px] font-extrabold uppercase tracking-wider">Tạo QR</span>
                               </button>
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handlePrintInvoice(); }}
-                                className="flex-1 flex flex-col items-center justify-center gap-1 text-fuchsia-400 bg-fuchsia-900/30 border border-fuchsia-500/30 rounded-xl py-1.5 hover:bg-fuchsia-500/30 hover:border-fuchsia-500/60 transition-all shadow-inner shadow-fuchsia-500/10"
+                                className="flex-1 flex flex-col items-center justify-center gap-1 text-violet-400 bg-transparent border border-violet-500/80 rounded-xl py-1.5 hover:bg-violet-500/20 hover:shadow-[inset_0_0_15px_rgba(139,92,246,0.5)] transition-all shadow-[inset_0_0_10px_rgba(139,92,246,0.2)]"
                               >
                                 <PrinterOutlined className="text-base" />
                                 <span className="text-[9px] font-extrabold uppercase tracking-wider">In hóa đơn</span>
                               </button>
                               <button 
                                 onClick={(e) => { e.stopPropagation(); setEditDetailPayload(detail); setShowEditDetailModal(true); }}
-                                className="flex-1 flex flex-col items-center justify-center gap-1 text-violet-400 bg-violet-900/30 border border-violet-500/30 rounded-xl py-1.5 hover:bg-violet-500/30 hover:border-violet-500/60 transition-all shadow-inner shadow-violet-500/10"
+                                className="flex-1 flex flex-col items-center justify-center gap-1 text-yellow-500 bg-transparent border border-yellow-500/80 rounded-xl py-1.5 hover:bg-yellow-500/20 hover:shadow-[inset_0_0_15px_rgba(234,179,8,0.5)] transition-all shadow-[inset_0_0_10px_rgba(234,179,8,0.2)]"
                               >
                                 <EditOutlined className="text-base" />
                                 <span className="text-[9px] font-extrabold uppercase tracking-wider">Sửa GD</span>
