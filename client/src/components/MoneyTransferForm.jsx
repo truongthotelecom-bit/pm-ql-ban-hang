@@ -113,67 +113,25 @@ export default function MoneyTransferForm({ value, onChange }) {
 
       // Ưu tiên 2: query Supabase – giao dịch gần nhất cùng danh mục dịch vụ (khác hồ sơ)
       if (!lastTx && idDanhMuc) {
-        const { data: hdList } = await supabase
-          .from('ma_hop_dong')
-          .select('id_ma_hop_dong')
-          .eq('id_danh_muc_dich_vu', idDanhMuc);
-
-        if (hdList && hdList.length > 0) {
-          const hdIds = hdList.map(h => h.id_ma_hop_dong);
-          const { data: fileList } = await supabase
-            .from('vw_ho_so_dich_vu_v3')
-            .select('id_ho_so_dich_vu')
-            .in('id_ma_hop_dong', hdIds);
-
-          if (fileList && fileList.length > 0) {
-            const fileIds = fileList.map(f => f.id_ho_so_dich_vu).filter(id => id !== idHoSo);
-            if (fileIds.length > 0) {
-              const { data: dmTxs } = await supabase
-                .from('chi_tiet_giao_dich')
-                .select('*')
-                .in('id_ho_so_dich_vu', fileIds)
-                .order('thoi_gian_giao_dich', { ascending: false })
-                .limit(1);
-              if (dmTxs && dmTxs.length > 0) lastTx = dmTxs[0];
-            }
-          }
+        const { data: dmTxs } = await supabase
+          .rpc('get_last_tx_by_danh_muc', {
+            p_id_danh_muc_dich_vu: idDanhMuc,
+            p_id_ho_so_dich_vu: idHoSo
+          });
+        if (dmTxs && dmTxs.length > 0) {
+          lastTx = dmTxs[0];
         }
       }
 
       // Ưu tiên 3: query Supabase – giao dịch gần nhất cùng loại dịch vụ
       if (!lastTx && idLoaiDV) {
-        const { data: dmList } = await supabase
-          .from('sys_danh_muc_dich_vu')
-          .select('id_danh_muc_dich_vu')
-          .eq('id_loai_dich_vu', idLoaiDV);
-
-        if (dmList && dmList.length > 0) {
-          const dmIds = dmList.map(d => d.id_danh_muc_dich_vu);
-          const { data: hdList2 } = await supabase
-            .from('ma_hop_dong')
-            .select('id_ma_hop_dong')
-            .in('id_danh_muc_dich_vu', dmIds);
-
-          if (hdList2 && hdList2.length > 0) {
-            const hdIds2 = hdList2.map(h => h.id_ma_hop_dong);
-            const { data: fileList2 } = await supabase
-              .from('vw_ho_so_dich_vu_v3')
-              .select('id_ho_so_dich_vu')
-              .in('id_ma_hop_dong', hdIds2);
-
-            if (fileList2 && fileList2.length > 0) {
-              const fileIds2 = fileList2.map(f => f.id_ho_so_dich_vu).filter(id => id !== idHoSo);
-              if (fileIds2.length > 0) {
-                const { data: loaiTxs } = await supabase
-                  .from('chi_tiet_giao_dich')
-                  .select('*')
-                  .in('id_ho_so_dich_vu', fileIds2)
-                  .order('thoi_gian_giao_dich', { ascending: false })
-                  .limit(1);
-                if (loaiTxs && loaiTxs.length > 0) lastTx = loaiTxs[0];
-              }
-            }
-          }
+        const { data: loaiTxs } = await supabase
+          .rpc('get_last_tx_by_loai', {
+            p_id_loai_dich_vu: idLoaiDV,
+            p_id_ho_so_dich_vu: idHoSo
+          });
+        if (loaiTxs && loaiTxs.length > 0) {
+          lastTx = loaiTxs[0];
         }
       }
 
