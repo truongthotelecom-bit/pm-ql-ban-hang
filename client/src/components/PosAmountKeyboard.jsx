@@ -43,6 +43,10 @@ export default function PosAmountKeyboard({ open, value, onOk, onCancel, title =
       current = current.slice(0, -1);
     } else if (k === 'CLEAR') {
       current = '';
+    } else if (k === '.') {
+      if (!current.includes('.')) {
+        current = current === '' ? '0.' : current + '.';
+      }
     } else {
       if (current === '0' && k !== '000') current = k;
       else current += k;
@@ -65,7 +69,15 @@ export default function PosAmountKeyboard({ open, value, onOk, onCancel, title =
   const suggestList = (valStr === '' || currentNum === 0) ? statics : multis;
   const baseNum = (valStr === '' || currentNum === 0) ? 1 : currentNum;
 
-  const formatCurrency = (val) => new Intl.NumberFormat('vi-VN').format(val || 0);
+  const displayValue = (str) => {
+    if (!str) return '0';
+    const parts = str.split('.');
+    const intPart = new Intl.NumberFormat('vi-VN').format(Number(parts[0]) || 0);
+    if (parts.length > 1) {
+      return `${intPart},${parts[1]}`;
+    }
+    return intPart;
+  };
 
   // === RENDER SETTINGS ===
   if (isSettings) {
@@ -110,7 +122,7 @@ export default function PosAmountKeyboard({ open, value, onOk, onCancel, title =
 
           <div className="grid grid-cols-[1fr_auto_auto] gap-2 mb-4">
             <div className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-right text-lg font-bold text-sky-400 overflow-hidden flex items-center justify-end shadow-inner">
-              {formatCurrency(Number(settingInput || 0))}
+              {displayValue(settingInput)}
             </div>
             <button className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 rounded-lg shadow-md shadow-blue-900/50 transition-colors" onClick={() => {
               const n = Number(settingInput);
@@ -130,11 +142,10 @@ export default function PosAmountKeyboard({ open, value, onOk, onCancel, title =
             }}>+ Nhân</button>
           </div>
 
-          {/* Virtual Numpad */}
           <div className="grid grid-cols-3 gap-2">
-            {['7','8','9','4','5','6','1','2','3','0','000','DEL'].map(k => (
+            {['7','8','9','4','5','6','1','2','3','0','000','.'].map(k => (
               <button key={k} className="h-12 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-white font-bold text-xl rounded-xl active:scale-95 transition-transform shadow-md" onClick={() => handleNumpad(k, true)}>
-                {k === 'DEL' ? <DeleteOutlined className="text-red-400"/> : k}
+                {k === '.' ? ',' : k}
               </button>
             ))}
           </div>
@@ -180,7 +191,7 @@ export default function PosAmountKeyboard({ open, value, onOk, onCancel, title =
         <div className="bg-slate-950 border-2 border-slate-700/50 rounded-xl px-4 py-3 mb-5 flex justify-between items-center shadow-inner">
           <span className="text-slate-600 font-bold text-sm tracking-wider">{unit}</span>
           <span className="text-4xl font-black text-white overflow-hidden text-right tracking-tight">
-            {formatCurrency(currentNum)}
+            {displayValue(valStr)}
           </span>
         </div>
 
@@ -197,18 +208,21 @@ export default function PosAmountKeyboard({ open, value, onOk, onCancel, title =
         <div className="grid grid-cols-4 gap-2">
           {/* Numbers */}
           <div className="col-span-3 grid grid-cols-3 gap-2">
-            {['7','8','9','4','5','6','1','2','3','0','000','DEL'].map(k => (
+            {['7','8','9','4','5','6','1','2','3','0','000','.'].map(k => (
               <button key={k} className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-2xl h-14 rounded-xl active:scale-95 transition-transform shadow-md" onClick={() => handleNumpad(k, false)}>
-                {k === 'DEL' ? <DeleteOutlined className="text-red-400"/> : k}
+                {k === '.' ? ',' : k}
               </button>
             ))}
           </div>
           {/* Actions */}
-          <div className="col-span-1 grid grid-cols-1 gap-2">
-            <button className="bg-gradient-to-b from-red-500 to-red-700 border border-red-500 hover:from-red-400 hover:to-red-600 text-white font-bold text-sm rounded-xl active:scale-95 transition-transform h-14 shadow-md shadow-red-900/30" onClick={() => handleNumpad('CLEAR', false)}>
+          <div className="col-span-1 flex flex-col gap-2">
+            <button className="bg-gradient-to-b from-red-500 to-red-700 border border-red-500 hover:from-red-400 hover:to-red-600 text-white font-bold text-sm rounded-xl active:scale-95 transition-transform h-14 shadow-md shadow-red-900/30 flex items-center justify-center" onClick={() => handleNumpad('CLEAR', false)}>
               XOÁ
             </button>
-            <button className="bg-gradient-to-b from-emerald-500 to-emerald-700 border border-emerald-500 hover:from-emerald-400 hover:to-emerald-600 text-white font-black text-xl rounded-xl active:scale-95 transition-transform h-[120px] shadow-lg shadow-emerald-900/30" onClick={handleOk}>
+            <button className="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white font-bold text-xl rounded-xl active:scale-95 transition-transform h-14 shadow-md flex items-center justify-center" onClick={() => handleNumpad('DEL', false)}>
+              <DeleteOutlined className="text-red-400"/>
+            </button>
+            <button className="bg-gradient-to-b from-emerald-500 to-emerald-700 border border-emerald-500 hover:from-emerald-400 hover:to-emerald-600 text-white font-black text-xl rounded-xl active:scale-95 transition-transform flex-1 shadow-lg shadow-emerald-900/30 flex items-center justify-center" onClick={handleOk}>
               OK
             </button>
           </div>
