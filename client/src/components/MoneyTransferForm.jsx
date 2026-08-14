@@ -315,13 +315,22 @@ export default function MoneyTransferForm({ value, onChange }) {
     if (mode === 'mien_phi') {
       phi_dich_vu = 0;
       is_cuoc_trong = false;
+      setForm(prev => ({ ...prev, loai_cuoc_phi: mode, is_cuoc_trong, phi_dich_vu }));
     } else if (mode === 'trong') {
       is_cuoc_trong = true;
+      setForm(prev => ({ ...prev, loai_cuoc_phi: mode, is_cuoc_trong, phi_dich_vu }));
+      // Nếu chưa có phí thì tự tính lại
+      if (!phi_dich_vu || phi_dich_vu === 0) {
+        setTimeout(() => resolveFeeSchedule(form.so_tien), 0);
+      }
     } else {
       is_cuoc_trong = false;
+      setForm(prev => ({ ...prev, loai_cuoc_phi: mode, is_cuoc_trong, phi_dich_vu }));
+      // Nếu chưa có phí thì tự tính lại
+      if (!phi_dich_vu || phi_dich_vu === 0) {
+        setTimeout(() => resolveFeeSchedule(form.so_tien), 0);
+      }
     }
-
-    setForm(prev => ({ ...prev, loai_cuoc_phi: mode, is_cuoc_trong, phi_dich_vu }));
   };
 
   const formatCurrency = (val) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0);
