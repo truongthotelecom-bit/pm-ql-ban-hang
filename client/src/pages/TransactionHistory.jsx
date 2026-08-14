@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, Drawer, App as AntdApp, Dropdown, FloatButton, Checkbox } from 'antd';
-import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined, DownloadOutlined, FileExcelOutlined, CheckSquareOutlined, SearchOutlined, CopyOutlined } from '@ant-design/icons';
+import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined, DownloadOutlined, FileExcelOutlined, CheckSquareOutlined, SearchOutlined, CopyOutlined, SyncOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { numberToWords } from '../utils/stringUtils';
 import useAppStore from '../store/useAppStore';
 import { supabase } from '../lib/supabaseClient';
@@ -160,6 +160,38 @@ export default function TransactionHistory() {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
   const [expandedCardId, setExpandedCardId] = useState(null);
+
+  // Đổi trạng thái hàng loạt
+  const [batchStatusModalVisible, setBatchStatusModalVisible] = useState(false);
+  const [batchTargetStatus, setBatchTargetStatus] = useState(null);
+  const [isBatchUpdating, setIsBatchUpdating] = useState(false);
+
+  const handleBatchUpdateStatus = async () => {
+    if (!batchTargetStatus || selectedRowKeys.length === 0) return;
+    
+    setIsBatchUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('chi_tiet_giao_dich')
+        .update({ id_trang_thai: batchTargetStatus })
+        .in('id_chi_tiet_giao_dich', selectedRowKeys);
+
+      if (error) throw error;
+      
+      message.success(`Đã cập nhật trạng thái cho ${selectedRowKeys.length} giao dịch!`);
+      setBatchStatusModalVisible(false);
+      setBatchTargetStatus(null);
+      setSelectedRowKeys([]);
+      setSelectedRows([]);
+      
+      store.fetchHistoryTransactions(null, null);
+    } catch (err) {
+      console.error(err);
+      message.error('Có lỗi xảy ra khi cập nhật hàng loạt!');
+    } finally {
+      setIsBatchUpdating(false);
+    }
+  };
 
   // Khóa cuộn body toàn trang để dùng cuộn nội bộ
   useEffect(() => {
@@ -1228,6 +1260,90 @@ export default function TransactionHistory() {
               {filteredBanks.map(b => (
                 <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>
                   {b.ten_viet_tat} - {b.ten_dich_vu}
+                </Option>
+              ))}
+            </Select>
+          </div>
+        </div>
+      </Modal>
+
+      {/* THỰC HIỆN HÀNG LOẠT (FLOATING ACTION BAR) */}
+      {selectedRowKeys.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] bg-[#1a2235] border border-violet-500/30 shadow-[0_10px_40px_rgba(139,92,246,0.3)] rounded-full px-4 py-3 flex items-center gap-4 animate-slide-up backdrop-blur-md">
+          <div className="text-white font-semibold">
+            Đã chọn <span className="text-violet-400">{selectedRowKeys.length}</span> giao dịch
+          </div>
+          <div className="w-px h-6 bg-white/10" />
+          <Button 
+            type="primary" 
+            className="bg-violet-600 border-none shadow-lg shadow-violet-500/20 rounded-full"
+            icon={<SyncOutlined />}
+            onClick={() => setBatchStatusModalVisible(true)}
+          >
+            Đổi trạng thái
+          </Button>
+          <Button 
+            type="text" 
+            className="text-gray-400 hover:text-white rounded-full"
+            onClick={() => { setSelectedRowKeys([]); setSelectedRows([]); }}
+          >
+            Bỏ chọn
+          </Button>
+        </div>
+      )}
+
+      {/* MODAL CẬP NHẬT TRẠNG THÁI HÀNG LOẠT */}
+      <Modal
+        title={
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center text-violet-400 border border-violet-500/30">
+              <SyncOutlined className="text-lg" />
+            </div>
+            <div>
+              <div className="text-white font-bold text-lg">Cập nhật Trạng thái</div>
+              <div className="text-sm text-gray-400 font-normal">Đang chọn {selectedRowKeys.length} giao dịch</div>
+            </div>
+          </div>
+        }
+        open={batchStatusModalVisible}
+        onCancel={() => {
+          if (!isBatchUpdating) {
+            setBatchStatusModalVisible(false);
+            setBatchTargetStatus(null);
+          }
+        }}
+        onOk={handleBatchUpdateStatus}
+        confirmLoading={isBatchUpdating}
+        okText="Cập nhật ngay"
+        cancelText="Hủy"
+        className="dark-modal"
+        okButtonProps={{ 
+          className: 'bg-violet-600 border-none shadow-lg shadow-violet-500/20',
+          disabled: !batchTargetStatus
+        }}
+      >
+        <div className="py-4 space-y-4">
+          <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 flex gap-3 text-orange-400">
+            <ExclamationCircleOutlined className="text-lg mt-0.5 shrink-0" />
+            <div className="text-sm">
+              Trạng thái mới sẽ được áp dụng cho toàn bộ {selectedRowKeys.length} giao dịch đang chọn. Các giao dịch đã ở trạng thái này sẽ bị bỏ qua.
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-gray-300 font-semibold text-sm">Chọn trạng thái mới</label>
+            <Select
+              className="w-full"
+              placeholder="Vui lòng chọn trạng thái"
+              size="large"
+              value={batchTargetStatus}
+              onChange={setBatchTargetStatus}
+            >
+              {store.categories.filter(c => c.id_phan_loai === 'pl-1').map(s => (
+                <Option key={s.id_danh_muc} value={s.id_danh_muc}>
+                  <div className="flex items-center gap-2 font-semibold">
+                    <span>{s.icon}</span> 
+                    <span className="text-white">{s.ten_danh_muc}</span>
+                  </div>
                 </Option>
               ))}
             </Select>
