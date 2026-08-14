@@ -1828,6 +1828,14 @@ export default function TransactionHistory() {
                 Hủy
               </Button>
               <Button 
+                type="primary" 
+                className="flex-1 md:flex-none bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-500 hover:to-fuchsia-400 border-none shadow-lg shadow-violet-500/20 rounded-xl font-bold h-10"
+                icon={<SyncOutlined />}
+                onClick={() => setBatchStatusModalVisible(true)}
+              >
+                Đổi trạng thái
+              </Button>
+              <Button 
                 type="primary"
                 onClick={() => handleExportExcel(true)}
                 icon={<DownloadOutlined />}
