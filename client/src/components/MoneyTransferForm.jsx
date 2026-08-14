@@ -136,6 +136,7 @@ export default function MoneyTransferForm({ value, onChange }) {
     if (lastTx) {
       const isMienPhi = !lastTx.phi_dich_vu || Number(lastTx.phi_dich_vu) === 0;
       const inheritedLoaiCuoc = isMienPhi ? 'mien_phi' : (lastTx.is_cuoc_trong ? 'trong' : 'ngoai');
+      const inheritedDiscount = lastTx.chiet_khau || 0;
       
       onChange(prev => ({
         ...(prev || {}),
@@ -143,8 +144,13 @@ export default function MoneyTransferForm({ value, onChange }) {
         id_pttt_di:    (prev || {}).id_pttt_di    || lastTx.id_pttt_di    || undefined,
         id_pttt_phi:   (prev || {}).id_pttt_phi   || lastTx.id_pttt_phi   || undefined,
         is_cuoc_trong: lastTx.is_cuoc_trong || false,
-        loai_cuoc_phi: inheritedLoaiCuoc
+        loai_cuoc_phi: inheritedLoaiCuoc,
+        chiet_khau: inheritedDiscount
       }));
+      
+      if (inheritedDiscount > 0) {
+        setShowDiscount(true);
+      }
       hasInherited.current = true; // Đánh dấu đã kế thừa xong
     } else {
        // Mặc định miễn phí
