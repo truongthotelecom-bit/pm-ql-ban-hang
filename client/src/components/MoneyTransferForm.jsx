@@ -78,96 +78,7 @@ export default function MoneyTransferForm({ value, onChange }) {
   // Tự động điền hình thức thanh toán & chế độ phí từ giao dịch gần nhất
   const hasInherited = useRef(false);
 
-  useEffect(() => {
-    // Reset khi đổi hồ sơ hoặc khi form được clear để tạo mới
-    if (!value || Object.keys(value).length === 0) {
-      hasInherited.current = false;
-    }
-  }, [activeFile?.id_ho_so_dich_vu, value]);
-
-  useEffect(() => {
-    // Chỉ chạy nếu chưa kế thừa thành công, và đang tạo mới
-    if (!activeFile || hasInherited.current) return;
-    // Nếu value đã có > 2 fields (tức là người dùng đang sửa hoặc đã điền), bỏ qua
-    if (Object.keys(value || {}).length > 2) return;
-
-    const idHoSo = activeFile?.id_ho_so_dich_vu;
-    const idDanhMuc = activeContract?.id_danh_muc_dich_vu;
-    const idLoaiDV = store.banks?.find(b => b.id_danh_muc_dich_vu === idDanhMuc)?.id_loai_dich_vu;
-
-
-    const doInherit = async () => {
-      let lastTx = null;
-
-      // Ưu tiên 1: query thẳng DB – giao dịch gần nhất của chính hồ sơ này
-      const { data: profileTxs } = await supabase
-        .from('chi_tiet_giao_dich')
-        .select('*')
-        .eq('id_ho_so_dich_vu', idHoSo)
-        .order('thoi_gian_giao_dich', { ascending: false })
-        .limit(5);
-
-      if (profileTxs && profileTxs.length > 0) {
-        lastTx = profileTxs[0];
-      }
-
-      // Ưu tiên 2: query Supabase – giao dịch gần nhất cùng danh mục dịch vụ (khác hồ sơ)
-      if (!lastTx && idDanhMuc) {
-        const { data: dmTxs } = await supabase
-          .rpc('get_last_tx_by_danh_muc', {
-            p_id_danh_muc_dich_vu: idDanhMuc,
-            p_id_ho_so_dich_vu: idHoSo
-          });
-        if (dmTxs && dmTxs.length > 0) {
-          lastTx = dmTxs[0];
-        }
-      }
-
-      // Ưu tiên 3: query Supabase – giao dịch gần nhất cùng loại dịch vụ
-      if (!lastTx && idLoaiDV) {
-        const { data: loaiTxs } = await supabase
-          .rpc('get_last_tx_by_loai', {
-            p_id_loai_dich_vu: idLoaiDV,
-            p_id_ho_so_dich_vu: idHoSo
-          });
-        if (loaiTxs && loaiTxs.length > 0) {
-          lastTx = loaiTxs[0];
-        }
-      }
-
-      if (lastTx) {
-        const isMienPhi = !lastTx.phi_dich_vu || Number(lastTx.phi_dich_vu) === 0;
-        const inheritedLoaiCuoc = isMienPhi ? 'mien_phi' : (lastTx.is_cuoc_trong ? 'trong' : 'ngoai');
-        const inheritedDiscount = lastTx.chiet_khau || 0;
-
-        onChange(prev => ({
-          ...(prev || {}),
-          id_pttt_nguon: (prev || {}).id_pttt_nguon || lastTx.id_pttt_nguon || undefined,
-          id_pttt_di:    (prev || {}).id_pttt_di    || lastTx.id_pttt_di    || undefined,
-          id_pttt_phi:   (prev || {}).id_pttt_phi   || lastTx.id_pttt_phi   || undefined,
-          is_cuoc_trong: lastTx.is_cuoc_trong || false,
-          loai_cuoc_phi: inheritedLoaiCuoc,
-          chiet_khau: inheritedDiscount
-        }));
-
-        if (inheritedDiscount > 0) {
-          setShowDiscount(true);
-        }
-        hasInherited.current = true;
-      } else {
-        // Mặc định miễn phí
-        onChange(prev => ({
-          ...(prev || {}),
-          loai_cuoc_phi: 'mien_phi',
-          is_cuoc_trong: false
-        }));
-        hasInherited.current = true;
-      }
-    };
-
-    doInherit();
-
-  }, [activeFile?.id_ho_so_dich_vu, store.transactionDetails?.length, store.allTransactions?.length]);
+  // Kế thừa dữ liệu đã được xử lý ở TransactionDrawer.jsx
 
   useEffect(() => {
     if (form.so_tien_giam > 0 && !showDiscount) {
@@ -294,7 +205,7 @@ export default function MoneyTransferForm({ value, onChange }) {
         return { 
           ...prev, 
           phi_dich_vu: newPhi, 
-          chiet_khau: newCk,
+          chiet_khau: (prev.chiet_khau && prev.chiet_khau > 0) ? prev.chiet_khau : newCk,
           loai_cuoc_phi: newLoaiCuoc,
           is_cuoc_trong: newLoaiCuoc === 'trong',
           id_cach_tinh_phi: bestMatch.id_cach_tinh_phi

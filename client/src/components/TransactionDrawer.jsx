@@ -47,7 +47,84 @@ export default function TransactionDrawer({ open, onClose }) {
       }
     }
 
-    setGdPayload({ noi_dung: defaultNoiDung });
+    // Query Supabase lấy dữ liệu kế thừa
+    const fetchInheritedData = async () => {
+      const basePayload = { noi_dung: defaultNoiDung };
+      
+      const idHoSo = activeFile?.id_ho_so_dich_vu || '00000000-0000-0000-0000-000000000000';
+      const idDanhMuc = activeBank?.id_danh_muc_dich_vu;
+      const idLoaiDV = activeBank?.id_loai_dich_vu;
+
+      let inheritedLoaiCuoc = undefined;
+      let inheritedIsCuocTrong = false;
+      let inheritedPtttNguon = undefined;
+      let inheritedPtttDi = undefined;
+      let inheritedPtttPhi = undefined;
+      let inheritedChietKhau = 0;
+
+      // KẾ THỪA PHÍ TRONG/NGOÀI VÀ PTTT: CHỈ Ưu tiên 1 (Cùng hồ sơ)
+      if (activeFile?.id_ho_so_dich_vu) {
+        const { data } = await supabase
+          .from('chi_tiet_giao_dich')
+          .select('*')
+          .eq('id_ho_so_dich_vu', activeFile.id_ho_so_dich_vu)
+          .order('thoi_gian_giao_dich', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+          
+        if (data) {
+          const isMienPhi = !data.phi_dich_vu || Number(data.phi_dich_vu) === 0;
+          inheritedLoaiCuoc = isMienPhi ? 'mien_phi' : (data.is_cuoc_trong ? 'trong' : 'ngoai');
+          inheritedIsCuocTrong = data.is_cuoc_trong || false;
+          inheritedPtttNguon = data.id_pttt_nguon;
+          inheritedPtttDi = data.id_pttt_di;
+          inheritedPtttPhi = data.id_pttt_phi;
+          
+          if (data.chiet_khau && Number(data.chiet_khau) > 0) {
+            inheritedChietKhau = Number(data.chiet_khau);
+          }
+        }
+      }
+
+      // KẾ THỪA CHIẾT KHẤU: Ưu tiên 2 (Cùng danh mục) nếu Ưu tiên 1 không có chiết khấu
+      if (inheritedChietKhau === 0 && idDanhMuc) {
+        const { data: dmTxs } = await supabase.rpc('get_last_tx_by_danh_muc', {
+          p_id_danh_muc_dich_vu: idDanhMuc,
+          p_id_ho_so_dich_vu: idHoSo
+        });
+        if (dmTxs && dmTxs.length > 0 && dmTxs[0].chiet_khau && Number(dmTxs[0].chiet_khau) > 0) {
+          inheritedChietKhau = Number(dmTxs[0].chiet_khau);
+        }
+      }
+
+      // KẾ THỪA CHIẾT KHẤU: Ưu tiên 3 (Cùng loại dịch vụ) nếu Ưu tiên 2 không có chiết khấu
+      if (inheritedChietKhau === 0 && idLoaiDV) {
+        const { data: loaiTxs } = await supabase.rpc('get_last_tx_by_loai', {
+          p_id_loai_dich_vu: idLoaiDV,
+          p_id_ho_so_dich_vu: idHoSo
+        });
+        if (loaiTxs && loaiTxs.length > 0 && loaiTxs[0].chiet_khau && Number(loaiTxs[0].chiet_khau) > 0) {
+          inheritedChietKhau = Number(loaiTxs[0].chiet_khau);
+        }
+      }
+
+      // SET PAYLOAD
+      if (inheritedLoaiCuoc || inheritedChietKhau > 0) {
+        setGdPayload({
+          noi_dung: defaultNoiDung,
+          loai_cuoc_phi: inheritedLoaiCuoc || 'mien_phi', // Mặc định nếu không có giao dịch cũ
+          is_cuoc_trong: inheritedIsCuocTrong,
+          chiet_khau: inheritedChietKhau,
+          id_pttt_nguon: inheritedPtttNguon,
+          id_pttt_di: inheritedPtttDi,
+          id_pttt_phi: inheritedPtttPhi,
+        });
+      } else {
+        setGdPayload(basePayload);
+      }
+    };
+
+    fetchInheritedData();
   }, [open, activeFile?.id_ho_so_dich_vu]);
 
   // QR State (Kế thừa từ danh mục ngân hàng & hợp đồng)
