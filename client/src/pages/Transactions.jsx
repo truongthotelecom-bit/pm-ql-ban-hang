@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useAppStore from '../store/useAppStore';
 import useAuthStore from '../store/useAuthStore';
 import { supabase } from '../lib/supabaseClient';
-import { Button, Tag, App as AntdApp, Modal, Input, Select, Radio, Badge, Pagination, Checkbox, Dropdown, Popover } from 'antd';
+import { Button, Tag, App as AntdApp, Modal, Input, Select, Radio, Badge, Pagination, Checkbox, Dropdown, Popover, Form, InputNumber, Switch } from 'antd';
 import { 
   SearchOutlined, 
   PlusOutlined, 
@@ -24,10 +24,12 @@ import {
   EllipsisOutlined,
   DeleteOutlined,
   DownloadOutlined,
-  AppstoreOutlined
+  AppstoreOutlined,
+  SettingOutlined
 } from '@ant-design/icons';
 import TransactionDrawer from '../components/TransactionDrawer';
 import MoneyTransferForm from '../components/MoneyTransferForm';
+import AdminCategoryPage from './admin/AdminCategoryPage';
 import html2canvas from 'html2canvas';
 import SearchableDropdown from '../components/SearchableDropdown';
 import { adminCategoriesConfig } from '../config/adminConfig';
@@ -202,8 +204,12 @@ export default function Transactions() {
   const [showEditContractModal, setShowEditContractModal] = useState(false);
   const [showEditDetailModal, setShowEditDetailModal] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [feeConfigModalVisible, setFeeConfigModalVisible] = useState(false);
   const [showEditBankModal, setShowEditBankModal] = useState(false);
   const [editBankPayload, setEditBankPayload] = useState({});
+  const [quickFeeModal, setQuickFeeModal] = useState({ visible: false, record: null, isEdit: false, mode: 'danh_muc_dich_vu' });
+  const [quickFeeForm] = Form.useForm();
+  const [quickFeeSaving, setQuickFeeSaving] = useState(false);
 
   // Mobile state
   const [showMobileDetail, setShowMobileDetail] = useState(false); // Hien thi modal chi tiet tren mobile
@@ -552,10 +558,29 @@ export default function Transactions() {
   };
 
 
-  const openEditFileModal = () => {
+  const openEditFileModal = async () => {
     const activeFile = store.selectedServiceFile;
     if (activeFile) {
-      setEditFilePayload(activeFile);
+      try {
+        const { data, error } = await supabase
+          .from('ho_so_dich_vu')
+          .select('id_loai_hop_dong, noi_dung, ghi_chu')
+          .eq('id_ho_so_dich_vu', activeFile.id_ho_so_dich_vu)
+          .single();
+          
+        if (data && !error) {
+          setEditFilePayload({
+            ...activeFile,
+            id_loai_hop_dong: data.id_loai_hop_dong,
+            noi_dung: data.noi_dung,
+            ghi_chu: data.ghi_chu
+          });
+        } else {
+          setEditFilePayload(activeFile);
+        }
+      } catch (e) {
+        setEditFilePayload(activeFile);
+      }
       setShowEditFileModal(true);
     }
   };
@@ -613,6 +638,74 @@ export default function Transactions() {
       store.fetchSystemConfig(); // Reload to update logo and names
     } catch (error) {
       message.error('Lỗi khi cập nhật danh mục: ' + error.message);
+    }
+  };
+
+  const openQuickFeeModal = (mode) => {
+    // mode can be 'loai_dich_vu' or 'danh_muc_dich_vu'
+    const id_loai_hop_dong = activeFile?.id_loai_hop_dong || null;
+    let id_loai_dich_vu = null;
+    let id_danh_muc_dich_vu = null;
+
+    if (mode === 'loai_dich_vu') {
+      id_loai_dich_vu = activeBank?.id_loai_dich_vu || null;
+    } else if (mode === 'danh_muc_dich_vu') {
+      id_danh_muc_dich_vu = activeHd?.id_danh_muc_dich_vu || null;
+    }
+
+    // T\u00ecm bi\u1ec3u ph\u00ed \u0111\u00e3 t\u1ed3n t\u1ea1i kh\u1edbp v\u1edbi h\u1ed3 s\u01a1 n\u00e0y
+    const existing = store.bieuPhis?.find(bp =>
+      (bp.id_loai_dich_vu || null) === id_loai_dich_vu &&
+      (bp.id_danh_muc_dich_vu || null) === id_danh_muc_dich_vu &&
+      (bp.id_loai_hop_dong || null) === id_loai_hop_dong
+    );
+
+    const defaults = {
+      id_loai_hop_dong,
+      id_loai_dich_vu,
+      id_danh_muc_dich_vu,
+      phi_dich_vu_mac_dinh: existing?.phi_dich_vu_mac_dinh ?? null,
+      id_cach_tinh_phi: existing?.id_cach_tinh_phi ?? null,
+      chiet_khau_mac_dinh: existing?.chiet_khau_mac_dinh ?? null,
+      id_cach_tinh_chiet_khau: existing?.id_cach_tinh_chiet_khau ?? null,
+      phi_toi_thieu: existing?.phi_toi_thieu ?? null,
+      buoc_lam_tron: existing?.buoc_lam_tron ?? null,
+      trang_thai: existing?.trang_thai ?? true,
+      ghi_chu: existing?.ghi_chu ?? '',
+    };
+
+    quickFeeForm.setFieldsValue(defaults);
+    setQuickFeeModal({ visible: true, record: existing || null, isEdit: !!existing, mode });
+  };
+
+  const handleSaveQuickFee = async () => {
+    try {
+      const vals = await quickFeeForm.validateFields();
+      setQuickFeeSaving(true);
+      const payload = { ...vals, ngay_sua: new Date().toISOString() };
+
+      if (quickFeeModal.isEdit && quickFeeModal.record) {
+        const { error } = await supabase
+          .from('dm_bieu_phi')
+          .update(payload)
+          .eq('id_bieu_phi', quickFeeModal.record.id_bieu_phi);
+        if (error) throw error;
+        message.success('C\u1eadp nh\u1eadt \u0111\u1ecbnh m\u1ee9c ph\u00ed th\u00e0nh c\u00f4ng!');
+      } else {
+        const { error } = await supabase
+          .from('dm_bieu_phi')
+          .insert({ ...payload, ngay_tao: new Date().toISOString() });
+        if (error) throw error;
+        message.success('Th\u00eam \u0111\u1ecbnh m\u1ee9c ph\u00ed th\u00e0nh c\u00f4ng!');
+      }
+
+      setQuickFeeModal({ visible: false, record: null, isEdit: false, mode: 'danh_muc_dich_vu' });
+      store.fetchSystemConfig();
+    } catch (err) {
+      if (err?.errorFields) return; // validation error
+      message.error('L\u1ed7i: ' + (err.message || 'Kh\u00f4ng x\u00e1c \u0111\u1ecbnh'));
+    } finally {
+      setQuickFeeSaving(false);
     }
   };
 
@@ -1096,7 +1189,7 @@ export default function Transactions() {
           <div className="absolute bottom-4 right-4 z-20">
             <button
               onClick={() => {
-                const stdType = store.loaiHopDongs?.find(l => l.ten_loai?.toLowerCase().includes('tiêu chuẩn'))?.id_loai_hop_dong;
+                const stdType = store.loaiHopDongs?.find(l => l.index === 1 || l.ten_loai?.toLowerCase().includes('khách lẻ'))?.id_loai_hop_dong || store.loaiHopDongs?.[0]?.id_loai_hop_dong;
                 setNewFilePayload(prev => ({ ...prev, id_loai_hop_dong: stdType || '' }));
                 setShowNewFileModal(true);
               }}
@@ -1354,13 +1447,45 @@ export default function Transactions() {
                     <Button onClick={() => openEditCustModal(activeCust)} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><UserOutlined className="text-lg" /> Sửa khách</Button>
                     <Button onClick={() => openEditContractModal()} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><EditOutlined className="text-lg" /> Sửa HĐ</Button>
                     {isSuperAdminOrOwner && (
-                      <Button onClick={openEditBankModal} disabled={!activeBank} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><AppstoreOutlined className="text-lg" /> Sửa danh mục DV</Button>
+                      <>
+                        {(() => {
+                          const ldv = activeBank?.id_loai_dich_vu || null;
+                          const dmdv = activeHd?.id_danh_muc_dich_vu || null;
+                          const lhd = activeFile?.id_loai_hop_dong || null;
+                          
+                          const hasLoaiDV = store.bieuPhis?.some(bp => (bp.id_loai_dich_vu || null) === ldv && (bp.id_danh_muc_dich_vu || null) === null && (bp.id_loai_hop_dong || null) === lhd);
+                          const hasDanhMucDV = store.bieuPhis?.some(bp => (bp.id_loai_dich_vu || null) === null && (bp.id_danh_muc_dich_vu || null) === dmdv && (bp.id_loai_hop_dong || null) === lhd);
+
+                          return (
+                            <>
+                              <Button
+                                onClick={() => openQuickFeeModal('loai_dich_vu')}
+                                disabled={!activeFile}
+                                className={`h-12 border-none text-sm font-bold justify-start px-4 transition-all ${hasLoaiDV ? 'bg-violet-900/40 text-violet-300 hover:bg-violet-600 hover:text-white' : 'bg-[#1a2238] text-white hover:bg-violet-600 hover:text-white'}`}
+                              >
+                                <SettingOutlined className="text-lg" />
+                                {hasLoaiDV ? 'Sửa phí Loại DV' : 'Tạo phí cho Loại DV'}
+                              </Button>
+                              <Button
+                                onClick={() => openQuickFeeModal('danh_muc_dich_vu')}
+                                disabled={!activeFile}
+                                className={`h-12 border-none text-sm font-bold justify-start px-4 transition-all ${hasDanhMucDV ? 'bg-violet-900/40 text-violet-300 hover:bg-violet-600 hover:text-white' : 'bg-[#1a2238] text-white hover:bg-violet-600 hover:text-white'}`}
+                              >
+                                <SettingOutlined className="text-lg" />
+                                {hasDanhMucDV ? 'Sửa phí Ngân hàng/POS' : 'Tạo phí cho Ngân hàng/POS'}
+                              </Button>
+                            </>
+                          );
+                        })()}
+                        <Button onClick={() => setFeeConfigModalVisible(true)} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><SettingOutlined className="text-lg" /> Cấu hình phí & CK</Button>
+                        <Button onClick={openEditBankModal} disabled={!activeBank} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><AppstoreOutlined className="text-lg" /> Sửa danh mục DV</Button>
+                      </>
                     )}
                   </div>
                 }
                 trigger="click" 
                 placement="top"
-                overlayInnerStyle={{ backgroundColor: '#0d1426', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                styles={{ body: { backgroundColor: '#0d1426', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' } }}
               >
                 <Button className="flex-1 h-12 bg-[#131c33] border border-white/10 text-white font-bold hover:border-violet-500 hover:text-violet-400 shadow-lg flex items-center justify-center gap-2">
                   <EditOutlined /> <span className="hidden sm:inline">SỬA</span>
@@ -2397,6 +2522,120 @@ export default function Transactions() {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* Modal Cấu Hình Phí */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2 text-violet-400 font-black tracking-widest uppercase text-lg">
+            <SettingOutlined /> CẤU HÌNH BIỂU PHÍ & CHIẾT KHẤU
+          </div>
+        }
+        open={feeConfigModalVisible}
+        onCancel={() => setFeeConfigModalVisible(false)}
+        footer={null}
+        width={1000}
+        className="custom-dark-modal fee-modal"
+        destroyOnHidden
+        centered
+        style={{ top: 20 }}
+      >
+        <div className="h-[75vh] overflow-y-auto overflow-x-hidden custom-scrollbar -mx-6 px-6">
+          <AdminCategoryPage propTableName="dm_bieu_phi" hideSettingsHeader={true} />
+        </div>
+      </Modal>
+
+      {/* Modal Định Mức Phí Nhanh */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2 font-black tracking-wide uppercase text-base">
+            <SettingOutlined className={quickFeeModal.isEdit ? 'text-violet-400' : 'text-green-400'} />
+            <span className={quickFeeModal.isEdit ? 'text-violet-300' : 'text-green-300'}>
+              {quickFeeModal.isEdit ? 'SỬA ĐỊNH MỨC PHÍ' : 'THÊM ĐỊNH MỨC PHÍ'}
+            </span>
+          </div>
+        }
+        open={quickFeeModal.visible}
+        onCancel={() => setQuickFeeModal({ visible: false, record: null, isEdit: false, mode: 'danh_muc_dich_vu' })}
+        onOk={handleSaveQuickFee}
+        okText={quickFeeModal.isEdit ? 'Cập nhật' : 'Thêm mới'}
+        cancelText="Hủy"
+        confirmLoading={quickFeeSaving}
+        className="custom-dark-modal"
+        centered
+        destroyOnHidden
+        width={520}
+        okButtonProps={{ className: 'bg-violet-600 hover:bg-violet-500 border-none font-bold' }}
+      >
+        <Form form={quickFeeForm} layout="vertical" className="mt-4">
+          <div className="grid grid-cols-2 gap-x-4">
+            <Form.Item name="id_loai_hop_dong" label={<span className="text-slate-300 text-xs">Loại hợp đồng</span>}>
+              <Select placeholder="Loại hợp đồng..." className="w-full admin-select" allowClear>
+                {store.loaiHopDongs?.map(t => <Select.Option key={t.id_loai_hop_dong} value={t.id_loai_hop_dong}>{t.ten_loai}</Select.Option>)}
+              </Select>
+            </Form.Item>
+            
+            {quickFeeModal.mode === 'loai_dich_vu' && (
+              <Form.Item name="id_loai_dich_vu" label={<span className="text-slate-300 text-xs">Loại dịch vụ</span>}>
+                <Select placeholder="Loại dịch vụ..." className="w-full admin-select" allowClear>
+                  {store.services?.map(s => <Select.Option key={s.id_loai_dich_vu} value={s.id_loai_dich_vu}>{s.ten_danh_muc}</Select.Option>)}
+                </Select>
+              </Form.Item>
+            )}
+
+            {quickFeeModal.mode === 'danh_muc_dich_vu' && (
+              <Form.Item name="id_danh_muc_dich_vu" label={<span className="text-slate-300 text-xs">Ngân hàng / POS</span>}>
+                <Select placeholder="Chọn ngân hàng/POS..." className="w-full admin-select" allowClear showSearch optionFilterProp="children">
+                  {store.banks?.map(b => <Select.Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>{b.ten_dich_vu}</Select.Option>)}
+                </Select>
+              </Form.Item>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-x-4">
+            <Form.Item name="phi_dich_vu_mac_dinh" label={<span className="text-slate-300 text-xs">Mức Phí DV</span>} rules={[{ required: true, message: 'Nhập mức phí!' }]}>
+              <InputNumber step="any" className="w-full bg-slate-900 border-slate-700 text-white" placeholder="VD: 0.33 hoặc 15000" />
+            </Form.Item>
+            <Form.Item name="id_cach_tinh_phi" label={<span className="text-slate-300 text-xs">Cách tính phí</span>} rules={[{ required: true, message: 'Chọn cách tính!' }]}>
+              <Select placeholder="Chọn..." className="w-full admin-select">
+                {store.cachTinhPhis?.map(c => <Select.Option key={c.id_cach_tinh} value={c.id_cach_tinh}>{c.ten_cach_tinh}</Select.Option>)}
+              </Select>
+            </Form.Item>
+          </div>
+          
+          <div className="mt-4 pt-4 border-t border-slate-700/50">
+            <h4 className="text-violet-400 text-xs font-bold uppercase tracking-wider mb-3">Thông tin chiết khấu</h4>
+            <div className="grid grid-cols-2 gap-x-4">
+              <Form.Item name="chiet_khau_mac_dinh" label={<span className="text-slate-300 text-xs">Mức Chiết Khấu</span>}>
+                <InputNumber step="any" className="w-full bg-slate-900 border-slate-700 text-white" placeholder="VD: 0.1 hoặc 5000" />
+              </Form.Item>
+              <Form.Item name="id_cach_tinh_chiet_khau" label={<span className="text-slate-300 text-xs">Cách tính chiết khấu</span>}>
+                <Select placeholder="Chọn..." className="w-full admin-select" allowClear>
+                  {store.cachTinhPhis?.map(c => <Select.Option key={c.id_cach_tinh} value={c.id_cach_tinh}>{c.ten_cach_tinh}</Select.Option>)}
+                </Select>
+              </Form.Item>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-slate-700/50">
+            <h4 className="text-violet-400 text-xs font-bold uppercase tracking-wider mb-3">Cấu hình nâng cao</h4>
+            <div className="grid grid-cols-2 gap-x-4">
+            <Form.Item name="phi_toi_thieu" label={<span className="text-slate-300 text-xs">Phí tối thiểu</span>}>
+              <InputNumber step={1000} className="w-full bg-slate-900 border-slate-700 text-white" placeholder="VD: 10000" />
+            </Form.Item>
+            <Form.Item name="buoc_lam_tron" label={<span className="text-slate-300 text-xs">Làm tròn tới</span>}>
+              <InputNumber step={5000} className="w-full bg-slate-900 border-slate-700 text-white" placeholder="VD: 5000 hoặc 10000" />
+            </Form.Item>
+          </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <Form.Item name="trang_thai" valuePropName="checked" label={<span className="text-slate-300 text-xs">Trạng thái</span>}>
+              <Switch />
+            </Form.Item>
+          </div>
+          <Form.Item name="ghi_chu" label={<span className="text-slate-300 text-xs">Ghi chú</span>}>
+            <Input.TextArea rows={2} className="bg-slate-900 border-slate-700 text-white" placeholder="Ghi chú thêm..." />
+          </Form.Item>
+        </Form>
       </Modal>
 
     </div>

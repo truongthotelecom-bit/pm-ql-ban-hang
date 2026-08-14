@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { Table, Button, Modal, Form, Input, message, Popconfirm, Select, Switch, Tabs } from 'antd';
+import { Table, Button, Modal, Form, Input, Popconfirm, Select, Switch, Tabs, App as AntdApp } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, MenuOutlined, CheckSquareOutlined, DeleteFilled, EyeOutlined } from '@ant-design/icons';
 import { supabase } from '../../lib/supabaseClient';
 import useAppStore from '../../store/useAppStore';
 import MoneyTransferForm from '../../components/MoneyTransferForm';
 import { adminCategoriesConfig } from '../../config/adminConfig';
 
-export default function AdminCategoryPage() {
-  const { tableName } = useParams();
+export default function AdminCategoryPage({ propTableName }) {
+  const params = useParams();
+  const tableName = propTableName || params.tableName;
   
-  const activeConfig = adminCategoriesConfig.find(c => c.tableName === tableName);
+  const user = useAppStore(state => state.user);
+  const isStoreOwner = user?.dm_nhom_quyen?.ma_quyen === 'CHU_DIEM_BAN';
+
+  const activeConfig = React.useMemo(() => {
+    const baseConfig = adminCategoriesConfig.find(c => c.tableName === tableName);
+    if (!baseConfig) return null;
+    const cloned = { ...baseConfig };
+    if (isStoreOwner && tableName === 'dm_bieu_phi') {
+      cloned.columns = cloned.columns.filter(c => c.key !== 'id_diem_ban');
+    }
+    return cloned;
+  }, [tableName, isStoreOwner]);
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -19,6 +31,7 @@ export default function AdminCategoryPage() {
   
   // Row selection state
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const { message } = AntdApp.useApp();
 
   // Preview state inside Modal
   const [activeTab, setActiveTab] = useState('1');
@@ -78,10 +91,16 @@ export default function AdminCategoryPage() {
   const loadData = async (targetTableName = tableName) => {
     setLoading(true);
     try {
-      const { data: tableData, error } = await supabase
-        .from(targetTableName)
-        .select('*')
-        .order('ngay_tao', { ascending: false });
+      const hasIndexCol = activeConfig?.columns?.some(c => c.key === 'index');
+      let query = hasIndexCol
+        ? supabase.from(targetTableName).select('*').order('index', { ascending: true, nullsFirst: false })
+        : supabase.from(targetTableName).select('*').order('ngay_tao', { ascending: false });
+      
+      if (targetTableName === 'dm_bieu_phi' && isStoreOwner && user?.id_diem_ban) {
+        query = query.or(`id_diem_ban.eq.${user.id_diem_ban},id_diem_ban.is.null`);
+      }
+
+      const { data: tableData, error } = await query;
 
       if (error) throw error;
       
@@ -158,12 +177,23 @@ export default function AdminCategoryPage() {
         message.success('Cập nhật thành công');
       } else {
         // Insert
+        const insertData = { ...dataToSave };
+        if (activeConfig.tableName === 'dm_bieu_phi' && isStoreOwner && user?.id_diem_ban) {
+          insertData.id_diem_ban = user.id_diem_ban;
+        }
+
         const { error } = await supabase
           .from(activeConfig.tableName)
-          .insert([{ ...dataToSave }]);
+          .insert([insertData]);
         
         if (error) throw error;
         message.success('Thêm mới thành công');
+        
+        // Caching for inheritance (Remember last choice for lookup fields)
+        try {
+          const cacheKey = `admin_cache_${activeConfig.tableName}`;
+          localStorage.setItem(cacheKey, JSON.stringify(dataToSave));
+        } catch (e) {}
       }
       setIsModalVisible(false);
       form.resetFields();
@@ -223,6 +253,24 @@ export default function AdminCategoryPage() {
       }
     } else {
       form.resetFields();
+      
+      // Khôi phục giá trị kế thừa từ LocalStorage
+      try {
+        const cacheKey = `admin_cache_${activeConfig.tableName}`;
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          const inheritedData = {};
+          // Chỉ kế thừa các trường dạng select (lookup)
+          activeConfig.columns.forEach(col => {
+            if (col.type === 'lookup' && parsed[col.key] !== undefined) {
+              inheritedData[col.key] = parsed[col.key];
+            }
+          });
+          form.setFieldsValue(inheritedData);
+        }
+      } catch (e) {}
+
       if (activeConfig.tableName === 'sys_ql_cot_du_lieu') {
         const currentSelectedService = form.getFieldValue('id_loai_dich_vu');
         if (currentSelectedService) {
@@ -382,7 +430,7 @@ export default function AdminCategoryPage() {
         extra={suggestionNode}
       >
         {col.type === 'number' ? (
-          <Input type="number" className="bg-slate-900 border-slate-700 text-white" />
+          <Input type="number" step="any" className="bg-slate-900 border-slate-700 text-white" />
         ) : col.type === 'boolean' ? (
           <Switch />
         ) : col.type === 'select' ? (

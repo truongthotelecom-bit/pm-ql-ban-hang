@@ -162,14 +162,16 @@ export const adminCategoriesConfig = [
     group: 'Hệ thống',
     primaryKey: 'id_bieu_phi',
     columns: [
-      { key: 'ten_bieu_phi', label: 'Tên quy tắc', type: 'text', required: true },
-      { key: 'id_danh_muc_dich_vu', label: 'Ngân hàng/POS', type: 'lookup', lookup: { table: 'sys_danh_muc_dich_vu', labelField: 'ten_dich_vu', valueField: 'id_danh_muc_dich_vu' } },
       { key: 'id_loai_hop_dong', label: 'Loại hợp đồng', type: 'lookup', lookup: { table: 'dm_loai_hop_dong', labelField: 'ten_loai', valueField: 'id_loai_hop_dong' } },
+      { key: 'id_loai_dich_vu', label: 'Loại dịch vụ', type: 'lookup', lookup: { table: 'sys_loai_dich_vu', labelField: 'ten_danh_muc', valueField: 'id_loai_dich_vu' } },
+      { key: 'id_danh_muc_dich_vu', label: 'Ngân hàng/POS', type: 'lookup', lookup: { table: 'sys_danh_muc_dich_vu', labelField: 'ten_dich_vu', valueField: 'id_danh_muc_dich_vu' } },
       { key: 'phi_dich_vu_mac_dinh', label: 'Mức Phí DV', type: 'number' },
       { key: 'id_cach_tinh_phi', label: 'Cách tính phí', type: 'lookup', lookup: { table: 'dm_cach_tinh_phi', labelField: 'ten_cach_tinh', valueField: 'id_cach_tinh' } },
-      { key: 'chiet_khau_mac_dinh', label: 'Mức Chiết khấu', type: 'number' },
-      { key: 'id_cach_tinh_chiet_khau', label: 'Cách tính CK', type: 'lookup', lookup: { table: 'dm_cach_tinh_phi', labelField: 'ten_cach_tinh', valueField: 'id_cach_tinh' } },
-      { key: 'trang_thai', label: 'Trạng thái', type: 'boolean' }
+      { key: 'phi_toi_thieu', label: 'Phí tối thiểu', type: 'number' },
+      { key: 'buoc_lam_tron', label: 'Làm tròn tới', type: 'number' },
+      { key: 'trang_thai', label: 'Trạng thái', type: 'boolean' },
+      { key: 'id_diem_ban', label: 'Điểm bán', type: 'lookup', lookup: { table: 'sys_diem_ban', labelField: 'ten_diem_ban', valueField: 'id_diem_ban' } },
+      { key: 'ghi_chu', label: 'Ghi chú', type: 'text' },
     ]
   },
   {

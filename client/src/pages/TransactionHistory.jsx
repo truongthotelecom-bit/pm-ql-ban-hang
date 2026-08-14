@@ -1,8 +1,8 @@
 // Force HMR
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, Drawer, App as AntdApp, Dropdown, FloatButton } from 'antd';
-import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined, DownloadOutlined, FileExcelOutlined, CheckSquareOutlined, SearchOutlined } from '@ant-design/icons';
+import { Select, DatePicker, Empty, Table, Tag, Modal, Tooltip, Button, Drawer, App as AntdApp, Dropdown, FloatButton, Checkbox } from 'antd';
+import { FilterOutlined, CreditCardOutlined, QrcodeOutlined, EditOutlined, StopOutlined, DeleteOutlined, FolderOpenOutlined, PrinterOutlined, DownloadOutlined, FileExcelOutlined, CheckSquareOutlined, SearchOutlined, CopyOutlined } from '@ant-design/icons';
 import { numberToWords } from '../utils/stringUtils';
 import useAppStore from '../store/useAppStore';
 import { supabase } from '../lib/supabaseClient';
@@ -124,6 +124,16 @@ export default function TransactionHistory() {
 
   const [displayCount, setDisplayCount] = useState(20);
   const { message, modal } = AntdApp.useApp();
+  const [copyModalVisible, setCopyModalVisible] = useState(false);
+  const [copyRecord, setCopyRecord] = useState(null);
+  const getInitialCopyFields = () => {
+    try {
+      const saved = localStorage.getItem('selectedCopyFields');
+      if (saved) return JSON.parse(saved);
+    } catch(e) {}
+    return ['ma_hd']; // Mặc định chỉ chọn mã hợp đồng
+  };
+  const [selectedCopyFields, setSelectedCopyFields] = useState(getInitialCopyFields());
   const qrRef = useRef(null);
 
   const getStatusStyle = (statusId) => {
@@ -482,6 +492,42 @@ export default function TransactionHistory() {
         document.body.removeChild(printWindow);
       }, 500);
     };
+  };
+
+  const handleOpenCopy = (record) => {
+    setCopyRecord(record);
+    // Không reset về mặc định cứng để giữ lại tùy chọn của user đã chọn trước đó
+    setCopyModalVisible(true);
+  };
+
+  const handleCopySubmit = () => {
+    if (!copyRecord) return;
+    
+    const parts = [];
+    if (selectedCopyFields.includes('danh_muc') && copyRecord.category?.ten_danh_muc) {
+      parts.push(copyRecord.category.ten_danh_muc);
+    }
+    if (selectedCopyFields.includes('ma_hd') && copyRecord.contract?.ma_hop_dong) {
+      parts.push(copyRecord.contract.ma_hop_dong);
+    }
+    if (selectedCopyFields.includes('chu_hd') && copyRecord.contract?.chu_hop_dong) {
+      parts.push(copyRecord.contract.chu_hop_dong);
+    }
+    
+    if (parts.length > 0) {
+      const textToCopy = parts.join('\n');
+      navigator.clipboard.writeText(textToCopy)
+        .then(() => {
+          message.success('Đã copy dữ liệu thành công!');
+          setCopyModalVisible(false);
+        })
+        .catch(err => {
+          console.error('Lỗi khi copy', err);
+          message.error('Không thể copy dữ liệu, trình duyệt từ chối quyền.');
+        });
+    } else {
+      message.warning('Vui lòng chọn ít nhất 1 trường để copy');
+    }
   };
 
   const handlePrintInvoice = (record) => {
@@ -1304,18 +1350,26 @@ export default function TransactionHistory() {
               title: 'Thao tác',
               key: 'actions',
               align: 'right',
-              width: 140,
+              width: 280,
               render: (_, record) => {
                 const hasContract = !!(record.contract?.ma_hop_dong);
                 return (
-                  <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
+                    <Tooltip title="Copy Thông tin">
+                      <Button 
+                        type="text" 
+                        icon={<CopyOutlined />} 
+                        onClick={() => handleOpenCopy(record)}
+                        className="text-fuchsia-500 hover:text-fuchsia-400 hover:bg-fuchsia-500/10 text-xl w-10 h-10 flex items-center justify-center"
+                      />
+                    </Tooltip>
                     <Tooltip title={hasContract ? "Mã QR" : "Không có hợp đồng để tạo QR"}>
                       <Button 
                         type="text" 
                         icon={<QrcodeOutlined />} 
                         onClick={() => handleShowQR(record)}
                         disabled={!hasContract}
-                        className={hasContract ? "text-blue-400 hover:text-blue-300 hover:bg-blue-400/10" : "opacity-30 cursor-not-allowed"}
+                        className={`text-xl w-10 h-10 flex items-center justify-center ${hasContract ? "text-blue-400 hover:text-blue-300 hover:bg-blue-400/10" : "opacity-30 cursor-not-allowed"}`}
                       />
                     </Tooltip>
                     <Tooltip title="Chỉnh sửa Hồ sơ">
@@ -1323,7 +1377,7 @@ export default function TransactionHistory() {
                         type="text" 
                         icon={<FolderOpenOutlined />} 
                         onClick={() => handleGoToWorkspace(record)}
-                        className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10"
+                        className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10 text-xl w-10 h-10 flex items-center justify-center"
                       />
                     </Tooltip>
                     <Tooltip title="In Biên Lai">
@@ -1331,7 +1385,7 @@ export default function TransactionHistory() {
                         type="text" 
                         icon={<PrinterOutlined />} 
                         onClick={() => handlePrintInvoice(record)}
-                        className="text-fuchsia-400 hover:text-fuchsia-300 hover:bg-fuchsia-400/10"
+                        className="text-fuchsia-400 hover:text-fuchsia-300 hover:bg-fuchsia-400/10 text-xl w-10 h-10 flex items-center justify-center"
                       />
                     </Tooltip>
                     <Tooltip title="Sửa">
@@ -1339,7 +1393,7 @@ export default function TransactionHistory() {
                         type="text" 
                         icon={<EditOutlined />} 
                         onClick={() => handleEdit(record)}
-                        className="text-violet-400 hover:text-violet-300 hover:bg-violet-400/10"
+                        className="text-violet-400 hover:text-violet-300 hover:bg-violet-400/10 text-xl w-10 h-10 flex items-center justify-center"
                       />
                     </Tooltip>
                     <Tooltip title="Hủy GD">
@@ -1347,7 +1401,7 @@ export default function TransactionHistory() {
                         type="text" 
                         icon={<StopOutlined />} 
                         onClick={() => handleCancel(record)}
-                        className="text-orange-400 hover:text-orange-300 hover:bg-orange-400/10"
+                        className="text-orange-400 hover:text-orange-300 hover:bg-orange-400/10 text-xl w-10 h-10 flex items-center justify-center"
                       />
                     </Tooltip>
                     <Tooltip title="Xóa">
@@ -1355,7 +1409,7 @@ export default function TransactionHistory() {
                         type="text" 
                         icon={<DeleteOutlined />} 
                         onClick={() => handleDelete(record)}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                        className="text-red-400 hover:text-red-300 hover:bg-red-400/10 text-xl w-10 h-10 flex items-center justify-center"
                       />
                     </Tooltip>
                   </div>
@@ -1707,6 +1761,54 @@ export default function TransactionHistory() {
           tooltip="Xuất Excel"
         />
       </Dropdown>
+
+      {/* Copy Modal */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2 text-fuchsia-400 font-black tracking-widest uppercase text-base">
+            <CopyOutlined /> COPY THÔNG TIN
+          </div>
+        }
+        open={copyModalVisible}
+        onCancel={() => setCopyModalVisible(false)}
+        footer={null}
+        width={400}
+        className="custom-dark-modal"
+        centered
+      >
+        <div className="pt-2 flex flex-col gap-5">
+          <Checkbox.Group 
+            className="flex flex-col gap-4"
+            value={selectedCopyFields}
+            onChange={(val) => {
+              setSelectedCopyFields(val);
+              localStorage.setItem('selectedCopyFields', JSON.stringify(val));
+            }}
+          >
+            <Checkbox value="danh_muc" className="text-gray-200">
+              <span className="font-semibold">1. Tên danh mục dịch vụ</span> 
+              <span className="text-gray-400 ml-1">({copyRecord?.category?.ten_danh_muc || 'Không có'})</span>
+            </Checkbox>
+            <Checkbox value="ma_hd" className="text-gray-200">
+              <span className="font-semibold">2. Mã hợp đồng</span> 
+              <span className="text-gray-400 ml-1">({copyRecord?.contract?.ma_hop_dong || 'Không có'})</span>
+            </Checkbox>
+            <Checkbox value="chu_hd" className="text-gray-200">
+              <span className="font-semibold">3. Chủ hợp đồng</span> 
+              <span className="text-gray-400 ml-1">({copyRecord?.contract?.chu_hop_dong || 'Không có'})</span>
+            </Checkbox>
+          </Checkbox.Group>
+          
+          <Button 
+            type="primary" 
+            icon={<CopyOutlined />}
+            onClick={handleCopySubmit}
+            className="w-full h-10 mt-1 bg-fuchsia-600 hover:bg-fuchsia-500 border-none font-bold text-base rounded-xl shadow-lg shadow-fuchsia-600/30"
+          >
+            Copy dữ liệu đã chọn
+          </Button>
+        </div>
+      </Modal>
 
     </div>
   );

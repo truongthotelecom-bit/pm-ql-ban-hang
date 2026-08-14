@@ -22,6 +22,7 @@ const useAppStore = create((set, get) => ({
   // Danh mục mới
   loaiHopDongs: [],
   bieuPhis: [],
+  cachTinhPhis: [],
 
   // --- SCHEMA V2 STATES ---
   services: [],
@@ -88,6 +89,7 @@ const useAppStore = create((set, get) => ({
         { data: resLdv },
         { data: resLhd },
         { data: resBp },
+        { data: resCachTinh },
         { data: resDanhSachCot }
       ] = await Promise.all([
         supabase.from('dm_trang_thai_giao_dich').select('*'),
@@ -100,7 +102,15 @@ const useAppStore = create((set, get) => ({
         fetchAllRecords(supabase.from('ma_hop_dong').select('*').order('ngay_tao', { ascending: false })),
         supabase.from('sys_loai_dich_vu').select('*').order('ngay_tao'),
         supabase.from('dm_loai_hop_dong').select('*'),
-        supabase.from('dm_bieu_phi').select('*'),
+        (() => {
+          let query = supabase.from('dm_bieu_phi').select('*, dm_cach_tinh_phi!id_cach_tinh_phi(id_cach_tinh, ten_cach_tinh)');
+          const currentUser = get().user;
+          if (currentUser?.id_diem_ban) {
+            query = query.or(`id_diem_ban.eq.${currentUser.id_diem_ban},id_diem_ban.is.null`);
+          }
+          return query;
+        })(),
+        supabase.from('dm_cach_tinh_phi').select('*').order('index'),
         supabase.from('sys_danh_sach_cot').select('*')
       ]);
 
@@ -132,6 +142,7 @@ const useAppStore = create((set, get) => ({
         services: resLdv || [],
         loaiHopDongs: resLhd || [],
         bieuPhis: resBp || [],
+        cachTinhPhis: resCachTinh || [],
         danhSachCot: resDanhSachCot || [],
         dbOnline: true,
         isBootstrapped: true,
@@ -397,9 +408,30 @@ const useAppStore = create((set, get) => ({
       const { data: flatData, count, error } = await filesQuery;
       
       if (error) throw error;
+      
+      let finalFlatData = flatData || [];
+      
+      // Bổ sung vá lỗi: vw_ho_so_dich_vu_v3 chưa có cột id_loai_hop_dong (cột mới thêm)
+      // Query bảng gốc để chèn thêm vào tránh lỗi tính phí
+      if (finalFlatData.length > 0) {
+        const fetchIds = finalFlatData.map(f => f.id_ho_so_dich_vu);
+        const { data: missingData } = await supabase
+          .from('ho_so_dich_vu')
+          .select('id_ho_so_dich_vu, id_loai_hop_dong')
+          .in('id_ho_so_dich_vu', fetchIds);
+          
+        if (missingData) {
+          const mapMissing = {};
+          missingData.forEach(d => mapMissing[d.id_ho_so_dich_vu] = d.id_loai_hop_dong);
+          finalFlatData = finalFlatData.map(row => ({
+            ...row,
+            id_loai_hop_dong: mapMissing[row.id_ho_so_dich_vu] ?? row.id_loai_hop_dong
+          }));
+        }
+      }
 
       // Chuyển flatData thành dạng nested object mà Transactions.jsx đang dùng
-      const filesData = (flatData || []).map(row => ({
+      const filesData = finalFlatData.map(row => ({
         ...row,
         ma_hop_dong: {
           id_ma_hop_dong: row.id_ma_hop_dong,

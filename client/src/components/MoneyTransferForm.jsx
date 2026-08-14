@@ -61,6 +61,19 @@ export default function MoneyTransferForm({ value, onChange }) {
     }
   }, [activeFile?.id_loai_hop_dong, activeContract?.id_danh_muc_dich_vu]);
 
+  // Tự động tính phí khi số tiền thay đổi
+  useEffect(() => {
+    if (activeFile && activeContract && form.so_tien > 0) {
+      // Chỉ tự tính khi user chưa chọn Phiến tích phí thủ công (miễn phí)
+      if (form.loai_cuoc_phi !== 'mien_phi') {
+        resolveFeeSchedule(form.so_tien);
+      } else if (form.loai_cuoc_phi === 'mien_phi' && !form._user_set_fee) {
+        // Chưa ai chịn mã, thử tính tự động
+        resolveFeeSchedule(form.so_tien);
+      }
+    }
+  }, [form.so_tien, activeFile?.id_loai_hop_dong, activeContract?.id_danh_muc_dich_vu]);
+
   // Tự động điền hình thức thanh toán & chế độ phí từ giao dịch gần nhất
   const hasInherited = useRef(false);
 
@@ -153,7 +166,13 @@ export default function MoneyTransferForm({ value, onChange }) {
     // 1. Tìm biểu phí phù hợp nhất
     const id_loai_dich_vu = store.banks?.find(b => b.id_danh_muc_dich_vu === activeContract?.id_danh_muc_dich_vu)?.id_loai_dich_vu;
     const id_danh_muc_dich_vu = activeContract?.id_danh_muc_dich_vu;
-    const id_loai_hop_dong = activeFile?.id_loai_hop_dong;
+    let id_loai_hop_dong = activeFile?.id_loai_hop_dong;
+    
+    // Nếu hồ sơ chưa phân loại khách hàng, tự động lấy loại Mặc định
+    if (!id_loai_hop_dong && store.loaiHopDongs?.length > 0) {
+      const defaultType = store.loaiHopDongs.find(t => t.index === 1 || t.ten_loai?.toLowerCase().includes('mặc định')) || store.loaiHopDongs[0];
+      id_loai_hop_dong = defaultType?.id_loai_hop_dong;
+    }
 
     let bestMatch = null;
     let maxScore = -1;
@@ -204,23 +223,61 @@ export default function MoneyTransferForm({ value, onChange }) {
       const cachTinhPhi = store.categories.find(c => c.id_danh_muc === bestMatch.id_cach_tinh_phi);
       const cachTinhCk = store.categories.find(c => c.id_danh_muc === bestMatch.id_cach_tinh_chiet_khau);
       
-      // Tính Phí DV
-      if (cachTinhPhi?.ten_cach_tinh?.toLowerCase().includes('phần trăm') || cachTinhPhi?.ten_cach_tinh?.toLowerCase().includes('%')) {
-        newPhi = (amount * (bestMatch.phi_dich_vu_mac_dinh || 0)) / 100;
+      // Lấy tên cách tính phí và chiết khấu từ store.cachTinhPhis
+      const cachTinhPhiObj = store.cachTinhPhis?.find(c => c.id_cach_tinh === bestMatch.id_cach_tinh_phi);
+      const cachTinhCkObj = store.cachTinhPhis?.find(c => c.id_cach_tinh === bestMatch.id_cach_tinh_chiet_khau);
+      
+      const tenCachTinh = (cachTinhPhiObj?.ten_cach_tinh || '').toLowerCase();
+      if (tenCachTinh.includes('phần trăm') || tenCachTinh.includes('%')) {
+        let calcPhi = (amount * (bestMatch.phi_dich_vu_mac_dinh || 0)) / 100;
+        
+        // Luôn áp dụng Phí Tối Thiểu nếu có cấu hình
+        if (bestMatch.phi_toi_thieu && calcPhi < bestMatch.phi_toi_thieu) {
+          calcPhi = bestMatch.phi_toi_thieu;
+        }
+        // Luôn áp dụng Làm Tròn nếu có cấu hình
+        if (bestMatch.buoc_lam_tron && bestMatch.buoc_lam_tron > 0) {
+          const step = bestMatch.buoc_lam_tron;
+          calcPhi = Math.ceil(calcPhi / step) * step;
+        }
+        newPhi = calcPhi;
+      } else if (tenCachTinh.includes('lốc 1') || tenCachTinh.includes('block 3tr')) {
+        // Lốc 1: Cứ 3tr/10k, chẵn 10tr thì 30k
+        const phiCoBan = bestMatch.phi_dich_vu_mac_dinh || 10000;
+        if (amount === 10000000) {
+          newPhi = phiCoBan * 3;
+        } else {
+          const blocks = Math.ceil(amount / 3000000);
+          newPhi = blocks * phiCoBan;
+        }
+      } else if (tenCachTinh.includes('lốc 2')) {
+        // Lốc 2: 10tr đầu 10k, 5tr tiếp theo 5k
+        const phiCoBan = bestMatch.phi_dich_vu_mac_dinh || 10000;
+        if (amount <= 10000000) {
+          newPhi = phiCoBan;
+        } else {
+          const remaining = amount - 10000000;
+          const blocks = Math.ceil(remaining / 5000000);
+          newPhi = phiCoBan + (blocks * (phiCoBan / 2));
+        }
       } else {
         newPhi = bestMatch.phi_dich_vu_mac_dinh || 0;
       }
 
       // Tính CK
-      if (cachTinhCk?.ten_cach_tinh?.toLowerCase().includes('phần trăm') || cachTinhCk?.ten_cach_tinh?.toLowerCase().includes('%')) {
+      const tenCachTinhCk = (cachTinhCkObj?.ten_cach_tinh || '').toLowerCase();
+      if (tenCachTinhCk.includes('phần trăm') || tenCachTinhCk.includes('%')) {
         newCk = (amount * (bestMatch.chiet_khau_mac_dinh || 0)) / 100;
       } else {
         newCk = bestMatch.chiet_khau_mac_dinh || 0;
       }
 
       setForm(prev => {
+        // Nếu có phí > 0 và user chưa chọn kiểu phí thủ công => tự động chọn Phí ngoài
         let newLoaiCuoc = prev.loai_cuoc_phi;
-        // Bỏ tự động nhảy sang 'ngoai', giữ nguyên lựa chọn của user hoặc kế thừa
+        if (newPhi > 0 && (!newLoaiCuoc || newLoaiCuoc === 'mien_phi')) {
+          newLoaiCuoc = 'ngoai';
+        }
         return { 
           ...prev, 
           phi_dich_vu: newPhi, 

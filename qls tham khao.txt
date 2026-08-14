@@ -1,275 +1,6 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
-CREATE TABLE public.phan_loai (
-  id_phan_loai uuid NOT NULL DEFAULT gen_random_uuid(),
-  ten_phan_loai text NOT NULL,
-  icon text,
-  ghi_chu text,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT phan_loai_pkey PRIMARY KEY (id_phan_loai)
-);
-CREATE TABLE public.dm_danh_muc (
-  id_danh_muc uuid NOT NULL DEFAULT gen_random_uuid(),
-  ten_danh_muc text NOT NULL,
-  id_phan_loai uuid,
-  index integer DEFAULT 0,
-  icon text,
-  ghi_chu text,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT dm_danh_muc_pkey PRIMARY KEY (id_danh_muc),
-  CONSTRAINT dm_danh_muc_id_phan_loai_fkey FOREIGN KEY (id_phan_loai) REFERENCES public.phan_loai(id_phan_loai)
-);
-CREATE TABLE public.nhom_menu (
-  id_nhom uuid NOT NULL DEFAULT gen_random_uuid(),
-  ten_nhom text NOT NULL,
-  index integer DEFAULT 0,
-  ghi_chu text,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT nhom_menu_pkey PRIMARY KEY (id_nhom)
-);
-CREATE TABLE public.menu (
-  id_menu uuid NOT NULL DEFAULT gen_random_uuid(),
-  id_nhom uuid,
-  id_loai_dich_vu uuid,
-  view_link text,
-  index integer DEFAULT 0,
-  ghi_chu text,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT menu_pkey PRIMARY KEY (id_menu),
-  CONSTRAINT menu_id_nhom_fkey FOREIGN KEY (id_nhom) REFERENCES public.nhom_menu(id_nhom)
-);
-CREATE TABLE public.ql_cot_du_lieu (
-  id_ql_cot_du_lieu uuid NOT NULL DEFAULT gen_random_uuid(),
-  id_ten_bang text NOT NULL,
-  id_loai_dich_vu uuid,
-  id_ten_cot text NOT NULL,
-  noi_dung_hien_thi text NOT NULL,
-  is_an_cot boolean DEFAULT false,
-  ghi_chu text,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT ql_cot_du_lieu_pkey PRIMARY KEY (id_ql_cot_du_lieu)
-);
-CREATE TABLE public.quan_ly_chu_ky (
-  id_chu_ky uuid NOT NULL DEFAULT gen_random_uuid(),
-  ten_chu_ky text NOT NULL,
-  ten_cua_hang text NOT NULL,
-  sdt1 text,
-  sdt2 text,
-  dia_chi text,
-  zalo text,
-  facebook text,
-  dich_vu_1 text,
-  dich_vu_2 text,
-  dich_vu_3 text,
-  ghi_chu text,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT quan_ly_chu_ky_pkey PRIMARY KEY (id_chu_ky)
-);
-CREATE TABLE public.danh_muc_dich_vu (
-  id_danh_muc_dich_vu uuid NOT NULL DEFAULT gen_random_uuid(),
-  id_loai_dich_vu uuid,
-  ma_bin text,
-  ten_dich_vu text NOT NULL,
-  ten_viet_tat text,
-  ten_viet_tat_2 text,
-  logo text,
-  ghi_chu text,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT danh_muc_dich_vu_pkey PRIMARY KEY (id_danh_muc_dich_vu)
-);
-CREATE TABLE public.ma_hop_dong (
-  id_ma_hop_dong uuid NOT NULL DEFAULT gen_random_uuid(),
-  id_loai_dich_vu uuid,
-  id_danh_muc_dich_vu uuid,
-  ma_hop_dong text NOT NULL UNIQUE,
-  chu_hop_dong text,
-  ghi_chu text,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT ma_hop_dong_pkey PRIMARY KEY (id_ma_hop_dong),
-  CONSTRAINT ma_hop_dong_id_danh_muc_dich_vu_fkey FOREIGN KEY (id_danh_muc_dich_vu) REFERENCES public.danh_muc_dich_vu(id_danh_muc_dich_vu)
-);
-CREATE TABLE public.khach_hang (
-  id_khach_hang uuid NOT NULL DEFAULT gen_random_uuid(),
-  toggle_up_anh boolean DEFAULT false,
-  anh_khach_hang text,
-  up_anh_khach_hang text,
-  id_doi_tuong uuid,
-  ho_va_ten text NOT NULL,
-  ten_khac text,
-  so_dien_thoai text NOT NULL,
-  so_dien_thoai_2 text,
-  dia_chi text,
-  ngay_sinh date,
-  id_gioi_tinh uuid,
-  id_nghe_nghiep uuid,
-  id_level uuid,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT khach_hang_pkey PRIMARY KEY (id_khach_hang),
-  CONSTRAINT khach_hang_id_doi_tuong_fkey FOREIGN KEY (id_doi_tuong) REFERENCES public.dm_danh_muc(id_danh_muc),
-  CONSTRAINT khach_hang_id_gioi_tinh_fkey FOREIGN KEY (id_gioi_tinh) REFERENCES public.dm_danh_muc(id_danh_muc),
-  CONSTRAINT khach_hang_id_nghe_nghiep_fkey FOREIGN KEY (id_nghe_nghiep) REFERENCES public.dm_danh_muc(id_danh_muc),
-  CONSTRAINT khach_hang_id_level_fkey FOREIGN KEY (id_level) REFERENCES public.dm_danh_muc(id_danh_muc)
-);
-CREATE TABLE public.giao_dich (
-  id_giao_dich uuid NOT NULL DEFAULT gen_random_uuid(),
-  id_khach_hang uuid,
-  id_loai_dich_vu uuid,
-  id_ma_hop_dong uuid,
-  noi_dung text,
-  id_loai_icon uuid,
-  link_icon_giao_dich text,
-  up_anh_icon_giao_dich text,
-  ghi_chu text,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT giao_dich_pkey PRIMARY KEY (id_giao_dich),
-  CONSTRAINT giao_dich_id_khach_hang_fkey FOREIGN KEY (id_khach_hang) REFERENCES public.khach_hang(id_khach_hang),
-  CONSTRAINT giao_dich_id_ma_hop_dong_fkey FOREIGN KEY (id_ma_hop_dong) REFERENCES public.ma_hop_dong(id_ma_hop_dong)
-);
-CREATE TABLE public.chuyen_khoan_chi_tiet (
-  id_chuyen_khoan_chi_tiet uuid NOT NULL DEFAULT gen_random_uuid(),
-  id_nhan_vien uuid,
-  id_giao_dich uuid,
-  nguon_giao_dich_id_phuong_thuc_thanh_toan uuid,
-  so_tien numeric DEFAULT 0,
-  so_tien_nhap_tay numeric DEFAULT 0,
-  id_phi_ngoai uuid,
-  id_cach_tinh_phi uuid,
-  nguon_phi_dich_vu_id_phuong_thuc_thanh_toan uuid,
-  phi_dich_vu numeric DEFAULT 0,
-  phi_dich_vu_nhap_tay numeric DEFAULT 0,
-  chiet_khau numeric DEFAULT 0,
-  toggle_so_tien_giam boolean DEFAULT false,
-  so_tien_giam numeric DEFAULT 0,
-  nguon_chuyen_di_id_phuong_thuc_thanh_toan uuid,
-  so_tien_di numeric DEFAULT 0,
-  noi_dung text,
-  id_trang_thai uuid,
-  hinh_anh_kiem_duyet text,
-  file_in text,
-  id_chu_ky uuid,
-  ghi_chu text,
-  thoi_gian_giao_dich timestamp with time zone,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT chuyen_khoan_chi_tiet_pkey PRIMARY KEY (id_chuyen_khoan_chi_tiet),
-  CONSTRAINT chuyen_khoan_chi_tiet_id_giao_dich_fkey FOREIGN KEY (id_giao_dich) REFERENCES public.giao_dich(id_giao_dich),
-  CONSTRAINT chuyen_khoan_chi_tiet_nguon_giao_dich_id_phuong_thuc_thanh_fkey FOREIGN KEY (nguon_giao_dich_id_phuong_thuc_thanh_toan) REFERENCES public.dm_danh_muc(id_danh_muc),
-  CONSTRAINT chuyen_khoan_chi_tiet_nguon_phi_dich_vu_id_phuong_thuc_tha_fkey FOREIGN KEY (nguon_phi_dich_vu_id_phuong_thuc_thanh_toan) REFERENCES public.dm_danh_muc(id_danh_muc),
-  CONSTRAINT chuyen_khoan_chi_tiet_nguon_chuyen_di_id_phuong_thuc_thanh_fkey FOREIGN KEY (nguon_chuyen_di_id_phuong_thuc_thanh_toan) REFERENCES public.dm_danh_muc(id_danh_muc),
-  CONSTRAINT chuyen_khoan_chi_tiet_id_trang_thai_fkey FOREIGN KEY (id_trang_thai) REFERENCES public.dm_danh_muc(id_danh_muc),
-  CONSTRAINT chuyen_khoan_chi_tiet_id_chu_ky_fkey FOREIGN KEY (id_chu_ky) REFERENCES public.quan_ly_chu_ky(id_chu_ky)
-);
-CREATE TABLE public.log_in_hoa_don (
-  id_log_in_hoa_don uuid NOT NULL DEFAULT gen_random_uuid(),
-  id_hoa_don uuid,
-  noi_dung_in text,
-  ghi_chu text,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT log_in_hoa_don_pkey PRIMARY KEY (id_log_in_hoa_don),
-  CONSTRAINT log_in_hoa_don_id_hoa_don_fkey FOREIGN KEY (id_hoa_don) REFERENCES public.giao_dich(id_giao_dich)
-);
-CREATE TABLE public.tao_ma_qr (
-  id_tao_ma_qr uuid NOT NULL DEFAULT gen_random_uuid(),
-  id_chuyen_khoan_chi_tiet uuid,
-  id_loai_khach_hang uuid,
-  id_khach_hang uuid,
-  id_giao_dich uuid,
-  id_link_tu_dong text,
-  id_danh_muc_dich_vu uuid,
-  so_tai_khoan text,
-  chu_tai_khoan text,
-  noi_dung_chuyen text,
-  ghi_chu text,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT tao_ma_qr_pkey PRIMARY KEY (id_tao_ma_qr),
-  CONSTRAINT tao_ma_qr_id_chuyen_khoan_chi_tiet_fkey FOREIGN KEY (id_chuyen_khoan_chi_tiet) REFERENCES public.chuyen_khoan_chi_tiet(id_chuyen_khoan_chi_tiet),
-  CONSTRAINT tao_ma_qr_id_loai_khach_hang_fkey FOREIGN KEY (id_loai_khach_hang) REFERENCES public.dm_danh_muc(id_danh_muc),
-  CONSTRAINT tao_ma_qr_id_khach_hang_fkey FOREIGN KEY (id_khach_hang) REFERENCES public.khach_hang(id_khach_hang),
-  CONSTRAINT tao_ma_qr_id_giao_dich_fkey FOREIGN KEY (id_giao_dich) REFERENCES public.giao_dich(id_giao_dich),
-  CONSTRAINT tao_ma_qr_id_danh_muc_dich_vu_fkey FOREIGN KEY (id_danh_muc_dich_vu) REFERENCES public.danh_muc_dich_vu(id_danh_muc_dich_vu)
-);
-CREATE TABLE public.lich_su_thu_chi (
-  id_lich_su_thu_chi uuid NOT NULL DEFAULT gen_random_uuid(),
-  id_loai_giao_dich uuid,
-  so_tien numeric DEFAULT 0,
-  phuong_thuc_thanh_toan_id uuid,
-  so_du_cuoi numeric DEFAULT 0,
-  nguon_goc_bang text,
-  id_giao_dich_goc uuid,
-  noi_dung text,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  CONSTRAINT lich_su_thu_chi_pkey PRIMARY KEY (id_lich_su_thu_chi),
-  CONSTRAINT lich_su_thu_chi_id_loai_giao_dich_fkey FOREIGN KEY (id_loai_giao_dich) REFERENCES public.dm_danh_muc(id_danh_muc),
-  CONSTRAINT lich_su_thu_chi_phuong_thuc_thanh_toan_id_fkey FOREIGN KEY (phuong_thuc_thanh_toan_id) REFERENCES public.dm_danh_muc(id_danh_muc)
-);
-CREATE TABLE public.phieu_dem_tien (
-  id_phieu_dem_tien uuid NOT NULL DEFAULT gen_random_uuid(),
-  id_chuyen_khoan_chi_tiet uuid,
-  ngay_dem timestamp with time zone DEFAULT now(),
-  nguoi_dem text,
-  so_to_500k integer DEFAULT 0,
-  so_to_200k integer DEFAULT 0,
-  so_to_100k integer DEFAULT 0,
-  so_to_50k integer DEFAULT 0,
-  so_to_20k integer DEFAULT 0,
-  so_to_10k integer DEFAULT 0,
-  so_to_5k integer DEFAULT 0,
-  so_to_2k integer DEFAULT 0,
-  so_to_1k integer DEFAULT 0,
-  so_to_500d integer DEFAULT 0,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT phieu_dem_tien_pkey PRIMARY KEY (id_phieu_dem_tien),
-  CONSTRAINT phieu_dem_tien_id_chuyen_khoan_chi_tiet_fkey FOREIGN KEY (id_chuyen_khoan_chi_tiet) REFERENCES public.chuyen_khoan_chi_tiet(id_chuyen_khoan_chi_tiet)
-);
-CREATE TABLE public.chi_tiet_giao_dich (
-  id_chi_tiet_giao_dich uuid NOT NULL DEFAULT gen_random_uuid(),
-  id_nhan_vien uuid,
-  id_giao_dich uuid,
-  id_loai_dich_vu uuid,
-  id_pttt_nguon uuid,
-  so_tien numeric DEFAULT 0,
-  so_tien_nhap_tay numeric DEFAULT 0,
-  id_phi_ngoai uuid,
-  id_cach_tinh_phi uuid,
-  id_pttt_phi uuid,
-  phi_dich_vu numeric DEFAULT 0,
-  phi_dich_vu_nhap_tay numeric DEFAULT 0,
-  chiet_khau numeric DEFAULT 0,
-  toggle_so_tien_giam boolean DEFAULT false,
-  so_tien_giam numeric DEFAULT 0,
-  id_pttt_di uuid,
-  so_tien_di numeric DEFAULT 0,
-  noi_dung text,
-  id_trang_thai uuid,
-  hinh_anh_kiem_duyet text,
-  file_in text,
-  id_chu_ky uuid,
-  ghi_chu text,
-  thoi_gian_giao_dich timestamp with time zone,
-  ngay_tao timestamp with time zone DEFAULT now(),
-  ngay_sua timestamp with time zone DEFAULT now(),
-  CONSTRAINT chi_tiet_giao_dich_pkey PRIMARY KEY (id_chi_tiet_giao_dich),
-  CONSTRAINT ctgd_id_giao_dich_fkey FOREIGN KEY (id_giao_dich) REFERENCES public.giao_dich(id_giao_dich),
-  CONSTRAINT ctgd_id_trang_thai_fkey FOREIGN KEY (id_trang_thai) REFERENCES public.dm_danh_muc(id_danh_muc),
-  CONSTRAINT ctgd_id_chu_ky_fkey FOREIGN KEY (id_chu_ky) REFERENCES public.quan_ly_chu_ky(id_chu_ky),
-  CONSTRAINT ctgd_id_pttt_nguon_fkey FOREIGN KEY (id_pttt_nguon) REFERENCES public.dm_danh_muc(id_danh_muc),
-  CONSTRAINT ctgd_id_pttt_phi_fkey FOREIGN KEY (id_pttt_phi) REFERENCES public.dm_danh_muc(id_danh_muc),
-  CONSTRAINT ctgd_id_pttt_di_fkey FOREIGN KEY (id_pttt_di) REFERENCES public.dm_danh_muc(id_danh_muc)
-);
 CREATE TABLE public.dm_nhom_quyen (
   id_nhom_quyen uuid NOT NULL DEFAULT gen_random_uuid(),
   ma_quyen text NOT NULL UNIQUE,
@@ -307,6 +38,414 @@ CREATE TABLE public.tai_khoan_nguoi_dung (
   so_dien_thoai text,
   is_active boolean DEFAULT true,
   ngay_tao timestamp with time zone DEFAULT now(),
+  id_diem_ban uuid,
   CONSTRAINT tai_khoan_nguoi_dung_pkey PRIMARY KEY (id_tai_khoan),
+  CONSTRAINT tknd_id_diem_ban_fkey FOREIGN KEY (id_diem_ban) REFERENCES public.sys_diem_ban(id_diem_ban),
   CONSTRAINT fk_tk_nhom FOREIGN KEY (id_nhom_quyen) REFERENCES public.dm_nhom_quyen(id_nhom_quyen)
+);
+CREATE TABLE public.dm_trang_thai_giao_dich (
+  id_trang_thai uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_trang_thai text NOT NULL,
+  icon text,
+  index integer DEFAULT 0,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT dm_trang_thai_giao_dich_pkey PRIMARY KEY (id_trang_thai)
+);
+CREATE TABLE public.dm_phuong_thuc_thanh_toan (
+  id_pttt uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_pttt text NOT NULL,
+  icon text,
+  index integer DEFAULT 0,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT dm_phuong_thuc_thanh_toan_pkey PRIMARY KEY (id_pttt)
+);
+CREATE TABLE public.dm_hang_khach_hang (
+  id_hang uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_hang text NOT NULL,
+  icon text,
+  index integer DEFAULT 0,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT dm_hang_khach_hang_pkey PRIMARY KEY (id_hang)
+);
+CREATE TABLE public.dm_gioi_tinh (
+  id_gioi_tinh uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_gioi_tinh text NOT NULL,
+  icon text,
+  index integer DEFAULT 0,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT dm_gioi_tinh_pkey PRIMARY KEY (id_gioi_tinh)
+);
+CREATE TABLE public.dm_doi_tuong_kh (
+  id_doi_tuong uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_doi_tuong text NOT NULL,
+  icon text,
+  index integer DEFAULT 0,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT dm_doi_tuong_kh_pkey PRIMARY KEY (id_doi_tuong)
+);
+CREATE TABLE public.dm_nghe_nghiep (
+  id_nghe_nghiep uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_nghe_nghiep text NOT NULL,
+  icon text,
+  index integer DEFAULT 0,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT dm_nghe_nghiep_pkey PRIMARY KEY (id_nghe_nghiep)
+);
+CREATE TABLE public.dm_loai_gd_thu_chi (
+  id_loai_gd uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_loai text NOT NULL,
+  icon text,
+  index integer DEFAULT 0,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT dm_loai_gd_thu_chi_pkey PRIMARY KEY (id_loai_gd)
+);
+CREATE TABLE public.dm_cach_tinh_phi (
+  id_cach_tinh uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_cach_tinh text NOT NULL,
+  icon text,
+  index integer DEFAULT 0,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT dm_cach_tinh_phi_pkey PRIMARY KEY (id_cach_tinh)
+);
+CREATE TABLE public.dm_loai_icon (
+  id_loai_icon uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_loai text NOT NULL,
+  icon text,
+  index integer DEFAULT 0,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT dm_loai_icon_pkey PRIMARY KEY (id_loai_icon)
+);
+CREATE TABLE public.sys_quan_ly_chu_ky (
+  id_chu_ky uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_chu_ky text NOT NULL,
+  ten_cua_hang text NOT NULL,
+  sdt1 text,
+  sdt2 text,
+  dia_chi text,
+  zalo text,
+  facebook text,
+  dich_vu_1 text,
+  dich_vu_2 text,
+  dich_vu_3 text,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  id_diem_ban uuid,
+  CONSTRAINT sys_quan_ly_chu_ky_pkey PRIMARY KEY (id_chu_ky),
+  CONSTRAINT sqck_id_diem_ban_fkey FOREIGN KEY (id_diem_ban) REFERENCES public.sys_diem_ban(id_diem_ban)
+);
+CREATE TABLE public.sys_nhom_menu (
+  id_nhom uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_nhom text NOT NULL,
+  index integer DEFAULT 0,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT sys_nhom_menu_pkey PRIMARY KEY (id_nhom)
+);
+CREATE TABLE public.sys_loai_dich_vu (
+  id_loai_dich_vu uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_nhom uuid,
+  icon text,
+  ten_danh_muc text NOT NULL,
+  ma_viet_tat text,
+  view_text text,
+  view_link text,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT sys_loai_dich_vu_pkey PRIMARY KEY (id_loai_dich_vu),
+  CONSTRAINT sys_loai_dich_vu_id_nhom_fkey FOREIGN KEY (id_nhom) REFERENCES public.sys_nhom_menu(id_nhom)
+);
+CREATE TABLE public.sys_danh_muc_dich_vu (
+  id_danh_muc_dich_vu uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_loai_dich_vu uuid,
+  ma_bin text,
+  ten_dich_vu text NOT NULL,
+  ten_viet_tat text,
+  ten_viet_tat_2 text,
+  logo text,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT sys_danh_muc_dich_vu_pkey PRIMARY KEY (id_danh_muc_dich_vu),
+  CONSTRAINT sys_dmdv_id_loai_dich_vu_fkey FOREIGN KEY (id_loai_dich_vu) REFERENCES public.sys_loai_dich_vu(id_loai_dich_vu)
+);
+CREATE TABLE public.sys_menu (
+  id_menu uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_nhom uuid,
+  id_loai_dich_vu uuid,
+  view_link text,
+  index integer DEFAULT 0,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT sys_menu_pkey PRIMARY KEY (id_menu),
+  CONSTRAINT sys_menu_id_nhom_fkey FOREIGN KEY (id_nhom) REFERENCES public.sys_nhom_menu(id_nhom),
+  CONSTRAINT sys_menu_id_loai_dich_vu_fkey FOREIGN KEY (id_loai_dich_vu) REFERENCES public.sys_loai_dich_vu(id_loai_dich_vu)
+);
+CREATE TABLE public.sys_ql_cot_du_lieu (
+  id_ql_cot_du_lieu uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_ten_bang text NOT NULL,
+  id_loai_dich_vu uuid,
+  id_ten_cot text NOT NULL,
+  noi_dung_hien_thi text NOT NULL,
+  is_an_cot boolean DEFAULT false,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT sys_ql_cot_du_lieu_pkey PRIMARY KEY (id_ql_cot_du_lieu),
+  CONSTRAINT sys_ql_cot_du_lieu_id_bang_fkey FOREIGN KEY (id_ten_bang) REFERENCES public.sys_danh_sach_bang(id_bang),
+  CONSTRAINT sys_ql_cot_du_lieu_id_cot_fkey FOREIGN KEY (id_ten_cot) REFERENCES public.sys_danh_sach_cot(id_cot),
+  CONSTRAINT sys_ql_cot_du_lieu_id_cot_fkey FOREIGN KEY (id_ten_bang) REFERENCES public.sys_danh_sach_cot(id_bang),
+  CONSTRAINT sys_qlcdl_id_loai_dv_fkey FOREIGN KEY (id_loai_dich_vu) REFERENCES public.sys_loai_dich_vu(id_loai_dich_vu)
+);
+CREATE TABLE public.khach_hang (
+  toggle_up_anh boolean DEFAULT false,
+  anh_khach_hang text,
+  up_anh_khach_hang text,
+  id_doi_tuong uuid,
+  ho_va_ten text NOT NULL,
+  ten_khac text,
+  so_dien_thoai text NOT NULL,
+  so_dien_thoai_2 text,
+  email text,
+  so_cccd text,
+  dia_chi text,
+  ngay_sinh date,
+  id_gioi_tinh uuid,
+  id_nghe_nghiep uuid,
+  id_level uuid,
+  ghi_chu text,
+  utm_source text,
+  last_interaction timestamp with time zone,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  id_khach_hang text NOT NULL DEFAULT (gen_random_uuid())::text,
+  id_diem_ban uuid,
+  id_tai_khoan_tao uuid,
+  CONSTRAINT khach_hang_pkey PRIMARY KEY (id_khach_hang),
+  CONSTRAINT kh_id_diem_ban_fkey FOREIGN KEY (id_diem_ban) REFERENCES public.sys_diem_ban(id_diem_ban),
+  CONSTRAINT kh_id_tai_khoan_tao_fkey FOREIGN KEY (id_tai_khoan_tao) REFERENCES public.tai_khoan_nguoi_dung(id_tai_khoan),
+  CONSTRAINT kh_id_doi_tuong_fkey FOREIGN KEY (id_doi_tuong) REFERENCES public.dm_doi_tuong_kh(id_doi_tuong),
+  CONSTRAINT kh_id_gioi_tinh_fkey FOREIGN KEY (id_gioi_tinh) REFERENCES public.dm_gioi_tinh(id_gioi_tinh),
+  CONSTRAINT kh_id_nghe_nghiep_fkey FOREIGN KEY (id_nghe_nghiep) REFERENCES public.dm_nghe_nghiep(id_nghe_nghiep),
+  CONSTRAINT kh_id_level_fkey FOREIGN KEY (id_level) REFERENCES public.dm_hang_khach_hang(id_hang)
+);
+CREATE TABLE public.ma_hop_dong (
+  id_ma_hop_dong uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_danh_muc_dich_vu uuid,
+  ma_hop_dong text NOT NULL,
+  chu_hop_dong text,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  id_diem_ban uuid,
+  id_tai_khoan_tao uuid,
+  CONSTRAINT ma_hop_dong_pkey PRIMARY KEY (id_ma_hop_dong),
+  CONSTRAINT mhd_id_diem_ban_fkey FOREIGN KEY (id_diem_ban) REFERENCES public.sys_diem_ban(id_diem_ban),
+  CONSTRAINT mhd_id_tai_khoan_tao_fkey FOREIGN KEY (id_tai_khoan_tao) REFERENCES public.tai_khoan_nguoi_dung(id_tai_khoan),
+  CONSTRAINT ma_hop_dong_id_danh_muc_dich_vu_fkey FOREIGN KEY (id_danh_muc_dich_vu) REFERENCES public.sys_danh_muc_dich_vu(id_danh_muc_dich_vu)
+);
+CREATE TABLE public.ho_so_dich_vu (
+  id_ho_so_dich_vu uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_ma_hop_dong uuid,
+  noi_dung text,
+  id_loai_icon uuid,
+  link_icon_giao_dich text,
+  up_anh_icon_giao_dich text,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  id_loai_hop_dong uuid,
+  id_khach_hang text,
+  id_diem_ban uuid,
+  id_tai_khoan_tao uuid,
+  CONSTRAINT ho_so_dich_vu_pkey PRIMARY KEY (id_ho_so_dich_vu),
+  CONSTRAINT ho_so_dich_vu_id_loai_hop_dong_fkey FOREIGN KEY (id_loai_hop_dong) REFERENCES public.dm_loai_hop_dong(id_loai_hop_dong),
+  CONSTRAINT hsdv_id_khach_hang_fkey FOREIGN KEY (id_khach_hang) REFERENCES public.khach_hang(id_khach_hang),
+  CONSTRAINT hsdv_id_diem_ban_fkey FOREIGN KEY (id_diem_ban) REFERENCES public.sys_diem_ban(id_diem_ban),
+  CONSTRAINT hsdv_id_tai_khoan_tao_fkey FOREIGN KEY (id_tai_khoan_tao) REFERENCES public.tai_khoan_nguoi_dung(id_tai_khoan),
+  CONSTRAINT hsdv_id_ma_hop_dong_fkey FOREIGN KEY (id_ma_hop_dong) REFERENCES public.ma_hop_dong(id_ma_hop_dong),
+  CONSTRAINT hsdv_id_loai_icon_fkey FOREIGN KEY (id_loai_icon) REFERENCES public.dm_loai_icon(id_loai_icon)
+);
+CREATE TABLE public.chi_tiet_giao_dich (
+  id_nhan_vien uuid,
+  id_ho_so_dich_vu uuid,
+  id_pttt_nguon uuid,
+  so_tien numeric DEFAULT 0,
+  id_cach_tinh_phi uuid,
+  id_pttt_phi uuid,
+  phi_dich_vu numeric DEFAULT 0,
+  chiet_khau numeric DEFAULT 0,
+  toggle_so_tien_giam boolean DEFAULT false,
+  so_tien_giam numeric DEFAULT 0,
+  id_pttt_di uuid,
+  so_tien_di numeric DEFAULT 0,
+  noi_dung text,
+  id_trang_thai uuid,
+  hinh_anh_kiem_duyet text,
+  file_in text,
+  id_chu_ky uuid,
+  ghi_chu text,
+  thoi_gian_giao_dich timestamp with time zone,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  is_cuoc_trong boolean DEFAULT false,
+  id_chi_tiet_giao_dich text NOT NULL,
+  id_diem_ban uuid,
+  id_tai_khoan_tao uuid,
+  so_tien_yeu_cau numeric DEFAULT 0,
+  CONSTRAINT chi_tiet_giao_dich_pkey PRIMARY KEY (id_chi_tiet_giao_dich),
+  CONSTRAINT ctgd_id_diem_ban_fkey FOREIGN KEY (id_diem_ban) REFERENCES public.sys_diem_ban(id_diem_ban),
+  CONSTRAINT ctgd_id_tai_khoan_tao_fkey FOREIGN KEY (id_tai_khoan_tao) REFERENCES public.tai_khoan_nguoi_dung(id_tai_khoan),
+  CONSTRAINT ctgd_id_ho_so_dich_vu_fkey FOREIGN KEY (id_ho_so_dich_vu) REFERENCES public.ho_so_dich_vu(id_ho_so_dich_vu),
+  CONSTRAINT ctgd_id_chu_ky_fkey FOREIGN KEY (id_chu_ky) REFERENCES public.sys_quan_ly_chu_ky(id_chu_ky),
+  CONSTRAINT ctgd_id_trang_thai_fkey FOREIGN KEY (id_trang_thai) REFERENCES public.dm_trang_thai_giao_dich(id_trang_thai),
+  CONSTRAINT ctgd_id_pttt_nguon_fkey FOREIGN KEY (id_pttt_nguon) REFERENCES public.dm_phuong_thuc_thanh_toan(id_pttt),
+  CONSTRAINT ctgd_id_pttt_phi_fkey FOREIGN KEY (id_pttt_phi) REFERENCES public.dm_phuong_thuc_thanh_toan(id_pttt),
+  CONSTRAINT ctgd_id_pttt_di_fkey FOREIGN KEY (id_pttt_di) REFERENCES public.dm_phuong_thuc_thanh_toan(id_pttt),
+  CONSTRAINT ctgd_id_cach_tinh_phi_fkey FOREIGN KEY (id_cach_tinh_phi) REFERENCES public.dm_cach_tinh_phi(id_cach_tinh)
+);
+CREATE TABLE public.tao_ma_qr (
+  id_tao_ma_qr uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_loai_khach_hang uuid,
+  id_ho_so_dich_vu uuid,
+  id_link_tu_dong text,
+  id_danh_muc_dich_vu uuid,
+  so_tai_khoan text,
+  chu_tai_khoan text,
+  noi_dung_chuyen text,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  id_khach_hang text,
+  id_chi_tiet_giao_dich text,
+  CONSTRAINT tao_ma_qr_pkey PRIMARY KEY (id_tao_ma_qr),
+  CONSTRAINT qr_id_khach_hang_fkey FOREIGN KEY (id_khach_hang) REFERENCES public.khach_hang(id_khach_hang),
+  CONSTRAINT qr_id_ctgd_fkey FOREIGN KEY (id_chi_tiet_giao_dich) REFERENCES public.chi_tiet_giao_dich(id_chi_tiet_giao_dich),
+  CONSTRAINT qr_id_loai_kh_fkey FOREIGN KEY (id_loai_khach_hang) REFERENCES public.dm_doi_tuong_kh(id_doi_tuong),
+  CONSTRAINT qr_id_ho_so_dv_fkey FOREIGN KEY (id_ho_so_dich_vu) REFERENCES public.ho_so_dich_vu(id_ho_so_dich_vu),
+  CONSTRAINT qr_id_danh_muc_dv_fkey FOREIGN KEY (id_danh_muc_dich_vu) REFERENCES public.sys_danh_muc_dich_vu(id_danh_muc_dich_vu)
+);
+CREATE TABLE public.phieu_dem_tien (
+  id_phieu_dem_tien uuid NOT NULL DEFAULT gen_random_uuid(),
+  ngay_dem timestamp with time zone DEFAULT now(),
+  nguoi_dem text,
+  so_to_500k integer DEFAULT 0,
+  so_to_200k integer DEFAULT 0,
+  so_to_100k integer DEFAULT 0,
+  so_to_50k integer DEFAULT 0,
+  so_to_20k integer DEFAULT 0,
+  so_to_10k integer DEFAULT 0,
+  so_to_5k integer DEFAULT 0,
+  so_to_2k integer DEFAULT 0,
+  so_to_1k integer DEFAULT 0,
+  so_to_500d integer DEFAULT 0,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  id_chi_tiet_giao_dich text,
+  CONSTRAINT phieu_dem_tien_pkey PRIMARY KEY (id_phieu_dem_tien),
+  CONSTRAINT pdt_id_ctgd_fkey FOREIGN KEY (id_chi_tiet_giao_dich) REFERENCES public.chi_tiet_giao_dich(id_chi_tiet_giao_dich)
+);
+CREATE TABLE public.log_in_hoa_don (
+  id_log_in_hoa_don uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_ho_so_dich_vu uuid,
+  noi_dung_in text,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT log_in_hoa_don_pkey PRIMARY KEY (id_log_in_hoa_don),
+  CONSTRAINT log_id_ho_so_dv_fkey FOREIGN KEY (id_ho_so_dich_vu) REFERENCES public.ho_so_dich_vu(id_ho_so_dich_vu)
+);
+CREATE TABLE public.lich_su_thu_chi (
+  id_lich_su_thu_chi uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_loai_giao_dich uuid,
+  so_tien numeric DEFAULT 0,
+  phuong_thuc_thanh_toan_id uuid,
+  so_du_cuoi numeric DEFAULT 0,
+  nguon_goc_bang text,
+  id_giao_dich_goc uuid,
+  noi_dung text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  id_diem_ban uuid,
+  CONSTRAINT lich_su_thu_chi_pkey PRIMARY KEY (id_lich_su_thu_chi),
+  CONSTRAINT lstc_id_diem_ban_fkey FOREIGN KEY (id_diem_ban) REFERENCES public.sys_diem_ban(id_diem_ban),
+  CONSTRAINT lstc_id_loai_gd_fkey FOREIGN KEY (id_loai_giao_dich) REFERENCES public.dm_loai_gd_thu_chi(id_loai_gd),
+  CONSTRAINT lstc_pttt_fkey FOREIGN KEY (phuong_thuc_thanh_toan_id) REFERENCES public.dm_phuong_thuc_thanh_toan(id_pttt)
+);
+CREATE TABLE public.dm_loai_hop_dong (
+  id_loai_hop_dong uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_loai text NOT NULL,
+  index integer,
+  trang_thai boolean DEFAULT true,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT dm_loai_hop_dong_pkey PRIMARY KEY (id_loai_hop_dong)
+);
+CREATE TABLE public.dm_bieu_phi (
+  id_bieu_phi uuid NOT NULL DEFAULT gen_random_uuid(),
+  ten_bieu_phi text NOT NULL,
+  id_loai_dich_vu uuid,
+  id_danh_muc_dich_vu uuid,
+  id_loai_hop_dong uuid,
+  phi_dich_vu_mac_dinh numeric DEFAULT 0,
+  id_cach_tinh_phi uuid,
+  chiet_khau_mac_dinh numeric DEFAULT 0,
+  id_cach_tinh_chiet_khau uuid,
+  trang_thai boolean DEFAULT true,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT dm_bieu_phi_pkey PRIMARY KEY (id_bieu_phi),
+  CONSTRAINT bieuphi_loaidv_fkey FOREIGN KEY (id_loai_dich_vu) REFERENCES public.sys_loai_dich_vu(id_loai_dich_vu),
+  CONSTRAINT bieuphi_danhmucdv_fkey FOREIGN KEY (id_danh_muc_dich_vu) REFERENCES public.sys_danh_muc_dich_vu(id_danh_muc_dich_vu),
+  CONSTRAINT bieuphi_loaihopdong_fkey FOREIGN KEY (id_loai_hop_dong) REFERENCES public.dm_loai_hop_dong(id_loai_hop_dong),
+  CONSTRAINT bieuphi_cachtinhphi_fkey FOREIGN KEY (id_cach_tinh_phi) REFERENCES public.dm_cach_tinh_phi(id_cach_tinh),
+  CONSTRAINT bieuphi_cachtinhck_fkey FOREIGN KEY (id_cach_tinh_chiet_khau) REFERENCES public.dm_cach_tinh_phi(id_cach_tinh)
+);
+CREATE TABLE public.sys_diem_ban (
+  id_diem_ban uuid NOT NULL DEFAULT gen_random_uuid(),
+  ma_diem_ban text NOT NULL UNIQUE,
+  ten_diem_ban text NOT NULL,
+  dia_chi text,
+  sdt text,
+  trang_thai boolean DEFAULT true,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  CONSTRAINT sys_diem_ban_pkey PRIMARY KEY (id_diem_ban)
+);
+CREATE TABLE public.sys_danh_sach_bang (
+  id_bang text NOT NULL,
+  ten_bang text NOT NULL,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT sys_danh_sach_bang_pkey PRIMARY KEY (id_bang)
+);
+CREATE TABLE public.sys_danh_sach_cot (
+  id_cot text NOT NULL,
+  id_bang text NOT NULL,
+  ten_cot text NOT NULL,
+  ghi_chu text,
+  ngay_tao timestamp with time zone DEFAULT now(),
+  ngay_sua timestamp with time zone DEFAULT now(),
+  CONSTRAINT sys_danh_sach_cot_pkey PRIMARY KEY (id_cot, id_bang),
+  CONSTRAINT sys_dsc_id_bang_fkey FOREIGN KEY (id_bang) REFERENCES public.sys_danh_sach_bang(id_bang)
 );
