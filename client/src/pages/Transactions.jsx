@@ -277,7 +277,10 @@ export default function Transactions() {
     const currentHd = store.ma_hop_dong.find(h => h.id_ma_hop_dong === activeFile.id_ma_hop_dong) || activeFile.ma_hop_dong;
     
     let copyParts = [];
-    if (copyOptions.serviceName) copyParts.push(store.selectedService?.ten_danh_muc || 'Không xác định');
+    if (copyOptions.serviceName) {
+      const currentBank = store.banks?.find(b => b.id_danh_muc_dich_vu === currentHd?.id_danh_muc_dich_vu);
+      copyParts.push(currentBank?.ten_viet_tat || currentBank?.ten_dich_vu || 'Không xác định');
+    }
     if (copyOptions.contractId) copyParts.push(currentHd?.ma_hop_dong || 'Không xác định');
     if (copyOptions.contractOwner) copyParts.push(currentHd?.chu_hop_dong || 'Không xác định');
 
@@ -2414,7 +2417,10 @@ export default function Transactions() {
                   onChange={(e) => setCopyOptions(prev => ({ ...prev, serviceName: e.target.checked }))}
                   className="text-white font-semibold"
                 >
-                  1. Tên danh mục dịch vụ <span className="text-gray-400 font-normal ml-1">({store.selectedService?.ten_danh_muc || 'N/A'})</span>
+                  1. Tên danh mục dịch vụ <span className="text-gray-400 font-normal ml-1">({(() => {
+                    const currentBank = store.banks?.find(b => b.id_danh_muc_dich_vu === currentHd?.id_danh_muc_dich_vu);
+                    return currentBank?.ten_viet_tat || currentBank?.ten_dich_vu || 'N/A';
+                  })()})</span>
                 </Checkbox>
                 <Checkbox 
                   checked={copyOptions.contractId} 
