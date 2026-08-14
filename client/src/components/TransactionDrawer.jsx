@@ -47,39 +47,8 @@ export default function TransactionDrawer({ open, onClose }) {
       }
     }
 
-    // Query Supabase lấy giao dịch gần nhất của hồ sơ này
-    const fetchLastTxFeeType = async () => {
-      const basePayload = { noi_dung: defaultNoiDung };
-      if (!activeFile?.id_ho_so_dich_vu) {
-        setGdPayload(basePayload);
-        return;
-      }
-      const { data } = await supabase
-        .from('chi_tiet_giao_dich')
-        .select('phi_dich_vu, is_cuoc_trong, id_pttt_nguon, id_pttt_di, id_pttt_phi')
-        .eq('id_ho_so_dich_vu', activeFile.id_ho_so_dich_vu)
-        .order('thoi_gian_giao_dich', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (data) {
-        const isMienPhi = !data.phi_dich_vu || Number(data.phi_dich_vu) === 0;
-        const loai_cuoc_phi = isMienPhi ? 'mien_phi' : (data.is_cuoc_trong ? 'trong' : 'ngoai');
-        setGdPayload({
-          noi_dung: defaultNoiDung,
-          loai_cuoc_phi,
-          is_cuoc_trong: data.is_cuoc_trong || false,
-          id_pttt_nguon: data.id_pttt_nguon || undefined,
-          id_pttt_di: data.id_pttt_di || undefined,
-          id_pttt_phi: data.id_pttt_phi || undefined,
-        });
-      } else {
-        setGdPayload(basePayload);
-      }
-    };
-
-    fetchLastTxFeeType();
-  }, [open]);
+    setGdPayload({ noi_dung: defaultNoiDung });
+  }, [open, activeFile?.id_ho_so_dich_vu]);
 
   // QR State (Kế thừa từ danh mục ngân hàng & hợp đồng)
   const [qrBankBin, setQrBankBin] = useState('970422');
