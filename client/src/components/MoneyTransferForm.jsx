@@ -143,7 +143,7 @@ export default function MoneyTransferForm({ value, onChange }) {
       // Ưu tiên 3: query Supabase – giao dịch gần nhất cùng loại dịch vụ
       if (!lastTx && idLoaiDV) {
         const { data: dmList } = await supabase
-          .from('dm_dich_vu')
+          .from('sys_danh_muc_dich_vu')
           .select('id_danh_muc_dich_vu')
           .eq('id_loai_dich_vu', idLoaiDV);
 
