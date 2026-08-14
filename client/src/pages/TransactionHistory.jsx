@@ -1654,6 +1654,9 @@ export default function TransactionHistory() {
                      {item.tx.phi_dich_vu > 0 && (
                        <div className="text-[9px] text-orange-400 font-medium tracking-wide">+ Phí: {formatCurrency(item.tx.phi_dich_vu)}</div>
                      )}
+                     {parseFloat(item.tx.chiet_khau || 0) > 0 && (
+                       <div className="text-[9px] text-emerald-400 font-medium tracking-wide">- Chiết khấu: {formatCurrency(Math.round(((item.tx.so_tien || 0) * parseFloat(item.tx.chiet_khau)) / 100))} ({item.tx.chiet_khau}%)</div>
+                     )}
                      <div className="mt-2 flex justify-end" onClick={e => e.stopPropagation()}>
                         <div className={`shrink-0 rounded-lg border transition-colors ${getStatusStyle(item.tx.id_trang_thai)}`}>
                           <Select
