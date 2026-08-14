@@ -78,9 +78,11 @@ export default function MoneyTransferForm({ value, onChange }) {
   const hasInherited = useRef(false);
 
   useEffect(() => {
-    // Reset khi đổi hồ sơ
-    hasInherited.current = false;
-  }, [activeFile?.id_ho_so_dich_vu]);
+    // Reset khi đổi hồ sơ hoặc khi form được clear để tạo mới
+    if (!value || Object.keys(value).length === 0) {
+      hasInherited.current = false;
+    }
+  }, [activeFile?.id_ho_so_dich_vu, value]);
 
   useEffect(() => {
     // Chỉ chạy nếu chưa kế thừa thành công, và đang tạo mới
