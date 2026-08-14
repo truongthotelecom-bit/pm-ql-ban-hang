@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Input, Button, message, Tabs } from 'antd';
 import useAppStore from '../store/useAppStore';
 import AdminCategoryPage from './admin/AdminCategoryPage';
-import useAppStore from '../store/useAppStore';
 
 export default function SettingsPage() {
   const store = useAppStore();
