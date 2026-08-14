@@ -99,17 +99,20 @@ export default function MoneyTransferForm({ value, onChange }) {
     const doInherit = async () => {
       let lastTx = null;
 
-      // Ưu tiên 1: giao dịch gần nhất của chính hồ sơ này (đã load sẵn)
-      const profileTxs = (store.transactionDetails || []).filter(t => t.id_ho_so_dich_vu === idHoSo);
-      if (profileTxs.length > 0) {
-        lastTx = [...profileTxs].sort((a, b) =>
-          new Date(b.thoi_gian_giao_dich || 0) - new Date(a.thoi_gian_giao_dich || 0)
-        )[0];
+      // Ưu tiên 1: query thẳng DB – giao dịch gần nhất của chính hồ sơ này
+      const { data: profileTxs } = await supabase
+        .from('chi_tiet_giao_dich')
+        .select('*')
+        .eq('id_ho_so_dich_vu', idHoSo)
+        .order('thoi_gian_giao_dich', { ascending: false })
+        .limit(5);
+
+      if (profileTxs && profileTxs.length > 0) {
+        lastTx = profileTxs[0];
       }
 
-      // Ưu tiên 2: query Supabase – giao dịch gần nhất cùng danh mục dịch vụ
+      // Ưu tiên 2: query Supabase – giao dịch gần nhất cùng danh mục dịch vụ (khác hồ sơ)
       if (!lastTx && idDanhMuc) {
-        // Tìm các hồ sơ cùng danh mục
         const { data: hdList } = await supabase
           .from('ma_hop_dong')
           .select('id_ma_hop_dong')
@@ -123,14 +126,16 @@ export default function MoneyTransferForm({ value, onChange }) {
             .in('id_ma_hop_dong', hdIds);
 
           if (fileList && fileList.length > 0) {
-            const fileIds = fileList.map(f => f.id_ho_so_dich_vu);
-            const { data: dmTxs } = await supabase
-              .from('chi_tiet_giao_dich')
-              .select('*')
-              .in('id_ho_so_dich_vu', fileIds)
-              .order('thoi_gian_giao_dich', { ascending: false })
-              .limit(1);
-            if (dmTxs && dmTxs.length > 0) lastTx = dmTxs[0];
+            const fileIds = fileList.map(f => f.id_ho_so_dich_vu).filter(id => id !== idHoSo);
+            if (fileIds.length > 0) {
+              const { data: dmTxs } = await supabase
+                .from('chi_tiet_giao_dich')
+                .select('*')
+                .in('id_ho_so_dich_vu', fileIds)
+                .order('thoi_gian_giao_dich', { ascending: false })
+                .limit(1);
+              if (dmTxs && dmTxs.length > 0) lastTx = dmTxs[0];
+            }
           }
         }
       }
@@ -157,14 +162,16 @@ export default function MoneyTransferForm({ value, onChange }) {
               .in('id_ma_hop_dong', hdIds2);
 
             if (fileList2 && fileList2.length > 0) {
-              const fileIds2 = fileList2.map(f => f.id_ho_so_dich_vu);
-              const { data: loaiTxs } = await supabase
-                .from('chi_tiet_giao_dich')
-                .select('*')
-                .in('id_ho_so_dich_vu', fileIds2)
-                .order('thoi_gian_giao_dich', { ascending: false })
-                .limit(1);
-              if (loaiTxs && loaiTxs.length > 0) lastTx = loaiTxs[0];
+              const fileIds2 = fileList2.map(f => f.id_ho_so_dich_vu).filter(id => id !== idHoSo);
+              if (fileIds2.length > 0) {
+                const { data: loaiTxs } = await supabase
+                  .from('chi_tiet_giao_dich')
+                  .select('*')
+                  .in('id_ho_so_dich_vu', fileIds2)
+                  .order('thoi_gian_giao_dich', { ascending: false })
+                  .limit(1);
+                if (loaiTxs && loaiTxs.length > 0) lastTx = loaiTxs[0];
+              }
             }
           }
         }
