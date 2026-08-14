@@ -384,7 +384,7 @@ const useAppStore = create((set, get) => ({
         filesQuery = filesQuery.eq('id_diem_ban', user.id_diem_ban);
       }
 
-      if (serviceId) {
+      if (serviceId && serviceId !== 'ALL') {
         filesQuery = filesQuery.eq('id_loai_dich_vu', serviceId);
       }
 

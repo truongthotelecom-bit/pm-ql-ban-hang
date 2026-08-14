@@ -98,13 +98,31 @@ export default function IndexPage() {
           <Button 
             type="primary" 
             onClick={() => { store.selectService(null); navigate('/'); }} 
-            className="w-full mb-3 bg-gradient-to-r from-violet-600 to-indigo-600 border-none text-white font-bold rounded-xl h-[150px] shadow-[0_4px_15px_rgba(124,58,237,0.3)] hover:scale-[1.02] transition-all flex flex-row items-center justify-center gap-2"
+            className="w-full mb-3 bg-gradient-to-r from-violet-600 to-indigo-600 border-none text-white font-bold rounded-xl h-11 shadow-[0_4px_15px_rgba(124,58,237,0.3)] hover:scale-[1.02] transition-all flex flex-row items-center justify-center gap-2"
           >
-            <SearchOutlined className="text-[24px]" />
+            <SearchOutlined className="text-[18px]" />
             <span className="text-[12px] tracking-wide whitespace-nowrap">TÌM DỊCH VỤ NHANH</span>
           </Button>
 
           <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2 px-2 mt-2">Hệ sinh thái dịch vụ</div>
+          
+          {/* MỤC TẤT CẢ DỊCH VỤ (Hiển thị toàn bộ hồ sơ không phân loại) */}
+          <div 
+            onClick={() => { 
+              store.selectService({ id_loai_dich_vu: 'ALL', ten_danh_muc: 'TẤT CẢ DỊCH VỤ', icon: '🌐' }); 
+              navigate('/'); 
+            }}
+            className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer select-none mb-1 ${
+              store.selectedService?.id_loai_dich_vu === 'ALL' && location.pathname === '/'
+                ? 'bg-violet-600/20 text-violet-300 border border-violet-500/30 shadow-sm'
+                : 'text-gray-300 hover:bg-white/5'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <AppstoreOutlined className={store.selectedService?.id_loai_dich_vu === 'ALL' ? "text-violet-400" : "text-gray-500"} />
+              <span className={`font-bold uppercase text-xs tracking-wide ${store.selectedService?.id_loai_dich_vu === 'ALL' ? 'text-violet-300' : ''}`}>TẤT CẢ DỊCH VỤ</span>
+            </div>
+          </div>
           
           {store.menuGroups.map(group => {
             const groupServices = store.services.filter(s => s.id_nhom === group.id_nhom || s.id_nhom_dich_vu === group.id_nhom);

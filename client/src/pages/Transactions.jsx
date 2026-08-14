@@ -1058,7 +1058,10 @@ export default function Transactions() {
               size="small" 
               type="primary" 
               icon={<HistoryOutlined />} 
-              onClick={() => navigate(`/lich-su?id_dich_vu=${store.selectedService?.id_loai_dich_vu || ''}`)} 
+              onClick={() => {
+                const serviceId = (store.selectedService?.id_loai_dich_vu && store.selectedService.id_loai_dich_vu !== 'ALL') ? store.selectedService.id_loai_dich_vu : '';
+                navigate(serviceId ? `/lich-su?id_dich_vu=${serviceId}` : '/lich-su');
+              }}
               className="bg-violet-600 border-none shadow-md shadow-violet-900/50 hover:bg-violet-500 !rounded-lg"
             >
               Lịch sử
@@ -1134,7 +1137,7 @@ export default function Transactions() {
                 onChange={setFilterCategoryId}
               >
                 {store.banks
-                  .filter(b => store.selectedService ? b.id_loai_dich_vu === store.selectedService.id_loai_dich_vu : true)
+                  .filter(b => (store.selectedService && store.selectedService.id_loai_dich_vu !== 'ALL') ? b.id_loai_dich_vu === store.selectedService.id_loai_dich_vu : true)
                   .map(b => (
                     <Option key={b.id_danh_muc_dich_vu} value={b.id_danh_muc_dich_vu}>
                       {b.ten_viet_tat || b.ten_dich_vu}

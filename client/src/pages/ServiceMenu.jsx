@@ -79,6 +79,20 @@ export default function ServiceMenu() {
 
     return (
       <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+        {/* CARD TẤT CẢ DỊCH VỤ */}
+        <div
+          onClick={() => handleSelectService({ id_loai_dich_vu: 'ALL', ten_danh_muc: 'TẤT CẢ DỊCH VỤ', icon: '🌐' })}
+          className="p-3 md:p-5 rounded-2xl bg-gradient-to-br from-violet-900/40 to-indigo-900/40 backdrop-blur-md border border-violet-500/50 hover:border-violet-400 hover:bg-violet-900/60 transition-all cursor-pointer flex flex-col items-center justify-start gap-2 text-center group hover:scale-[1.02] active:scale-95 shadow-lg shadow-violet-900/20"
+        >
+          <div className="w-10 h-10 md:w-14 md:h-14 shrink-0 rounded-full bg-gradient-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+            <Layers className="w-5 h-5 md:w-6 md:h-6" />
+          </div>
+          <div className="flex flex-col flex-1 items-center justify-between">
+            <h3 className="font-bold text-[10px] md:text-sm text-violet-200 tracking-wide uppercase line-clamp-2 leading-tight">TẤT CẢ DỊCH VỤ</h3>
+            <span className="text-[9px] md:text-[10px] text-violet-300 font-extrabold bg-violet-500/20 px-2 py-0.5 rounded-full mt-1.5 inline-block shrink-0 border border-violet-400/30">TẤT CẢ</span>
+          </div>
+        </div>
+
         {store.menuGroups.map(group => {
           const count = store.services.filter(s => s.id_nhom === group.id_nhom || s.id_nhom_dich_vu === group.id_nhom).length;
           return (
@@ -195,7 +209,20 @@ export default function ServiceMenu() {
     return (
       <div className="space-y-3 mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
         <h2 className="text-[11px] md:text-xs font-bold text-gray-400 flex items-center gap-2 uppercase tracking-wider"><History size={14} /> DÙNG GẦN ĐÂY</h2>
-        <div className="grid grid-cols-4 gap-2 md:gap-4">
+        <div className="grid grid-cols-4 md:grid-cols-5 gap-2 md:gap-4">
+          {/* CARD TẤT CẢ DỊCH VỤ */}
+          <div
+            onClick={() => handleSelectService({ id_loai_dich_vu: 'ALL', ten_danh_muc: 'TẤT CẢ DỊCH VỤ', icon: '🌐' })}
+            className="p-2 md:p-3 rounded-2xl bg-gradient-to-tr from-violet-900/60 to-indigo-900/60 backdrop-blur-md border border-violet-500/50 hover:border-violet-400 hover:bg-violet-800/80 transition-all cursor-pointer flex flex-col items-center justify-start gap-1 md:gap-2 text-center group hover:scale-[1.02] active:scale-95 shadow-lg shadow-violet-900/30"
+          >
+            <div className="w-10 h-10 md:w-12 md:h-12 shrink-0 rounded-xl bg-gradient-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <span className="text-xl md:text-2xl">🌐</span>
+            </div>
+            <div className="flex flex-col flex-1 items-center justify-start w-full">
+              <h3 className="font-bold text-[9px] md:text-xs text-violet-200 tracking-wide uppercase line-clamp-2 leading-tight w-full">TẤT CẢ DỊCH VỤ</h3>
+            </div>
+          </div>
+
           {store.recentServices.map(service => (
             <div
               key={service.id_loai_dich_vu}

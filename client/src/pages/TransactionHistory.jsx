@@ -236,7 +236,7 @@ export default function TransactionHistory() {
     if (id_dich_vu || id_khach_hang) {
       setFilters(prev => ({
         ...prev,
-        ...(id_dich_vu && { loaiDichVuId: id_dich_vu }),
+        ...(id_dich_vu && id_dich_vu !== 'ALL' && { loaiDichVuId: id_dich_vu }),
         ...(id_khach_hang && { khachHangId: id_khach_hang, dateRangeType: DATE_RANGES.ALL }) // Default to ALL to see full customer history
       }));
     }
