@@ -118,7 +118,7 @@ export default function MoneyTransferForm({ value, onChange }) {
         if (hdList && hdList.length > 0) {
           const hdIds = hdList.map(h => h.id_ma_hop_dong);
           const { data: fileList } = await supabase
-            .from('ho_so_dich_vu')
+            .from('vw_ho_so_dich_vu_v3')
             .select('id_ho_so_dich_vu')
             .in('id_ma_hop_dong', hdIds);
 
@@ -152,7 +152,7 @@ export default function MoneyTransferForm({ value, onChange }) {
           if (hdList2 && hdList2.length > 0) {
             const hdIds2 = hdList2.map(h => h.id_ma_hop_dong);
             const { data: fileList2 } = await supabase
-              .from('ho_so_dich_vu')
+              .from('vw_ho_so_dich_vu_v3')
               .select('id_ho_so_dich_vu')
               .in('id_ma_hop_dong', hdIds2);
 
