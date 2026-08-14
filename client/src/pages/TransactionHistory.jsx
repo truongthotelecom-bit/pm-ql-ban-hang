@@ -808,6 +808,7 @@ export default function TransactionHistory() {
 
   const totalAmount = validTransactions.reduce((s, i) => s + (i.tx.so_tien_di || 0), 0);
   const totalFee = validTransactions.reduce((s, i) => s + (i.tx.phi_dich_vu || 0), 0);
+  const totalDiscount = validTransactions.reduce((s, i) => s + (Math.round(((i.tx.so_tien || 0) * parseFloat(i.tx.chiet_khau || 0)) / 100)), 0);
 
   const fmtDate = (d) => {
     if (!d) return '---';
@@ -907,7 +908,7 @@ export default function TransactionHistory() {
       {/* Vùng Header (Cố định) */}
       <div className="shrink-0 space-y-4">
         {/* 1. SUMMARY CARDS (Đã chuyển lên trên) */}
-        <div className="hidden md:grid grid-cols-3 gap-4">
+        <div className="hidden md:grid grid-cols-4 gap-4">
           <div className="bg-gradient-to-r from-violet-900/40 to-blue-900/40 border border-violet-500/30 rounded-xl p-4">
             <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tổng tiền GD</div>
             <div className="text-2xl font-black text-white">{formatCurrency(totalAmount)}</div>
@@ -915,6 +916,10 @@ export default function TransactionHistory() {
           <div className="bg-gradient-to-r from-orange-900/40 to-red-900/40 border border-orange-500/30 rounded-xl p-4">
             <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tổng phí DV</div>
             <div className="text-2xl font-black text-white">{formatCurrency(totalFee)}</div>
+          </div>
+          <div className="bg-gradient-to-r from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-4">
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tổng chiết khấu</div>
+            <div className="text-2xl font-black text-white">{formatCurrency(totalDiscount)}</div>
           </div>
           <div className="bg-gradient-to-r from-green-900/40 to-teal-900/40 border border-green-500/30 rounded-xl p-4 flex flex-col items-center justify-center">
             <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Số lượng GD (Hợp lệ)</div>
@@ -1432,6 +1437,23 @@ export default function TransactionHistory() {
               render: (val) => val > 0 ? <span className="text-orange-400 font-medium text-xs whitespace-nowrap">+ {formatCurrency(val)}</span> : null,
               align: 'right',
               width: 100,
+            },
+            {
+              title: 'Chiết khấu',
+              key: 'chiet_khau',
+              render: (_, record) => {
+                const percent = parseFloat(record.tx.chiet_khau || 0);
+                if (percent <= 0) return <span className="text-gray-600 text-xs">-</span>;
+                const discountAmt = Math.round(((record.tx.so_tien || 0) * percent) / 100);
+                return (
+                  <div className="flex flex-col items-end leading-tight">
+                    <span className="text-emerald-400 font-bold text-xs whitespace-nowrap">{formatCurrency(discountAmt)}</span>
+                    <span className="text-gray-500 text-[10px]">({percent}%)</span>
+                  </div>
+                );
+              },
+              align: 'right',
+              width: 110,
             },
             {
               title: 'Trạng thái',

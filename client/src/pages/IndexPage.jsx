@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Outlet, NavLink } from 'react-router-dom';
 import useAppStore from '../store/useAppStore';
 import useAuthStore from '../store/useAuthStore';
-import { Dropdown } from 'antd';
-import { AppstoreOutlined, CalendarOutlined, TeamOutlined, FileProtectOutlined, UserOutlined, SettingOutlined, LogoutOutlined, ControlOutlined, HomeOutlined } from '@ant-design/icons';
+import { Dropdown, Button } from 'antd';
+import { AppstoreOutlined, CalendarOutlined, TeamOutlined, FileProtectOutlined, UserOutlined, SettingOutlined, LogoutOutlined, ControlOutlined, HomeOutlined, SearchOutlined } from '@ant-design/icons';
 import { Sparkles, ChevronRight, ChevronDown } from 'lucide-react';
 import TransactionDrawer from '../components/TransactionDrawer';
 import ServiceMenu from './ServiceMenu';
@@ -95,6 +95,15 @@ export default function IndexPage() {
 
         <nav className="flex flex-col gap-1.5 flex-grow overflow-y-auto scrollbar-thin pr-2 -mr-2">
           
+          <Button 
+            type="primary" 
+            onClick={() => { store.selectService(null); navigate('/'); }} 
+            className="w-full mb-3 bg-gradient-to-r from-violet-600 to-indigo-600 border-none text-white font-bold rounded-xl h-[150px] shadow-[0_4px_15px_rgba(124,58,237,0.3)] hover:scale-[1.02] transition-all flex flex-row items-center justify-center gap-2"
+          >
+            <SearchOutlined className="text-[24px]" />
+            <span className="text-[12px] tracking-wide whitespace-nowrap">TÌM DỊCH VỤ NHANH</span>
+          </Button>
+
           <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2 px-2 mt-2">Hệ sinh thái dịch vụ</div>
           
           {store.menuGroups.map(group => {

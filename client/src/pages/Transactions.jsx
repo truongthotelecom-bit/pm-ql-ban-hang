@@ -1458,7 +1458,7 @@ export default function Transactions() {
               </Button>
               <Popover 
                 content={
-                  <div className="flex flex-col gap-2 w-[220px] p-1">
+                  <div className="flex flex-col gap-2 w-[330px] p-1">
                     <Button onClick={() => openEditFileModal()} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><EditOutlined className="text-lg" /> Sửa hồ sơ</Button>
                     <Button onClick={() => openEditCustModal(activeCust)} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><UserOutlined className="text-lg" /> Sửa khách</Button>
                     <Button onClick={() => openEditContractModal()} disabled={!canEditFile()} className="h-12 bg-[#1a2238] border-none text-white text-sm font-bold hover:bg-violet-600 hover:text-white justify-start px-4 transition-all"><EditOutlined className="text-lg" /> Sửa HĐ</Button>
@@ -1634,15 +1634,15 @@ export default function Transactions() {
                   const huyId = store.categories.find(c => (c.ten_danh_muc || '').toLowerCase().includes('hủy'))?.id_danh_muc || 'dm-3';
                   
                   return (
-                    <div className="absolute bottom-[110%] flex flex-col gap-2 mb-2 animate-in slide-in-from-bottom-2 fade-in zoom-in-95 origin-bottom">
-                      <button onClick={() => handleChangeStatus(hoanThanhId, 'Hoàn thành')} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-green-500/50 px-4 py-2 rounded-full text-green-400 hover:text-white hover:bg-green-600 transition-all shadow-xl font-bold text-xs whitespace-nowrap">
-                        Hoàn thành <CheckCircleOutlined />
+                    <div className="absolute bottom-[110%] flex flex-col gap-3 mb-3 animate-in slide-in-from-bottom-2 fade-in zoom-in-95 origin-bottom right-0">
+                      <button onClick={() => handleChangeStatus(hoanThanhId, 'Hoàn thành')} className="flex items-center justify-between gap-4 bg-gradient-to-r from-green-600 to-emerald-500 border-none px-5 h-12 rounded-2xl text-white hover:from-green-500 hover:to-emerald-400 transition-all shadow-lg shadow-green-500/30 font-bold text-sm whitespace-nowrap min-w-[140px]">
+                        <span>Hoàn thành</span> <CheckCircleOutlined className="text-lg" />
                       </button>
-                      <button onClick={() => handleChangeStatus(dangXuLyId, 'Đang xử lý')} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-yellow-500/50 px-4 py-2 rounded-full text-yellow-400 hover:text-white hover:bg-yellow-600 transition-all shadow-xl font-bold text-xs whitespace-nowrap">
-                        Đang xử lý <SyncOutlined />
+                      <button onClick={() => handleChangeStatus(dangXuLyId, 'Đang xử lý')} className="flex items-center justify-between gap-4 bg-gradient-to-r from-yellow-600 to-orange-500 border-none px-5 h-12 rounded-2xl text-white hover:from-yellow-500 hover:to-orange-400 transition-all shadow-lg shadow-yellow-500/30 font-bold text-sm whitespace-nowrap min-w-[140px]">
+                        <span>Đang xử lý</span> <SyncOutlined className="text-lg" />
                       </button>
-                      <button onClick={handleCancelTransaction} disabled={!canCancelTransaction()} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-red-500/50 px-4 py-2 rounded-full text-red-400 hover:text-white hover:bg-red-600 transition-all shadow-xl font-bold text-xs whitespace-nowrap disabled:opacity-50">
-                        Hủy GD <span className="font-bold text-base">✕</span>
+                      <button onClick={handleCancelTransaction} disabled={!canCancelTransaction()} className="flex items-center justify-between gap-4 bg-gradient-to-r from-red-600 to-rose-500 border-none px-5 h-12 rounded-2xl text-white hover:from-red-500 hover:to-rose-400 transition-all shadow-lg shadow-red-500/30 font-bold text-sm whitespace-nowrap min-w-[140px] disabled:opacity-50">
+                        <span>Hủy GD</span> <span className="font-bold text-lg">✕</span>
                       </button>
                     </div>
                   );
@@ -1684,15 +1684,15 @@ export default function Transactions() {
               {/* FAB Tiện Ích */}
               <div className="relative flex flex-col items-center">
                 {showCol3Menu && (
-                  <div className="absolute bottom-[110%] flex flex-col gap-2 mb-2 animate-in slide-in-from-bottom-2 fade-in zoom-in-95 origin-bottom">
-                    <button onClick={() => { setShowCol3Menu(false); setShowQrModal(true); }} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-blue-500/50 px-4 py-2 rounded-full text-blue-400 hover:text-white hover:bg-blue-600 transition-all shadow-xl font-bold text-xs whitespace-nowrap">
-                      Tạo QR <QrcodeOutlined />
+                  <div className="absolute bottom-[110%] flex flex-col gap-3 mb-3 animate-in slide-in-from-bottom-2 fade-in zoom-in-95 origin-bottom right-0">
+                    <button onClick={() => { setShowCol3Menu(false); setShowQrModal(true); }} className="flex items-center justify-between gap-4 bg-gradient-to-r from-blue-600 to-blue-500 border-none px-5 h-12 rounded-2xl text-white hover:from-blue-500 hover:to-blue-400 transition-all shadow-lg shadow-blue-500/30 font-bold text-sm whitespace-nowrap min-w-[140px]">
+                      <span>Tạo QR</span> <QrcodeOutlined className="text-lg" />
                     </button>
-                    <button onClick={() => { setShowCol3Menu(false); handlePrintInvoice(); }} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-violet-500/50 px-4 py-2 rounded-full text-violet-400 hover:text-white hover:bg-violet-600 transition-all shadow-xl font-bold text-xs whitespace-nowrap">
-                      In hóa đơn <PrinterOutlined />
+                    <button onClick={() => { setShowCol3Menu(false); handlePrintInvoice(); }} className="flex items-center justify-between gap-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none px-5 h-12 rounded-2xl text-white hover:from-violet-500 hover:to-fuchsia-500 transition-all shadow-lg shadow-violet-500/30 font-bold text-sm whitespace-nowrap min-w-[140px]">
+                      <span>In hóa đơn</span> <PrinterOutlined className="text-lg" />
                     </button>
-                    <button onClick={() => { setShowCol3Menu(false); setEditDetailPayload(activeDetail); setShowEditDetailModal(true); }} className="flex items-center gap-3 bg-[#0d1426]/90 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-gray-300 hover:text-white hover:bg-white/20 transition-all shadow-xl font-bold text-xs whitespace-nowrap">
-                      Sửa GD <EditOutlined />
+                    <button onClick={() => { setShowCol3Menu(false); setEditDetailPayload(activeDetail); setShowEditDetailModal(true); }} className="flex items-center justify-between gap-4 bg-gradient-to-r from-gray-700 to-gray-600 border-none px-5 h-12 rounded-2xl text-white hover:from-gray-600 hover:to-gray-500 transition-all shadow-lg shadow-gray-500/30 font-bold text-sm whitespace-nowrap min-w-[140px]">
+                      <span>Sửa GD</span> <EditOutlined className="text-lg" />
                     </button>
                   </div>
                 )}

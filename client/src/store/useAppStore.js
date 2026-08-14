@@ -193,7 +193,7 @@ const useAppStore = create((set, get) => ({
         const file = files.find(f => f.id_ho_so_dich_vu === fId);
         if (file && file.id_loai_dich_vu && !serviceIds.includes(file.id_loai_dich_vu)) {
           serviceIds.push(file.id_loai_dich_vu);
-          if (serviceIds.length === 4) break;
+          if (serviceIds.length === 8) break;
         }
       }
       
