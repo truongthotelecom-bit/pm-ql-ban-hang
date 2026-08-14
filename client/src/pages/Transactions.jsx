@@ -685,6 +685,18 @@ export default function Transactions() {
     try {
       const vals = await quickFeeForm.validateFields();
       setQuickFeeSaving(true);
+      
+      // Tự động tạo tên định mức phí
+      const loaiHdName = store.loaiHopDongs?.find(t => t.id_loai_hop_dong === vals.id_loai_hop_dong)?.ten_loai || 'Mặc định';
+      let scopeName = 'Chung';
+      if (vals.id_danh_muc_dich_vu) {
+        scopeName = store.banks?.find(b => b.id_danh_muc_dich_vu === vals.id_danh_muc_dich_vu)?.ten_dich_vu || 
+                    store.banks?.find(b => b.id_danh_muc_dich_vu === vals.id_danh_muc_dich_vu)?.ten_viet_tat || '';
+      } else if (vals.id_loai_dich_vu) {
+        scopeName = store.services?.find(s => s.id_loai_dich_vu === vals.id_loai_dich_vu)?.ten_danh_muc || '';
+      }
+      const autoTenBieuPhi = `Phí ${loaiHdName} - ${scopeName}`.replace(' - Chung', '').trim();
+
       const payload = { ...vals, ngay_sua: new Date().toISOString() };
 
       if (quickFeeModal.isEdit && quickFeeModal.record) {
@@ -693,13 +705,13 @@ export default function Transactions() {
           .update(payload)
           .eq('id_bieu_phi', quickFeeModal.record.id_bieu_phi);
         if (error) throw error;
-        message.success('C\u1eadp nh\u1eadt \u0111\u1ecbnh m\u1ee9c ph\u00ed th\u00e0nh c\u00f4ng!');
+        message.success('Cập nhật định mức phí thành công!');
       } else {
         const { error } = await supabase
           .from('dm_bieu_phi')
-          .insert({ ...payload, ngay_tao: new Date().toISOString() });
+          .insert({ ...payload, ten_bieu_phi: autoTenBieuPhi, ngay_tao: new Date().toISOString() });
         if (error) throw error;
-        message.success('Th\u00eam \u0111\u1ecbnh m\u1ee9c ph\u00ed th\u00e0nh c\u00f4ng!');
+        message.success('Thêm định mức phí thành công!');
       }
 
       setQuickFeeModal({ visible: false, record: null, isEdit: false, mode: 'danh_muc_dich_vu' });
